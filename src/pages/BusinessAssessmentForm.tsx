@@ -53,7 +53,7 @@ export default function BusinessAssessmentForm() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Module 1 — User & Business Assessment
+              User & Business Assessment
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Provide your location and available margin capital to compute scheme eligibility and hyper-local market feasibility.
@@ -104,7 +104,7 @@ export default function BusinessAssessmentForm() {
                   required
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  placeholder="e.g. Maharashtra"
+                  placeholder="e.g. Gujarat"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
@@ -118,7 +118,7 @@ export default function BusinessAssessmentForm() {
                   required
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                  placeholder="e.g. Pune"
+                  placeholder="e.g. Ahmedabad"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
@@ -132,7 +132,7 @@ export default function BusinessAssessmentForm() {
                   required
                   value={formData.block}
                   onChange={(e) => setFormData({ ...formData, block: e.target.value })}
-                  placeholder="e.g. Haveli"
+                  placeholder="e.g. Sanand"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
@@ -146,7 +146,7 @@ export default function BusinessAssessmentForm() {
                   required
                   value={formData.village}
                   onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                  placeholder="e.g. Khed Shivapur"
+                  placeholder="e.g. Changodar"
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>

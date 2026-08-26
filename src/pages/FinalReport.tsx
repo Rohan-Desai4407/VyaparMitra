@@ -21,7 +21,7 @@ export default function FinalReport() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Module 8 — Final Feasibility Report
+              Final Feasibility Report
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Consolidated hyper-local recommendation and financial structuring report ready for bank submission.

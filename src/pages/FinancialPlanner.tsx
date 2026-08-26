@@ -17,7 +17,7 @@ export default function FinancialPlanner() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Module 4 & 5 — Smart Financial Calculator & Scheme Auto-Selection Router
+              Smart Financial Calculator & Scheme Auto-Selection Router
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Deterministic calculations based on PRD financial rules: Project Cost = Margin ÷ 10%, Max Loan = 90%.

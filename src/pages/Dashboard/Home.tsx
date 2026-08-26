@@ -109,7 +109,7 @@ export default function Home() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <span className="inline-block rounded-full bg-brand-100 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                    MODULE 5 — SCHEME AUTO-ROUTER
+                    SCHEME AUTO-ROUTER
                   </span>
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">
                     {financials.scheme.name}
@@ -225,7 +225,7 @@ export default function Home() {
             {/* AI Advisor Banner */}
             <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/40 dark:bg-purple-950/20">
               <span className="text-xs uppercase font-bold text-purple-700 dark:text-purple-300 tracking-wider">
-                Module 7 — AI Business Advisor
+                AI Business Advisor
               </span>
               <h4 className="text-base font-bold text-gray-900 dark:text-white mt-1">
                 Have questions about local risks or loans?

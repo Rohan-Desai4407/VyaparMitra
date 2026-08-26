@@ -124,13 +124,13 @@ export const computeFinancials = (margin: number): FinancialCalculation => {
 };
 
 const defaultInput: BusinessInputData = {
-  state: "Maharashtra",
-  district: "Pune",
-  block: "Haveli",
-  village: "Khed Shivapur",
+  state: "Gujarat",
+  district: "Ahmedabad",
+  block: "Sanand",
+  village: "Changodar",
   marginCapital: 25000,
   category: "Dairy & Livestock",
-  language: "English",
+  language: "Gujarati",
 };
 
 const defaultMarket: MarketData = {
@@ -155,7 +155,7 @@ const defaultSwot: SwotAndRisk = {
   ],
   opportunities: [
     "Government subsidy scheme integration under NABARD Dairy Plan",
-    "Direct B2B supply tie-ups with nearby Pune highway restaurants",
+    "Direct B2B supply tie-ups with nearby Ahmedabad highway restaurants",
     "Expansion into curd and butter products during summer season",
   ],
   threats: [
@@ -173,7 +173,7 @@ const defaultReport: FeasibilityReport = {
   viabilityScore: 84,
   overallVerdict: "Highly Viable",
   recommendation:
-    "The proposed Dairy & Livestock unit in Haveli block has strong demand parameters and high consumer density within a 7 km radius. Available margin capital of ₹25,000 unlocks a total feasible project setup of ₹2,50,000 under the Term Loan Scheme with 90% agency financing (₹2,25,000 loan at 8.0% interest).",
+    "The proposed Dairy & Livestock unit in Sanand block has strong demand parameters and high consumer density within a 7 km radius. Available margin capital of ₹25,000 unlocks a total feasible project setup of ₹2,50,000 under the Term Loan Scheme with 90% agency financing (₹2,25,000 loan at 8.0% interest).",
   marketInsights:
     "Local market analysis reveals underserved demand for packaged quality milk and paneer near regional highway food hubs.",
   keyActionItems:

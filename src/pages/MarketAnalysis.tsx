@@ -18,7 +18,7 @@ export default function MarketAnalysis() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Module 2 & 3 — Local Data & Market Intelligence
+              Local Data & Market Intelligence
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Hyper-local consumer analysis, pricing recommendations, and distribution channel map for{" "}

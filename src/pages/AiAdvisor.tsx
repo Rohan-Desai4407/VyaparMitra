@@ -73,7 +73,7 @@ export default function AiAdvisor() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Module 7 — AI Business Advisor & SWOT Matrix
+              AI Business Advisor & SWOT Matrix
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Multilingual AI analysis combining structured financial parameters and hyper-local economic data.
