@@ -5,7 +5,9 @@ import { Link, useLocation } from "react-router";
 import {
   BoxCubeIcon,
   CalenderIcon,
+  ChatIcon,
   ChevronDownIcon,
+  DollarLineIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -15,7 +17,6 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -41,9 +42,14 @@ const navItems: NavItem[] = [
     path: "/market-analysis",
   },
   {
-    icon: <TableIcon />,
-    name: "Financial & Scheme Router",
+    icon: <DollarLineIcon />,
+    name: "Financial Calculator",
     path: "/financial-planner",
+  },
+  {
+    icon: <TableIcon />,
+    name: "Scheme Router",
+    path: "/scheme-router",
   },
   {
     icon: <CalenderIcon />,
@@ -51,9 +57,14 @@ const navItems: NavItem[] = [
     path: "/repayment-schedule",
   },
   {
-    icon: <BoxCubeIcon />,
-    name: "AI SWOT & Risk Advisor",
+    icon: <ChatIcon />,
+    name: "AI Business Advisor",
     path: "/ai-advisor",
+  },
+  {
+    icon: <BoxCubeIcon />,
+    name: "SWOT & Risk Matrix",
+    path: "/swot-matrix",
   },
   {
     icon: <PageIcon />,
@@ -63,11 +74,6 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <PageIcon />,
-    name: "Landing Page",
-    path: "/landing",
-  },
   {
     icon: <UserCircleIcon />,
     name: "User Profile",
@@ -289,35 +295,37 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        className={`py-6 flex items-center ${
+          !isExpanded && !isHovered ? "lg:justify-center px-0" : "justify-start px-2"
         }`}
       >
-        <Link to="/">
+        <Link to="/" className="flex items-center gap-3 w-full">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20 dark:shadow-[0_0_15px_rgba(255,255,255,0.15)] shrink-0">
+                <img
+                  src="/images/logo/vyapar-mitra-logo.png"
+                  alt="VyaparMitra Logo"
+                  className="w-10 h-10 object-contain rounded-lg"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-none">
+                  Vyapar<span className="text-emerald-600 dark:text-emerald-400">Mitra</span>
+                </span>
+                <span className="text-[10px] font-bold text-gray-500 dark:text-emerald-300/90 tracking-wider uppercase mt-1">
+                  Plan • Grow • Prosper
+                </span>
+              </div>
+            </div>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20">
+              <img
+                src="/images/logo/vyapar-mitra-logo.png"
+                alt="VyaparMitra Logo"
+                className="w-8 h-8 object-contain rounded-lg"
+              />
+            </div>
           )}
         </Link>
       </div>

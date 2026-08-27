@@ -32,7 +32,7 @@ export default function FinancialPlanner() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Smart Financial Calculator & Scheme Auto-Selection Router
+              Smart Financial Calculator
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Evaluates actual government scheme eligibility based on location, category, and capital.
@@ -55,12 +55,12 @@ export default function FinancialPlanner() {
         )}
 
         {/* Interactive Margin Capital Slider */}
-        <ComponentCard title="Interactive Margin Capital & Loan Calculator">
+        <ComponentCard title="Interactive Margin Capital & Project Cost Simulator">
           <div className="space-y-6">
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  Available Margin Capital (User Contribution):
+                  Available Margin Capital (Self Contribution):
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-500">₹</span>
@@ -83,7 +83,7 @@ export default function FinancialPlanner() {
                 step="5000"
                 value={input.marginCapital}
                 onChange={(e) => updateInput({ marginCapital: Number(e.target.value) })}
-                className="h-2.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-brand-500 dark:bg-gray-700"
+                className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-brand-500 dark:bg-gray-700"
               />
             </div>
 

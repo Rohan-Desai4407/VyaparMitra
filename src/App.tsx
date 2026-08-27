@@ -5,12 +5,13 @@ import { ScrollToTop } from "./components/common/ScrollToTop";
 
 // VyaparMitra Module Pages
 import Home from "./pages/Dashboard/Home";
-import LandingPage from "./pages/LandingPage";
 import BusinessAssessmentForm from "./pages/BusinessAssessmentForm";
 import MarketAnalysis from "./pages/MarketAnalysis";
 import FinancialPlanner from "./pages/FinancialPlanner";
+import SchemeRouter from "./pages/SchemeRouter";
 import RepaymentSchedule from "./pages/RepaymentSchedule";
 import AiAdvisor from "./pages/AiAdvisor";
+import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
 
 // Other Pages
@@ -28,12 +29,13 @@ export default function App() {
           {/* Dashboard Main Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
-            <Route path="/landing" element={<LandingPage />} />
             <Route path="/assessment" element={<BusinessAssessmentForm />} />
             <Route path="/market-analysis" element={<MarketAnalysis />} />
             <Route path="/financial-planner" element={<FinancialPlanner />} />
+            <Route path="/scheme-router" element={<SchemeRouter />} />
             <Route path="/repayment-schedule" element={<RepaymentSchedule />} />
             <Route path="/ai-advisor" element={<AiAdvisor />} />
+            <Route path="/swot-matrix" element={<SwotMatrix />} />
             <Route path="/final-report" element={<FinalReport />} />
 
             {/* Profile & Settings */}

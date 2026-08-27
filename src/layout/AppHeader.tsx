@@ -83,17 +83,17 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
-            <img
-              className="dark:hidden"
-              src="./images/logo/logo.svg"
-              alt="Logo"
-            />
-            <img
-              className="hidden dark:block"
-              src="./images/logo/logo-dark.svg"
-              alt="Logo"
-            />
+          <Link to="/" className="flex items-center gap-2.5 lg:hidden">
+            <div className="flex items-center justify-center p-1 rounded-xl bg-white shadow-xs border border-gray-100 dark:bg-white dark:border-white/20">
+              <img
+                src="/images/logo/vyapar-mitra-logo.png"
+                alt="VyaparMitra Logo"
+                className="w-7 h-7 object-contain rounded-md"
+              />
+            </div>
+            <span className="text-base font-bold text-gray-900 dark:text-white">
+              Vyapar<span className="text-emerald-600 dark:text-emerald-400">Mitra</span>
+            </span>
           </Link>
 
           <button
