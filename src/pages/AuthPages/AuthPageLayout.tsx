@@ -16,17 +16,22 @@ export default function AuthLayout({
           <div className="relative flex items-center justify-center z-1">
             {/* <!-- ===== Common Grid Shape Start ===== --> */}
             <GridShape />
-            <div className="flex flex-col items-center max-w-xs">
+            <div className="flex flex-col items-center max-w-xs text-center">
               <Link to="/" className="block mb-4">
                 <img
-                  width={231}
-                  height={48}
-                  src="/images/logo/auth-logo.svg"
-                  alt="Logo"
+                  src="/images/logo/vyapar-mitra-logo.png"
+                  alt="VyaparMitra Logo"
+                  className="w-28 h-28 object-contain rounded-2xl mx-auto shadow-lg bg-white p-2"
                 />
               </Link>
-              <p className="text-center text-gray-400 dark:text-white/60">
-                Free and Open-Source Tailwind CSS Admin Dashboard Template
+              <h2 className="text-2xl font-bold text-white mb-1">
+                Vyapar<span className="text-emerald-400">Mitra</span>
+              </h2>
+              <p className="text-xs font-medium text-emerald-300 tracking-wider uppercase mb-2">
+                Plan • Grow • Prosper
+              </p>
+              <p className="text-center text-xs text-gray-300 dark:text-white/60">
+                AI-Powered Hyper-Local Business Feasibility & Scheme Router
               </p>
             </div>
           </div>

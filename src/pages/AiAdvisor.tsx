@@ -10,7 +10,7 @@ interface ChatMessage {
 }
 
 export default function AiAdvisor() {
-  const { input, financials, swot } = useVyapar();
+  const { input, financials } = useVyapar();
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -64,8 +64,8 @@ export default function AiAdvisor() {
   return (
     <>
       <PageMeta
-        title="AI Business Advisor & SWOT | VyaparMitra"
-        description="NLP-powered multilingual AI business assistant combined with structured SWOT and local risk analysis."
+        title="AI Business Advisor | VyaparMitra"
+        description="NLP-powered multilingual AI business assistant providing contextual guidance and business consultation."
       />
 
       <div className="space-y-6">
@@ -73,80 +73,39 @@ export default function AiAdvisor() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              AI Business Advisor & SWOT Matrix
+              AI Business Advisor
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Multilingual AI analysis combining structured financial parameters and hyper-local economic data.
+              Multilingual AI interactive assistant tailored to your hyper-local economic setup and business parameters.
             </p>
           </div>
         </div>
 
-        {/* SWOT Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Strengths */}
-          <ComponentCard title="💪 Key Business Strengths">
-            <ul className="space-y-2.5">
-              {swot.strengths.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-2.5 rounded-xl bg-emerald-50/60 p-3 text-xs text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300"
-                >
-                  <span className="text-emerald-600 font-bold">✓</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </ComponentCard>
-
-          {/* Weaknesses */}
-          <ComponentCard title="⚠️ Operational Weaknesses">
-            <ul className="space-y-2.5">
-              {swot.weaknesses.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-2.5 rounded-xl bg-amber-50/60 p-3 text-xs text-amber-900 dark:bg-amber-950/30 dark:text-amber-300"
-                >
-                  <span className="text-amber-600 font-bold">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </ComponentCard>
-
-          {/* Opportunities */}
-          <ComponentCard title="🚀 Local Market Opportunities">
-            <ul className="space-y-2.5">
-              {swot.opportunities.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-2.5 rounded-xl bg-blue-50/60 p-3 text-xs text-blue-900 dark:bg-blue-950/30 dark:text-blue-300"
-                >
-                  <span className="text-blue-600 font-bold">★</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </ComponentCard>
-
-          {/* Threats & Local Risks */}
-          <ComponentCard title="🛑 Threats & Local Bottlenecks">
-            <ul className="space-y-2.5">
-              {swot.threats.concat(swot.localRisks).map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start gap-2.5 rounded-xl bg-red-50/60 p-3 text-xs text-red-900 dark:bg-red-950/30 dark:text-red-300"
-                >
-                  <span className="text-red-500 font-bold">!</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </ComponentCard>
+        {/* Business Summary Header Card */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-semibold uppercase text-brand-600 dark:text-brand-400">
+                Active Business Context
+              </span>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                {input.category} • {input.village}, {input.block}, {input.district}
+              </h3>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="rounded-xl bg-brand-50 px-3 py-1.5 text-xs font-medium text-brand-700 dark:bg-brand-950/40 dark:text-brand-300">
+                Scheme: {financials.scheme.name}
+              </span>
+              <span className="rounded-xl bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 dark:bg-green-950/40 dark:text-green-300">
+                Max Loan: ₹{financials.maxLoanAmount.toLocaleString("en-IN")}
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* NLP Multilingual AI Assistant Chat Window */}
         <ComponentCard title="🤖 Interactive AI Business Advisory Assistant">
-          <div className="flex flex-col h-[400px]">
+          <div className="flex flex-col h-[480px]">
             {/* Message History */}
             <div className="flex-1 overflow-y-auto space-y-4 p-4 rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/40">
               {messages.map((msg, idx) => (
@@ -191,10 +150,17 @@ export default function AiAdvisor() {
               </button>
               <button
                 type="button"
-                onClick={() => setUserInputText("What pricing per liter gives best profitability?")}
+                onClick={() => setUserInputText("What pricing per unit gives best profitability?")}
                 className="rounded-full bg-white border border-gray-200 px-3 py-1 text-xs text-gray-700 hover:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
               >
                 ❓ Recommended pricing guidance
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserInputText("What subsidies or government schemes can I leverage in Gujarat?")}
+                className="rounded-full bg-white border border-gray-200 px-3 py-1 text-xs text-gray-700 hover:border-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+              >
+                ❓ Gujarat specific schemes & subsidies
               </button>
             </div>
 
@@ -204,7 +170,7 @@ export default function AiAdvisor() {
                 type="text"
                 value={userInputText}
                 onChange={(e) => setUserInputText(e.target.value)}
-                placeholder="Ask VyaparMitra AI a question about your business plan in Hindi, English, etc..."
+                placeholder="Ask VyaparMitra AI a question about your business plan in Gujarati, Hindi, English, etc..."
                 className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
               <button

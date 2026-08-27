@@ -144,8 +144,8 @@ export default function Home() {
 
               <div className="flex justify-between items-center text-xs text-gray-500">
                 <span>Rule applied: Project cost ₹{financials.projectCost.toLocaleString("en-IN")}</span>
-                <Link to="/financial-planner" className="font-semibold text-brand-500 hover:text-brand-600">
-                  Calculate Custom Amount →
+                <Link to="/scheme-router" className="font-semibold text-brand-500 hover:text-brand-600">
+                  Explore Scheme Details →
                 </Link>
               </div>
             </div>
