@@ -27,7 +27,16 @@ app.use(
   })
 );
 
-// 3. API Health Check Endpoint
+// 3. API Root & Health Check Endpoints
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to VyaparMitra Backend API Server 🚀",
+    healthCheck: "/api/health",
+    documentation: "/api/health",
+  });
+});
+
 app.get("/api/health", (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected (Running Mock Fallback)";
   res.status(200).json({
