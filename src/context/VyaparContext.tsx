@@ -2,11 +2,16 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { aiAdvisorService } from "../services/aiAdvisorService";
 
 export interface BusinessInputData {
+  stateId: string;
   state: string;
+  districtId: string;
   district: string;
+  subDistrictId: string;
   block: string;
+  villageId: string;
   village: string;
   marginCapital: number; // in INR (e.g. 15000)
+  categoryId: string;
   category: string;
   language: string;
 }
@@ -127,11 +132,16 @@ export const computeFinancials = (margin: number): FinancialCalculation => {
 };
 
 const defaultInput: BusinessInputData = {
+  stateId: "cm0az9s8700010cl3f9660dta", // Gujarat dummy ID
   state: "Gujarat",
+  districtId: "cm0az9s8l00q50cl3db306rtt", // Ahmedabad dummy ID
   district: "Ahmedabad",
+  subDistrictId: "cm0az9saf08v90cl336dta1a9",
   block: "Sanand",
+  villageId: "cm0az9sfp19u50cl393g08h7g",
   village: "Changodar",
   marginCapital: 25000,
+  categoryId: "mock-1",
   category: "Dairy & Livestock",
   language: "Gujarati",
 };

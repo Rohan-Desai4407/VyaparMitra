@@ -7,12 +7,18 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('admin@vyaparmitra.in');
   const [password, setPassword] = useState('admin123');
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to home dashboard on login
+    if (!email || !password) {
+      setError('Please enter email and password');
+      return;
+    }
+    setError('');
     navigate('/');
   };
+
 
   return (
     <div className="min-h-screen flex flex-col relative font-sans overflow-hidden bg-[#f6f3eb]">
@@ -66,8 +72,8 @@ export default function SignIn() {
           ))}
         </div>
 
-        {/* RIGHT — Login Card */}
-        <div className="w-full lg:w-5/12 flex flex-col justify-center items-center p-6 lg:p-12 relative z-20">
+        {/* RIGHT — Sign In Card */}
+        <div className="w-full lg:w-5/12 flex flex-col justify-center items-center p-6 lg:p-8 relative z-20">
 
           {/* Language Selector */}
           <div className="absolute top-8 right-8 z-30">
@@ -84,6 +90,11 @@ export default function SignIn() {
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
+              {error && (
+                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl font-medium text-center border border-red-100">
+                  {error}
+                </div>
+              )}
               <div className="group">
                 <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 group-focus-within:text-green-700 transition-colors">
                   Email or Mobile Number

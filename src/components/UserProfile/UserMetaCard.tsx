@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
@@ -6,19 +7,86 @@ import Label from "../form/Label";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+  const [unsavedAvatar, setUnsavedAvatar] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const savedAvatar = localStorage.getItem("userAvatar");
+    if (savedAvatar) {
+      setAvatarSrc(savedAvatar);
+    }
+  }, []);
+
+  const handleSaveInfo = () => {
+    // Handle save info logic here
     console.log("Saving changes...");
     closeModal();
   };
+
+  const handleSaveAvatar = () => {
+    if (unsavedAvatar) {
+      localStorage.setItem("userAvatar", unsavedAvatar);
+      setAvatarSrc(unsavedAvatar);
+      setUnsavedAvatar(null);
+      // Dispatch event to update UserDropdown
+      window.dispatchEvent(new Event("avatarUpdated"));
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUnsavedAvatar(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const displayAvatar = unsavedAvatar || avatarSrc;
+
   return (
     <>
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
-              <img src="/images/user/owner.jpg" alt="user" />
+            <div 
+              className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 cursor-pointer group relative flex items-center justify-center bg-gray-100 dark:bg-gray-800"
+              onClick={handleImageClick}
+              title="Click to change profile picture"
+            >
+              <input 
+                type="file" 
+                className="hidden" 
+                ref={fileInputRef} 
+                accept="image/*"
+                onChange={handleFileChange} 
+              />
+              {displayAvatar ? (
+                <img src={displayAvatar} alt="user" className="w-full h-full object-cover" />
+              ) : (
+                <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              )}
+              <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-xs font-medium">
+                Change
+              </div>
             </div>
+            {unsavedAvatar && (
+              <button 
+                onClick={handleSaveAvatar}
+                className="mt-2 text-xs font-semibold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-lg hover:bg-brand-100"
+              >
+                Save Image
+              </button>
+            )}
             <div className="order-3 xl:order-2">
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
                 Musharof Chowdhury
@@ -224,7 +292,7 @@ export default function UserMetaCard() {
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
+              <Button size="sm" onClick={handleSaveInfo}>
                 Save Changes
               </Button>
             </div>

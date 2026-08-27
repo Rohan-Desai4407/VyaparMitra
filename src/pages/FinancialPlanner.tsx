@@ -1,16 +1,30 @@
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import ComponentCard from "../components/common/ComponentCard";
-import { Link } from "react-router";
+import { useFinancialSchemes } from "../hooks/useFinancialSchemes";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 export default function FinancialPlanner() {
-  const { financials, updateInput } = useVyapar();
+  const { financials, updateInput, input } = useVyapar();
+  const { data, loading, error, refetch } = useFinancialSchemes();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const activeScheme = data?.recommendedScheme;
+  const isEligible = activeScheme?.status === 'ELIGIBLE' || activeScheme?.status === 'POTENTIALLY_ELIGIBLE';
+  const fData = activeScheme?.financials;
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 800);
+  };
 
   return (
     <>
       <PageMeta
-        title="Smart Financial Calculator | VyaparMitra"
-        description="Calculate total feasible project cost, margin capital breakdown, eligible loans, and self-contribution."
+        title="Smart Financial Calculator & Scheme Router | VyaparMitra"
+        description="Real verified government scheme eligibility engine and loan calculator."
       />
 
       <div className="space-y-6">
@@ -21,16 +35,24 @@ export default function FinancialPlanner() {
               Smart Financial Calculator
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Deterministic capital planning: Project Cost = Margin ÷ 10%, Maximum Agency Loan = 90%.
+              Evaluates actual government scheme eligibility based on location, category, and capital.
             </p>
           </div>
-          <Link
-            to="/scheme-router"
-            className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-xs font-semibold text-white hover:bg-brand-600 transition shadow-sm"
+          <button 
+             onClick={handleRefresh} 
+             disabled={loading || isRefreshing}
+             className="rounded-full bg-white p-2 text-gray-500 shadow-sm hover:bg-gray-50 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-brand-400 transition-all duration-200"
+             title="Refresh Financial Schemes"
           >
-            View Auto-Selected Scheme →
-          </Link>
+             <RefreshCw className={`h-5 w-5 ${(loading || isRefreshing) ? "animate-spin text-brand-500" : ""}`} />
+          </button>
         </div>
+
+        {error && (
+          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         {/* Interactive Margin Capital Slider */}
         <ComponentCard title="Interactive Margin Capital & Project Cost Simulator">
@@ -40,161 +62,210 @@ export default function FinancialPlanner() {
                 <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                   Available Margin Capital (Self Contribution):
                 </label>
-                <span className="text-2xl font-black text-brand-600 dark:text-brand-400">
-                  ₹{financials.marginCapital.toLocaleString("en-IN")}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    min="5000"
+                    max="5000000"
+                    step="1000"
+                    value={input.marginCapital}
+                    onChange={(e) => updateInput({ marginCapital: Number(e.target.value) })}
+                    className="w-28 text-right bg-transparent text-xl font-bold text-brand-600 focus:outline-none dark:text-brand-400 border-b border-brand-200 dark:border-brand-900"
+                  />
+                </div>
               </div>
 
               <input
                 type="range"
                 min="5000"
-                max="500000"
+                max="1000000"
                 step="5000"
-                value={financials.marginCapital}
+                value={input.marginCapital}
                 onChange={(e) => updateInput({ marginCapital: Number(e.target.value) })}
                 className="h-3 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-brand-500 dark:bg-gray-700"
               />
-              <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
-                <span>Min ₹5,000</span>
-                <span>₹14,000 (Threshold for ₹1.4L Scheme)</span>
-                <span>Max ₹5,00,000</span>
-              </div>
             </div>
 
             {/* Main Financial Result Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-800 dark:bg-gray-800/40">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    User Margin (10%)
-                  </span>
-                  <span className="rounded-md bg-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                    Self Equity
-                  </span>
-                </div>
-                <p className="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white">
-                  ₹{financials.userContribution.toLocaleString("en-IN")}
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
+                <span className="text-xs text-gray-500 dark:text-gray-400">User Margin ({fData?.marginPercentage || '...'})</span>
+                <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">
+                  {loading ? '...' : (fData?.userContribution ? `₹${fData.userContribution.toLocaleString("en-IN")}` : '₹0')}
                 </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Your upfront out-of-pocket investment</p>
+                <p className="mt-1 text-xs text-gray-400">Required scheme contribution</p>
               </div>
 
-              <div className="rounded-xl border border-brand-200 bg-brand-50/40 p-5 dark:border-brand-900/50 dark:bg-brand-950/20">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300">
-                    Total Feasible Project Cost
-                  </span>
-                  <span className="rounded-md bg-brand-100 px-2 py-0.5 text-[10px] font-bold text-brand-800 dark:bg-brand-900 dark:text-brand-200">
-                    100% Size
-                  </span>
-                </div>
-                <p className="mt-2 text-3xl font-black text-brand-600 dark:text-brand-400">
-                  ₹{financials.projectCost.toLocaleString("en-IN")}
+              <div className="rounded-xl border border-brand-200 bg-brand-50/40 p-4 dark:border-brand-900/50 dark:bg-brand-950/20">
+                <span className="text-xs font-semibold text-brand-700 dark:text-brand-300">
+                  Maximum Eligible Project Cost
+                </span>
+                <p className="mt-1 text-3xl font-black text-brand-600 dark:text-brand-400">
+                  {loading ? '...' : (fData?.projectCost ? `₹${fData.projectCost.toLocaleString("en-IN")}` : '₹0')}
                 </p>
-                <p className="mt-1 text-xs font-medium text-brand-600/80 dark:text-brand-400/80">
-                  Calculated as Margin Capital ÷ 10%
+                <p className="mt-1 text-xs text-brand-600 dark:text-brand-400">
+                  Derived from scheme bounds
                 </p>
               </div>
 
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-5 dark:border-emerald-900/50 dark:bg-emerald-950/20">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                    Eligible Loan Amount (90%)
-                  </span>
-                  <span className="rounded-md bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-                    Agency Debt
-                  </span>
-                </div>
-                <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                  ₹{financials.maxLoanAmount.toLocaleString("en-IN")}
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  Maximum Eligible Loan Amount
+                </span>
+                <p className="mt-1 text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                  {loading ? '...' : (fData?.loanAmount ? `₹${fData.loanAmount.toLocaleString("en-IN")}` : '₹0')}
                 </p>
-                <p className="mt-1 text-xs font-medium text-emerald-700/80 dark:text-emerald-300/80">
-                  Govt / Institutional Financing Share
+                <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                  {fData?.financingPercentage} Financing
                 </p>
               </div>
             </div>
           </div>
         </ComponentCard>
 
-        {/* Project Cost Breakdown & Capital Structure */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <ComponentCard title="Capital Breakdown & Financing Ratios">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-3.5 h-3.5 rounded-full bg-brand-500"></div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Promoter / Self Contribution</p>
-                    <p className="text-xs text-gray-400">Required 10% minimum margin</p>
-                  </div>
-                </div>
-                <span className="text-base font-bold text-gray-900 dark:text-white">
-                  ₹{financials.userContribution.toLocaleString("en-IN")} (10%)
+        {/* Auto Selected Scheme Details */}
+        <ComponentCard title="Auto-Selected Government Loan Scheme">
+          {loading ? (
+             <div className="py-10 text-center text-gray-500">Loading verified schemes...</div>
+          ) : !activeScheme ? (
+             <div className="py-10 text-center text-red-500">No verified matching government scheme found.</div>
+          ) : (
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-3 lg:w-1/2">
+              <div className="flex items-center gap-3">
+                <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                  activeScheme.status === 'ELIGIBLE' ? 'bg-emerald-500 text-white' : 
+                  activeScheme.status === 'POTENTIALLY_ELIGIBLE' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+                }`}>
+                  {activeScheme.status.replace('_', ' ')}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Score: {activeScheme.score}/100
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-500"></div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Agency Loan Financing</p>
-                    <p className="text-xs text-gray-400">Maximum eligible bank/agency loan</p>
-                  </div>
-                </div>
-                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                  ₹{financials.maxLoanAmount.toLocaleString("en-IN")} (90%)
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {activeScheme.name}
+              </h2>
 
-              {/* Visual Progress Ratio */}
-              <div className="pt-2">
-                <div className="flex justify-between text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1.5">
-                  <span>Margin: 10%</span>
-                  <span>Loan: 90%</span>
-                </div>
-                <div className="h-3 w-full rounded-full bg-gray-200 overflow-hidden flex dark:bg-gray-700">
-                  <div className="h-full bg-brand-500 w-[10%]"></div>
-                  <div className="h-full bg-emerald-500 w-[90%]"></div>
-                </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                {activeScheme.reason}
+              </p>
+              
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/60 rounded text-xs text-gray-600 dark:text-gray-400">
+                <p><strong>Official Ministry:</strong> {activeScheme.ministry}</p>
+                <p><strong>Source:</strong> <a href={activeScheme.sourceUrl} target="_blank" className="text-brand-500 hover:underline">{activeScheme.sourceUrl}</a></p>
+                <p><strong>Last Verified:</strong> {new Date(activeScheme.lastVerified).toLocaleDateString()}</p>
               </div>
             </div>
-          </ComponentCard>
 
-          <ComponentCard title="Financial Quick Summary & Scheme Snapshot">
-            <div className="space-y-4">
-              <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider">
-                    Auto-Matched Scheme
-                  </span>
-                  <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
-                    {financials.scheme.code}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  {financials.scheme.name}
-                </h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Applicable interest rate: <strong>{financials.scheme.interestRate}% p.a.</strong> • Tenure: <strong>{financials.scheme.tenureYears} Years</strong>
+            <div className="grid grid-cols-2 gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/60 lg:w-96">
+              <div>
+                <span className="text-xs text-gray-400">Interest Rate</span>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  {fData?.interestRate ? `${fData.interestRate}% p.a.` : 'Lender Dependent'}
                 </p>
               </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div>
-                  <span className="text-xs text-gray-400">Want full scheme terms & comparison?</span>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    Explore government scheme router
-                  </p>
-                </div>
-                <Link
-                  to="/scheme-router"
-                  className="rounded-xl border border-gray-300 bg-white px-3.5 py-2 text-xs font-bold text-gray-800 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 transition"
-                >
-                  Scheme Router →
-                </Link>
+              <div>
+                <span className="text-xs text-gray-400">Repayment Tenure</span>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  {fData?.tenureMonths} Months
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400">Moratorium Period</span>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  {fData?.moratoriumMonths} Months
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400">Est. EMI</span>
+                <p className="text-lg font-bold text-brand-600 dark:text-brand-400">
+                  ₹{fData?.emi?.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400">Gov. Subsidy</span>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  ₹{fData?.subsidy?.toLocaleString("en-IN")}
+                </p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-400">Total Repayment</span>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  ₹{fData?.totalRepayment?.toLocaleString("en-IN")}
+                </p>
               </div>
             </div>
-          </ComponentCard>
-        </div>
+          </div>
+          )}
+        </ComponentCard>
+
+        {/* Real Dynamic Scheme Comparison Table */}
+        <ComponentCard title="Government Scheme Comparison Matrix">
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="py-10 text-center text-gray-500">Loading scheme comparison...</div>
+            ) : (!data?.schemes || data.schemes.length === 0) ? (
+              <div className="py-10 text-center text-gray-500">No schemes to compare.</div>
+            ) : (
+            <table className="min-w-full text-left text-sm text-gray-800 dark:text-gray-200">
+              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50 text-xs uppercase tracking-wider text-gray-500">
+                <tr>
+                  <th className="px-4 py-3">Feature</th>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <th key={s.schemeId} className="px-4 py-3">{s.officialName || s.schemeCode}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Eligibility</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className={`px-4 py-3 font-bold ${s.status === 'ELIGIBLE' ? 'text-emerald-500' : s.status === 'POTENTIALLY_ELIGIBLE' ? 'text-amber-500' : 'text-red-500'}`}>
+                      {s.status.replace('_', ' ')}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Max Project Cost</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className="px-4 py-3">₹{s.financials.projectCost.toLocaleString("en-IN")}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Eligible Loan</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className="px-4 py-3">₹{s.financials.loanAmount.toLocaleString("en-IN")}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Gov Subsidy</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className="px-4 py-3">{s.financials.subsidy > 0 ? `₹${s.financials.subsidy.toLocaleString("en-IN")}` : 'None'}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Interest Rate</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className="px-4 py-3">{s.financials.interestRate ? `${s.financials.interestRate}%` : 'Variable'}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Repayment Tenure</td>
+                  {data.schemes.slice(0, 3).map((s: any) => (
+                    <td key={s.schemeId} className="px-4 py-3">{s.financials.tenureMonths} Months</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+            )}
+          </div>
+          <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            * Scheme eligibility, loan approval, interest rate and financing terms are subject to the latest official guidelines and lender approval. VyaparMitra provides decision support and does not guarantee loan approval.
+          </p>
+        </ComponentCard>
       </div>
     </>
   );

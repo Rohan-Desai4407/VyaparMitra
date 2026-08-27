@@ -166,6 +166,7 @@ const AppSidebar: React.FC = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
+              title={(!isExpanded && !isHovered && !isMobileOpen) ? nav.name : undefined}
               className={`menu-item group ${
                 openSubmenu?.type === menuType && openSubmenu?.index === index
                   ? "menu-item-active"
@@ -203,10 +204,15 @@ const AppSidebar: React.FC = () => {
             nav.path && (
               <Link
                 to={nav.path}
+                title={(!isExpanded && !isHovered && !isMobileOpen) ? nav.name : undefined}
+                aria-current={isActive(nav.path) ? "page" : undefined}
                 className={`menu-item group ${
                   isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                 }`}
               >
+                {isActive(nav.path) && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-brand-500 dark:bg-brand-400 rounded-r-full transition-opacity duration-200" />
+                )}
                 <span
                   className={`menu-item-icon-size ${
                     isActive(nav.path)
@@ -240,6 +246,7 @@ const AppSidebar: React.FC = () => {
                   <li key={subItem.name}>
                     <Link
                       to={subItem.path}
+                      aria-current={isActive(subItem.path) ? "page" : undefined}
                       className={`menu-dropdown-item ${
                         isActive(subItem.path)
                           ? "menu-dropdown-item-active"
