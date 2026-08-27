@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { Eye, EyeOff, Mail, Lock, CheckCircle2, Map, Shield } from 'lucide-react';
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,12 +43,12 @@ export default function SignIn() {
       <div className="flex-1 flex flex-col lg:flex-row w-full relative z-10 pb-16">
 
         {/* LEFT */}
-        <div className="w-full lg:w-7/12 flex flex-col p-8 lg:p-12 xl:p-16 opacity-0 [animation:slide-up_0.8s_ease-out_forwards]">
+        <div className="w-full lg:w-7/12 flex flex-col p-8 lg:p-12 xl:p-16 opacity-0" style={{ animation: 'slide-up 0.8s ease-out forwards' }}>
           <div className="max-w-3xl">
             {/* Logo */}
             <div className="mb-8">
               <img src="/logo.png" alt="VyaparMitra"
-                className="h-24 lg:h-28 object-contain"
+                className="h-20 lg:h-24 object-contain"
                 style={{ mixBlendMode: 'multiply' }} />
             </div>
 
@@ -82,7 +83,7 @@ export default function SignIn() {
             </button>
           </div>
 
-          <div className="bg-white rounded-[2rem] p-8 lg:p-10 w-full max-w-[420px] shadow-[0_20px_50px_rgb(0,0,0,0.08)] border border-gray-100 mt-12 lg:mt-0 opacity-0 [animation:slide-up_0.8s_ease-out_0.2s_forwards]">
+          <div className="bg-white rounded-[2rem] p-8 lg:p-10 w-full max-w-[420px] shadow-[0_20px_50px_rgb(0,0,0,0.08)] border border-gray-100 mt-12 lg:mt-0 opacity-0" style={{ animation: 'slide-up 0.8s ease-out 0.2s forwards' }}>
             <div className="text-center mb-8">
               <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Welcome Back!</h2>
               <p className="text-gray-500 text-sm font-medium">Login to continue your entrepreneurial journey</p>
@@ -150,11 +151,11 @@ export default function SignIn() {
                 </div>
               </div>
               <div className="space-y-3">
-                <button type="button" className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   Continue with Google
                 </button>
-                <button type="button" className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
                   <Map size={18} className="text-gray-500 group-hover:text-green-600 transition-all" strokeWidth={2.5} />
                   Continue with Mobile OTP
                 </button>
