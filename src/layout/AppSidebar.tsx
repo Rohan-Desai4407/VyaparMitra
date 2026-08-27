@@ -79,6 +79,16 @@ const othersItems: NavItem[] = [
     name: "User Profile",
     path: "/profile",
   },
+  {
+    icon: <UserCircleIcon />,
+    name: "Sign In",
+    path: "/signin",
+  },
+  {
+    icon: <UserCircleIcon />,
+    name: "Sign Up",
+    path: "/signup",
+  },
 ];
 
 const AppSidebar: React.FC = () => {
