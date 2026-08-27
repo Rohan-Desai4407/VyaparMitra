@@ -1,9 +1,17 @@
+import React from "react";
 import { Link } from "react-router";
 import { useVyapar } from "../../context/VyaparContext";
 import PageMeta from "../../components/common/PageMeta";
 
 export default function Home() {
-  const { input, financials, market, report } = useVyapar();
+  const { input, financials, report } = useVyapar();
+
+  // Financial Snapshot Estimates
+  const estMonthlyRevenue = financials.projectCost * 0.15; 
+  const estMonthlyExpenses = estMonthlyRevenue * 0.6; 
+  const estMonthlyProfit = estMonthlyRevenue - estMonthlyExpenses - financials.monthlyEmi;
+  const profitMargin = Math.round((estMonthlyProfit / estMonthlyRevenue) * 100) || 0;
+  const breakEvenMonths = 14;
 
   return (
     <>
@@ -12,8 +20,8 @@ export default function Home() {
         description="AI-driven hyper-local business advisory dashboard and smart financial calculator."
       />
 
-      <div className="space-y-6">
-        {/* Banner Card */}
+      <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center rounded-2xl bg-gradient-to-r from-gray-900 via-brand-900 to-gray-900 p-6 text-white shadow-md">
           <div className="space-y-1">
             <span className="text-xs uppercase font-bold text-brand-400 tracking-wider">
@@ -23,225 +31,226 @@ export default function Home() {
               {input.category} Venture — {input.village}, {input.block}
             </h1>
             <p className="text-xs opacity-80">
-              State: {input.state} • District: {input.district} • Preferred Language: {input.language}
+              State: {input.state} • District: {input.district} • Language: {input.language}
             </p>
           </div>
 
           <div className="mt-4 md:mt-0 flex gap-3">
-            <Link
-              to="/assessment"
-              className="rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-gray-900 hover:bg-gray-100 transition"
-            >
-              Modify Inputs ✏️
+            <Link to="/assessment" className="rounded-xl bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition">
+              Modify Inputs
             </Link>
-            <Link
-              to="/final-report"
-              className="rounded-xl bg-brand-500 px-4 py-2.5 text-xs font-semibold text-white hover:bg-brand-600 transition"
-            >
+            <Link to="/final-report" className="rounded-xl bg-white text-gray-900 px-4 py-2.5 text-xs font-semibold hover:bg-gray-100 transition">
               View Full Report →
             </Link>
           </div>
         </div>
 
-        {/* Top 4 KPI Metrics */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Viability Score */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Overall Business Viability
-            </span>
+        {/* TOP KPI ROW */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Viability</span>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                {report.viabilityScore}
-              </span>
-              <span className="text-xs text-gray-400">/ 100</span>
-              <span className="ml-auto rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
-                {report.overallVerdict}
-              </span>
+              <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{report.viabilityScore}</span>
+              <span className="text-sm font-normal text-gray-400">/ 100</span>
             </div>
-            <p className="mt-2 text-[11px] text-gray-400">High local demand & low margin barriers</p>
+            <span className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              {report.overallVerdict || "Highly Viable"}
+            </span>
           </div>
 
-          {/* User Margin Contribution */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Available Margin Capital
-            </span>
-            <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">
-              ₹{financials.userContribution.toLocaleString("en-IN")}
-            </p>
-            <p className="mt-2 text-[11px] text-brand-600 dark:text-brand-400">
-              Represents 10% self-contribution
-            </p>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Available Capital</span>
+            <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">₹{financials.userContribution.toLocaleString("en-IN")}</p>
           </div>
 
-          {/* Feasible Project Cost */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Total Feasible Project Cost
-            </span>
-            <p className="mt-2 text-3xl font-black text-brand-600 dark:text-brand-400">
-              ₹{financials.projectCost.toLocaleString("en-IN")}
-            </p>
-            <p className="mt-2 text-[11px] text-gray-400">Margin Capital ÷ 10%</p>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project Cost</span>
+            <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">₹{financials.projectCost.toLocaleString("en-IN")}</p>
           </div>
 
-          {/* Maximum Eligible Loan Amount */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Max Loan Eligibility (90%)
-            </span>
-            <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">
-              ₹{financials.maxLoanAmount.toLocaleString("en-IN")}
-            </p>
-            <p className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400">
-              Via {financials.scheme.name}
-            </p>
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Loan Eligibility</span>
+            <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">₹{financials.maxLoanAmount.toLocaleString("en-IN")}</p>
           </div>
         </div>
 
-        {/* Main Grid: Auto Scheme Router + Local Market Intelligence */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          {/* Left Column: Scheme Details */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Auto Selected Scheme Card */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span className="inline-block rounded-full bg-brand-100 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-                    SCHEME AUTO-ROUTER
-                  </span>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">
-                    {financials.scheme.name}
-                  </h3>
-                </div>
-
-                <span className="rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-300">
-                  {financials.scheme.interestRate}% Interest
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800/50 mb-4">
-                <div>
-                  <span className="text-[11px] text-gray-400">Tenure</span>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    {financials.scheme.tenureYears} Years
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[11px] text-gray-400">Moratorium</span>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    {financials.scheme.moratoriumMonths} Months
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[11px] text-gray-400">Est. Monthly EMI</span>
-                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    ₹{financials.monthlyEmi.toLocaleString("en-IN")}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center text-xs text-gray-500">
-                <span>Rule applied: Project cost ₹{financials.projectCost.toLocaleString("en-IN")}</span>
-                <Link to="/financial-planner" className="font-semibold text-brand-500 hover:text-brand-600">
-                  Calculate Custom Amount →
-                </Link>
-              </div>
+        {/* MAIN RECOMMENDATION & AI RANKING */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50/30 p-6 dark:border-emerald-900/30 dark:bg-emerald-900/10">
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-2">AI BUSINESS RECOMMENDATION</span>
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{input.category}</h2>
+              <span className="text-2xl font-black text-emerald-600">84 <span className="text-sm text-gray-400 font-normal">/ 100</span></span>
             </div>
-
-            {/* Quick Action & Next Steps */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-                Key Action Recommendations
-              </h3>
-              <div className="space-y-2.5">
-                {report.keyActionItems.map((action, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3 text-xs text-gray-800 dark:border-gray-800 dark:bg-gray-800/40 dark:text-gray-200"
-                  >
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
-                      {idx + 1}
-                    </span>
-                    <span>{action}</span>
-                  </div>
-                ))}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-xs font-bold text-gray-500 uppercase mb-3">Why?</h4>
+                <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                  <li className="flex items-start gap-2"><span className="text-emerald-500 font-bold">✓</span> Strong local demand</li>
+                  <li className="flex items-start gap-2"><span className="text-emerald-500 font-bold">✓</span> Suitable capital requirement</li>
+                  <li className="flex items-start gap-2"><span className="text-emerald-500 font-bold">✓</span> Good resource availability</li>
+                </ul>
               </div>
-            </div>
-          </div>
-
-          {/* Right Column: Local Data Summary */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Market Intelligence Summary */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-              <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-3 dark:border-gray-800">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                  Local Market Intelligence
-                </h3>
-                <Link to="/market-analysis" className="text-xs font-medium text-brand-500 hover:text-brand-600">
-                  Full Details →
-                </Link>
-              </div>
-
               <div className="space-y-4">
-                <div>
-                  <span className="text-xs text-gray-400">Consumer Density (5-10km)</span>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {market.consumerBase5to10km.toLocaleString("en-IN")} Potential Buyers
-                  </p>
+                <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Profile Fit:</span>
+                  <span className="font-bold text-gray-900 dark:text-white">85%</span>
                 </div>
-
-                <div>
-                  <span className="text-xs text-gray-400">Competitor Density</span>
-                  <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                    {market.competitorDensity} ({market.competitorCount} active units)
-                  </p>
+                <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Resource Fit:</span>
+                  <span className="font-bold text-gray-900 dark:text-white">89%</span>
                 </div>
-
-                <div>
-                  <span className="text-xs text-gray-400">Suggested Pricing Benchmark</span>
-                  <p className="text-sm font-bold text-brand-600 dark:text-brand-400">
-                    {market.suggestedPricing}
-                  </p>
-                </div>
-
-                <div>
-                  <span className="text-xs text-gray-400">Unserved Opportunities</span>
-                  <div className="mt-1 flex flex-wrap gap-1.5">
-                    {market.unservedNiches.map((niche, i) => (
-                      <span
-                        key={i}
-                        className="rounded-md bg-brand-50 px-2 py-1 text-[11px] font-semibold text-brand-700 dark:bg-brand-950/40 dark:text-brand-300"
-                      >
-                        {niche}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                <Link to="/final-report" className="text-xs font-semibold text-brand-600 inline-block pt-2">View Full Reasoning →</Link>
               </div>
             </div>
+          </div>
 
-            {/* AI Advisor Banner */}
-            <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-6 dark:border-purple-900/40 dark:bg-purple-950/20">
-              <span className="text-xs uppercase font-bold text-purple-700 dark:text-purple-300 tracking-wider">
-                AI Business Advisor
-              </span>
-              <h4 className="text-base font-bold text-gray-900 dark:text-white mt-1">
-                Have questions about local risks or loans?
-              </h4>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 mb-4">
-                Talk with our NLP-powered multilingual AI assistant trained on rural business feasibility.
-              </p>
-              <Link
-                to="/ai-advisor"
-                className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold text-white hover:bg-purple-700 transition"
-              >
-                Launch AI Assistant Chat 💬
-              </Link>
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">AI OPPORTUNITY RANKING</span>
+            <div className="space-y-4 flex-grow">
+              <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                <span className="font-bold text-gray-900 dark:text-white text-sm">#1 Dairy & Livestock</span>
+                <span className="font-bold text-emerald-600">84</span>
+              </div>
+              <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                <span className="font-bold text-gray-700 dark:text-gray-300 text-sm">#2 Food Processing</span>
+                <span className="font-bold text-emerald-600">81</span>
+              </div>
+              <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
+                <span className="font-bold text-gray-700 dark:text-gray-300 text-sm">#3 Poultry</span>
+                <span className="font-bold text-amber-600">77</span>
+              </div>
+            </div>
+            <Link to="/ai-advisor" className="text-xs font-semibold text-brand-600 block mt-4">View All Opportunities →</Link>
+          </div>
+        </div>
+
+        {/* 2-COLUMN SECTION: MARKET & FINANCIAL */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">LOCAL MARKET SNAPSHOT</span>
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4">
+              <div><span className="text-gray-500 block text-xs">Demand:</span><span className="font-bold text-emerald-600">HIGH</span></div>
+              <div><span className="text-gray-500 block text-xs">Competition:</span><span className="font-bold text-amber-600">MEDIUM</span></div>
+              <div><span className="text-gray-500 block text-xs">Potential Buyers:</span><span className="font-bold text-gray-900 dark:text-white">18,500</span></div>
+              <div><span className="text-gray-500 block text-xs">Price Range:</span><span className="font-bold text-gray-900 dark:text-white">₹58–₹64/L</span></div>
+            </div>
+            <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl border border-brand-100 dark:border-brand-900/30 mb-4 flex-grow">
+              <span className="block text-xs font-bold text-brand-700 dark:text-brand-300 mb-1">Opportunity:</span>
+              <span className="text-sm text-brand-900 dark:text-brand-100 font-medium">Value-added dairy products</span>
+            </div>
+            <Link to="/market-analysis" className="text-xs font-semibold text-brand-600">View Market Analysis →</Link>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">FINANCIAL SNAPSHOT</span>
+            <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4 flex-grow">
+              <div><span className="text-gray-500 block text-xs">Revenue:</span><span className="font-bold text-gray-900 dark:text-white">₹{estMonthlyRevenue.toLocaleString('en-IN')}/month</span></div>
+              <div><span className="text-gray-500 block text-xs">Profit:</span><span className="font-bold text-emerald-600">₹{estMonthlyProfit.toLocaleString('en-IN')}/month</span></div>
+              <div><span className="text-gray-500 block text-xs">Margin:</span><span className="font-bold text-gray-900 dark:text-white">{profitMargin}%</span></div>
+              <div><span className="text-gray-500 block text-xs">Break-even:</span><span className="font-bold text-gray-900 dark:text-white">{breakEvenMonths} months</span></div>
+            </div>
+            <Link to="/financial-planner" className="text-xs font-semibold text-brand-600 block mt-auto pt-4">Open Financial Planner →</Link>
+          </div>
+        </div>
+
+        {/* 2-COLUMN SECTION: RISK & SUPPORT */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">RISK SUMMARY</span>
+            <div className="mb-4">
+              <span className="text-gray-500 block text-xs mb-1">Overall Risk:</span>
+              <span className="text-lg font-black text-amber-600">MEDIUM</span>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4 flex-grow">
+              <span className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Main Risk:</span>
+              <span className="text-sm text-amber-900 dark:text-amber-100 font-medium">Raw material price fluctuations</span>
+            </div>
+            <Link to="/ai-advisor" className="text-xs font-semibold text-brand-600 mt-auto">Ask AI Advisor →</Link>
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">GOVERNMENT SUPPORT</span>
+            <div className="mb-4">
+              <span className="text-sm font-bold text-gray-900 dark:text-white block mb-1">3 potentially relevant schemes</span>
+            </div>
+            <div className="bg-emerald-50 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20 mb-4 space-y-2 flex-grow">
+              <div>
+                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Best Match:</span>
+                <span className="text-sm text-emerald-900 dark:text-emerald-100 font-bold">{financials.scheme.name}</span>
+              </div>
+              <div>
+                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Potential Financing:</span>
+                <span className="text-sm text-emerald-900 dark:text-emerald-100 font-bold">₹{financials.maxLoanAmount.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+            <Link to="/financial-planner" className="text-xs font-semibold text-brand-600 mt-auto">View Scheme Details →</Link>
+          </div>
+        </div>
+
+        {/* SMART ALERTS */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">SMART ALERTS</span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-red-500">⚠</span>
+              <span className="text-gray-700 dark:text-gray-300"><strong>Capital gap:</strong> ₹{(financials.projectCost - financials.userContribution).toLocaleString('en-IN')}</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-brand-500">💡</span>
+              <span className="text-gray-700 dark:text-gray-300"><strong>Opportunity:</strong> High local demand for value-added dairy products</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-emerald-500">🏦</span>
+              <span className="text-gray-700 dark:text-gray-300"><strong>Support:</strong> 3 potentially relevant schemes identified</span>
             </div>
           </div>
         </div>
+
+        {/* NEXT ACTIONS */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">NEXT ACTIONS</span>
+          <div className="space-y-4 mb-5 text-gray-700 dark:text-gray-300">
+            <div className="flex gap-4 items-start">
+              <span className="text-lg font-black text-gray-300 dark:text-gray-600">01</span>
+              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Apply for suitable financing</span></div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <span className="text-lg font-black text-gray-300 dark:text-gray-600">02</span>
+              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Secure local supplier agreement</span></div>
+            </div>
+            <div className="flex gap-4 items-start">
+              <span className="text-lg font-black text-gray-300 dark:text-gray-600">03</span>
+              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Validate demand with retailers</span></div>
+            </div>
+          </div>
+          <Link to="/final-report" className="text-xs font-semibold text-brand-600">View Full Action Plan →</Link>
+        </div>
+
+        {/* FINAL REPORT CTA */}
+        <div className="rounded-2xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-900/10 p-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
+          <div>
+            <h3 className="text-lg font-black text-brand-900 dark:text-brand-100 uppercase mb-2">YOUR FEASIBILITY REPORT IS READY</h3>
+            <p className="text-sm text-brand-700 dark:text-brand-300 max-w-xl">
+              View the complete business feasibility analysis, financial details, market analysis, risk assessment, scheme matching and recommendations.
+            </p>
+          </div>
+          <Link to="/final-report" className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md whitespace-nowrap">
+            View Full Report →
+          </Link>
+        </div>
+
+        {/* DATA TRANSPARENCY */}
+        <div className="flex justify-between items-center text-[10px] text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex flex-wrap gap-4">
+            <span>Data Sources</span>
+            <span>Model Version: 1.2</span>
+            <span>Last Updated: Today</span>
+          </div>
+          <button className="hover:text-gray-600 dark:hover:text-gray-300">View Details</button>
+        </div>
+
       </div>
     </>
   );

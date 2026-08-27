@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assessments Assessment[]
+}
+
+model State {
+  id              String     @id @default(uuid())
+  lgdCode         String     @unique
+  name            String
+  type            String     @default("STATE")
+  shortName       String?
+  isActive        Boolean    @default(true)
+  source          String     @default("LGD")
+  sourceUpdatedAt DateTime?
+  
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  districts       District[]
+}
+
+model District {
+  id              String     @id @default(uuid())
+  lgdCode         String     @unique
+  stateId         String
+  name            String
+  isActive        Boolean    @default(true)
+  source          String     @default("LGD")
+  sourceUpdatedAt DateTime?
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  state           State          @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  subDistricts    SubDistrict[]
+
+  @@index([stateId])
+}
+
+model SubDistrict {
+  id              String     @id @default(uuid())
+  lgdCode         String     @unique
+  districtId      String
+  name            String
+  officialType    String     @default("Sub-District")
+  isActive        Boolean    @default(true)
+  source          String     @default("LGD")
+  sourceUpdatedAt DateTime?
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  district        District   @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  villages        Village[]
+
+  @@index([districtId])
+}
+
+model Village {
+  id              String     @id @default(uuid())
+  lgdCode         String     @unique
+  subDistrictId   String
+  name            String
+  locationType    String     @default("VILLAGE")
+  villageCode     String?
+  pincode         String?
+  isInhabited     Boolean    @default(true)
+  isActive        Boolean    @default(true)
+  source          String     @default("LGD")
+  sourceUpdatedAt DateTime?
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  subDistrict     SubDistrict @relation(fields: [subDistrictId], references: [id], onDelete: Cascade)
+
+  @@index([subDistrictId])
+  @@index([name])
+}
+
+model LocationDatasetMetadata {
+  id                String   @id @default(uuid())
+  source            String
+  datasetName       String
+  datasetVersion    String
+  downloadDate      DateTime?
+  sourceUpdatedDate DateTime?
+  importedAt        DateTime @default(now())
+  recordCount       Int      @default(0)
+  status            String
+}
+
+model BusinessCategory {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g., DAIRY_LIVESTOCK
+  name        String
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assessments Assessment[]
+  schemes     SchemeCategoryMatch[]
+}
+
+model GovernmentScheme {
+  id                String   @id @default(uuid())
+  schemeCode        String   @unique
+  name              String
+  officialName      String?
+  ministry          String?
+  department        String?
+  description       String?
+  schemeType        String?
+  active            Boolean  @default(true)
+  officialSourceUrl String?
+  guidelineUrl      String?
+  sourceDate        DateTime?
+  lastVerifiedAt    DateTime?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  financialRules    SchemeFinancialRule[]
+  eligibilityRules  SchemeEligibilityRule[]
+  categories        SchemeCategoryMatch[]
+  assessmentResults AssessmentResult[]
+  loanCalculations  LoanCalculation[]
+}
+
+model SchemeFinancialRule {
+  id                          String   @id @default(uuid())
+  schemeId                    String
+  minimumProjectCost          Float
+  maximumProjectCost          Float
+  minimumLoan                 Float?
+  maximumLoan                 Float?
+  marginPercentage            Float
+  maximumFinancingPercentage  Float
+  subsidyPercentage           Float?
+  maximumSubsidy              Float?
+  interestRate                String?
+  interestRateType            String?
+  tenureMonths                Int?
+  moratoriumMonths            Int?
+  processingFee               String?
+  collateralRequired          String?
+  guaranteeAvailable          Boolean  @default(false)
+  guaranteePercentage         Float?
+  workingCapitalAllowed       Boolean  @default(true)
+  termLoanAllowed             Boolean  @default(true)
+  equipmentFinancingAllowed   Boolean  @default(true)
+  source                      String?
+  sourceUrl                   String?
+  effectiveDate               DateTime?
+  lastVerifiedAt              DateTime?
+
+  scheme                      GovernmentScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+}
+
+model SchemeEligibilityRule {
+  id         String   @id @default(uuid())
+  schemeId   String
+  ruleType   String
+  field      String
+  operator   String
+  value      String
+  source     String?
+  sourceUrl  String?
+
+  scheme     GovernmentScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+}
+
+model SchemeCategoryMatch {
+  id                 String @id @default(uuid())
+  schemeId           String
+  businessCategoryId String
+
+  scheme             GovernmentScheme @relation(fields: [schemeId], references: [id], onDelete: Cascade)
+  category           BusinessCategory @relation(fields: [businessCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([schemeId, businessCategoryId])
+}
+
+model Assessment {
+  id                     String   @id @default(uuid())
+  userId                 String
+  stateId                String?
+  districtId             String?
+  subDistrictId          String?
+  villageId              String?
+  businessCategoryId     String
+  availableMarginCapital Float
+  preferredLanguage      String   @default("English")
+  status                 String   @default("COMPLETED")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user             User             @relation(fields: [userId], references: [id])
+  businessCategory BusinessCategory @relation(fields: [businessCategoryId], references: [id])
+  
+  result AssessmentResult?
+}
+
+model AssessmentResult {
+  id                  String   @id @default(uuid())
+  assessmentId        String   @unique
+  matchedSchemeId     String?
+  
+  marginPercentage    Float
+  feasibleProjectCost Float
+  financingPercentage Float
+  potentialFinancing  Float
+  matchScore          Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  scheme     GovernmentScheme? @relation(fields: [matchedSchemeId], references: [id])
+}
+
+model LoanCalculation {
+  id                  String   @id @default(uuid())
+  schemeId            String?
+  projectCost         Float
+  userContribution    Float
+  loanAmount          Float
+  interestRate        Float
+  tenureMonths        Int
+  moratoriumMonths    Int
+  subsidy             Float    @default(0)
+  emi                 Float
+  totalInterest       Float
+  totalRepayment      Float
+  createdAt           DateTime @default(now())
+
+  scheme              GovernmentScheme? @relation(fields: [schemeId], references: [id])
+  schedules           RepaymentSchedule[]
+}
+
+model RepaymentSchedule {
+  id                  String   @id @default(uuid())
+  loanCalculationId   String
+  formulaVersion      String   @default("EMI_REDUCING_BALANCE_V1")
+  createdAt           DateTime @default(now())
+
+  loanCalculation     LoanCalculation @relation(fields: [loanCalculationId], references: [id], onDelete: Cascade)
+  items               RepaymentScheduleItem[]
+}
+
+model RepaymentScheduleItem {
+  id                  String   @id @default(uuid())
+  scheduleId          String
+  periodNumber        Int
+  openingBalance      Float
+  principal           Float
+  interest            Float
+  fees                Float    @default(0)
+  totalPayment        Float
+  closingBalance      Float
+  status              String   @default("SCHEDULED") // e.g., MORATORIUM, ACTIVE
+
+  schedule            RepaymentSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+}

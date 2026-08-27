@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Eye, EyeOff, Mail, Lock, CheckCircle2, Map, Shield } from 'lucide-react';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email === 'example@gmail.com' && password === 'Password@123') {
+      setError('');
+      navigate('/');
+    } else {
+      setError('Invalid email or password');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col relative font-sans overflow-hidden bg-[#f6f3eb]">
@@ -57,8 +71,8 @@ export default function SignIn() {
           ))}
         </div>
 
-        {/* RIGHT — Login Card */}
-        <div className="w-full lg:w-5/12 flex flex-col justify-center items-center p-6 lg:p-12 relative z-20">
+        {/* RIGHT — Sign In Card */}
+        <div className="w-full lg:w-5/12 flex flex-col justify-center items-center p-6 lg:p-8 relative z-20">
 
           {/* Language Selector */}
           <div className="absolute top-8 right-8 z-30">
@@ -74,7 +88,12 @@ export default function SignIn() {
               <p className="text-gray-500 text-sm font-medium">Login to continue your entrepreneurial journey</p>
             </div>
 
-            <form className="space-y-5">
+            <form className="space-y-4" onSubmit={handleLogin}>
+              {error && (
+                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl font-medium text-center border border-red-100">
+                  {error}
+                </div>
+              )}
               <div className="group">
                 <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 group-focus-within:text-green-700 transition-colors">
                   Email or Mobile Number
@@ -84,6 +103,8 @@ export default function SignIn() {
                     <Mail size={18} strokeWidth={2.5} />
                   </div>
                   <input type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-green-600 placeholder-gray-400 transition-all bg-gray-50/50 focus:bg-white text-gray-900 text-sm font-medium outline-none"
                     placeholder="Enter your email or mobile number" />
                 </div>
@@ -98,6 +119,8 @@ export default function SignIn() {
                     <Lock size={18} strokeWidth={2.5} />
                   </div>
                   <input type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:border-green-600 placeholder-gray-400 transition-all bg-gray-50/50 focus:bg-white text-gray-900 text-sm font-medium outline-none"
                     placeholder="Enter your password" />
                   <button type="button"
@@ -111,7 +134,7 @@ export default function SignIn() {
                 </div>
               </div>
 
-              <button type="button"
+              <button type="submit"
                 className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-[#0A4222] hover:bg-green-900 transition-all mt-6 tracking-wide hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2">
                 <CheckCircle2 size={18} strokeWidth={2.5} className="mr-2 opacity-90" /> Login
               </button>
