@@ -302,11 +302,11 @@ const AppSidebar: React.FC = () => {
         <Link to="/" className="flex items-center gap-3 w-full">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20 dark:shadow-[0_0_15px_rgba(255,255,255,0.15)] shrink-0">
+              <div className="flex items-center justify-center shrink-0">
                 <img
-                  src="/images/logo/vyapar-mitra-logo.png"
+                  src="/images/logo/vyapar-mitra-icon.png"
                   alt="VyaparMitra Logo"
-                  className="w-10 h-10 object-contain rounded-lg"
+                  className="w-10 h-10 object-contain"
                 />
               </div>
               <div className="flex flex-col">
@@ -319,11 +319,11 @@ const AppSidebar: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20">
+            <div className="flex items-center justify-center shrink-0 w-full">
               <img
-                src="/images/logo/vyapar-mitra-logo.png"
+                src="/images/logo/vyapar-mitra-icon.png"
                 alt="VyaparMitra Logo"
-                className="w-8 h-8 object-contain rounded-lg"
+                className="w-10 h-10 object-contain"
               />
             </div>
           )}

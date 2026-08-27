@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
+import { aiAdvisorService } from "../services/aiAdvisorService";
 
 interface ChatMessage {
   sender: "user" | "ai";
