@@ -1,9 +1,9 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { BusinessInputData, MarketData, SwotAndRisk, FeasibilityReport } from "./apiServices";
 
-// Initialize with environment variable. Fallback to empty to gracefully handle missing key in UI.
+// Lazily initialize GoogleGenAI client only when a valid API key exists
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-const ai = new GoogleGenAI(apiKey ? { apiKey } : {});
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export interface GeneratedReport {
   marketData: MarketData;
@@ -76,7 +76,7 @@ export const aiAdvisorService = {
    * Generates a hyper-local business feasibility report using Gemini LLM.
    */
   async generateFeasibilityReport(input: BusinessInputData): Promise<GeneratedReport> {
-    if (!apiKey) {
+    if (!ai || !apiKey) {
       console.warn("No VITE_GEMINI_API_KEY found. Returning mock structured data.");
       return getMockReport(input);
     }
@@ -119,7 +119,7 @@ export const aiAdvisorService = {
    * Generates a dynamic chat response for the AI Advisor interface
    */
   async generateChatResponse(input: BusinessInputData, userMessage: string, chatHistory: string = ""): Promise<string> {
-    if (!apiKey) {
+    if (!ai || !apiKey) {
       return getMockChatResponse(input, userMessage);
     }
 
