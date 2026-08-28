@@ -68,24 +68,13 @@ const AppSidebar: React.FC = () => {
       path: "/ai-advisor",
     },
     {
-      icon: <BoxCubeIcon />,
-      name: t("nav.swotMatrix"),
-      path: "/swot-matrix",
-    },
-    {
       icon: <PageIcon />,
       name: t("nav.finalReport"),
       path: "/final-report",
     },
   ];
 
-  const othersItems: NavItem[] = [
-    {
-      icon: <UserCircleIcon />,
-      name: t("nav.profile"),
-      path: "/profile",
-    },
-  ];
+  const othersItems: NavItem[] = [];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -349,26 +338,10 @@ const AppSidebar: React.FC = () => {
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
+              </div>
             </div>
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  t("common.others")
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
-            </div>
-          </div>
-        </nav>
-      </div>
+          </nav>
+        </div>
     </aside>
   );
 };
