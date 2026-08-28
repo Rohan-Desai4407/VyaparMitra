@@ -26,11 +26,3 @@ dist-ssr
 .env
 .env.*
 
-# Large data & SQLite databases
-*.db
-*.db-journal
-data/*.xlsx
-data/*.csv
-data/data.json
-
-

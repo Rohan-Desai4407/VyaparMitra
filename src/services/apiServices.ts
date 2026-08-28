@@ -219,3 +219,51 @@ export const financeService = {
   },
 };
 
+export const authApiService = {
+  async forgotPassword(email: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, newPassword }),
+    });
+    return res.json();
+  },
+
+  async verifyEmail(token: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/verify-email?token=${token}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.json();
+  },
+
+  async resendVerification(email: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+
+  async googleLogin(credential: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential }),
+    });
+    return res.json();
+  },
+};
+
+
+
