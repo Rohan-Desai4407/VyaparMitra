@@ -17,11 +17,11 @@ export default function AuthLayout({
             {/* <!-- ===== Common Grid Shape Start ===== --> */}
             <GridShape />
             <div className="flex flex-col items-center max-w-xs text-center">
-              <Link to="/" className="block mb-4">
+              <Link to="/" className="flex flex-col items-center mb-4">
                 <img
-                  src="/images/logo/vyapar-mitra-logo.png"
+                  src="/images/logo/vyapar-mitra-icon.png"
                   alt="VyaparMitra Logo"
-                  className="w-28 h-28 object-contain rounded-2xl mx-auto shadow-lg bg-white p-2"
+                  className="w-20 h-20 object-contain mx-auto drop-shadow-lg bg-white/10 rounded-full p-1 mb-2"
                 />
               </Link>
               <h2 className="text-2xl font-bold text-white mb-1">

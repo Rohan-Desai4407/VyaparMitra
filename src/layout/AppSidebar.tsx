@@ -68,24 +68,13 @@ const AppSidebar: React.FC = () => {
       path: "/ai-advisor",
     },
     {
-      icon: <BoxCubeIcon />,
-      name: t("nav.swotMatrix"),
-      path: "/swot-matrix",
-    },
-    {
       icon: <PageIcon />,
       name: t("nav.finalReport"),
       path: "/final-report",
     },
   ];
 
-  const othersItems: NavItem[] = [
-    {
-      icon: <UserCircleIcon />,
-      name: t("nav.profile"),
-      path: "/profile",
-    },
-  ];
+  const othersItems: NavItem[] = [];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -304,11 +293,11 @@ const AppSidebar: React.FC = () => {
         <Link to="/" className="flex items-center gap-3 w-full">
           {isExpanded || isHovered || isMobileOpen ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20 dark:shadow-[0_0_15px_rgba(255,255,255,0.15)] shrink-0">
+              <div className="flex items-center justify-center shrink-0">
                 <img
-                  src="/images/logo/vyapar-mitra-logo.png"
+                  src="/images/logo/vyapar-mitra-icon.png"
                   alt="VyaparMitra Logo"
-                  className="w-10 h-10 object-contain rounded-lg"
+                  className="w-10 h-10 object-contain"
                 />
               </div>
               <div className="flex flex-col">
@@ -321,11 +310,11 @@ const AppSidebar: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center p-1.5 rounded-2xl bg-white shadow-sm border border-gray-100 dark:bg-white dark:border-white/20">
+            <div className="flex items-center justify-center shrink-0 w-full">
               <img
-                src="/images/logo/vyapar-mitra-logo.png"
+                src="/images/logo/vyapar-mitra-icon.png"
                 alt="VyaparMitra Logo"
-                className="w-8 h-8 object-contain rounded-lg"
+                className="w-10 h-10 object-contain"
               />
             </div>
           )}
@@ -349,26 +338,10 @@ const AppSidebar: React.FC = () => {
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
+              </div>
             </div>
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  t("common.others")
-                ) : (
-                  <HorizontaLDots />
-                )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
-            </div>
-          </div>
-        </nav>
-      </div>
+          </nav>
+        </div>
     </aside>
   );
 };
