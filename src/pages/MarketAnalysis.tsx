@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { RefreshCw, Download } from "lucide-react";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
@@ -9,6 +10,7 @@ import { useMarketIntelligence } from "../hooks/useMarketIntelligence";
 import MapVisualization from "../components/MapVisualization";
 
 export default function MarketAnalysis() {
+  const { t } = useTranslation();
   const { input, swot } = useVyapar();
   const [radius, setRadius] = useState(10);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -24,9 +26,9 @@ export default function MarketAnalysis() {
   if (!input.stateId || !input.categoryId) {
     return (
       <div className="mx-auto max-w-4xl text-center py-20">
-        <h2 className="text-xl font-bold mb-4">Complete the Business Assessment to generate Market Intelligence.</h2>
+        <h2 className="text-xl font-bold mb-4">{t("assessment.selectStateFirst")}</h2>
         <Link to="/assessment" className="text-brand-500 hover:underline">
-          Go to Assessment &rarr;
+          {t("assessment.pageTitle")} &rarr;
         </Link>
       </div>
     );
@@ -39,8 +41,8 @@ export default function MarketAnalysis() {
   return (
     <>
       <PageMeta
-        title="Market Intelligence & Competitor Analysis | VyaparMitra"
-        description="Local market reach, consumer density, unserved niches, competitor density, and product pricing guidance."
+        title={`${t("market.pageTitle")} | VyaparMitra`}
+        description={t("market.pageDesc")}
       />
 
       <div className="space-y-6">
@@ -48,13 +50,10 @@ export default function MarketAnalysis() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Local Data & Market Intelligence
+              {t("market.pageTitle")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Hyper-local consumer analysis, pricing recommendations, and distribution channel map for{" "}
-              <span className="font-semibold text-brand-600 dark:text-brand-400">
-                {input.village}, {input.block} ({input.district})
-              </span>
+              {t("market.pageDesc")}
             </p>
           </div>
 
@@ -63,13 +62,13 @@ export default function MarketAnalysis() {
               to="/assessment"
               className="inline-flex items-center gap-1 text-xs font-semibold text-brand-500 hover:text-brand-600"
             >
-              &larr; Modify Location & Inputs
+              &larr; {t("dashboard.modifyInputs")}
             </Link>
             <div className="flex gap-2">
                <button 
                  onClick={handleRefresh} 
                  className="p-2 border rounded hover:bg-gray-50 flex items-center justify-center text-gray-600 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800"
-                 title="Refresh Data"
+                 title={t("common.refresh")}
                >
                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-brand-500' : ''}`} />
                </button>
@@ -77,7 +76,7 @@ export default function MarketAnalysis() {
                  onClick={handleExport} 
                  className="px-3 py-1.5 text-xs bg-brand-500 text-white rounded hover:bg-brand-600 flex items-center gap-1"
                >
-                 <Download className="w-3 h-3" /> Export PDF
+                 <Download className="w-3 h-3" /> {t("common.print")}
                </button>
             </div>
           </div>
@@ -93,7 +92,7 @@ export default function MarketAnalysis() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
-              Estimated Local Consumer Base
+              {t("market.potentialConsumers")}
               {data && <DataSourceBadge {...data.consumer} />}
             </span>
             <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">

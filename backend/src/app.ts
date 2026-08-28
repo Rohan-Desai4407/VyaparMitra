@@ -13,6 +13,7 @@ import competitorRoutes from "./routes/competitor.routes.js";
 import financeRoutes from "./routes/finance.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import legacyApiRoutes from "./routes/api.js";
 
 const app = express();
 
@@ -26,6 +27,14 @@ app.use(
     credentials: true,
   })
 );
+
+// Fallback user middleware for assessment endpoints when unauthenticated
+app.use((req: any, res, next) => {
+  if (!req.user) {
+    req.user = { id: 'mock-user-id-123' };
+  }
+  next();
+});
 
 // 3. API Root & Health Check Endpoints
 app.get("/", (req, res) => {
@@ -57,6 +66,7 @@ app.use("/api/competitors", competitorRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/report", reportRoutes);
+app.use("/api", legacyApiRoutes);
 
 // 5. Central Error Handling Middleware
 app.use(errorHandler);

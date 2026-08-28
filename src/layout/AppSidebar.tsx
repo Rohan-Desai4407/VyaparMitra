@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 
 // Assume these icons are imported from an icon library
 import {
@@ -25,75 +26,66 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard Overview",
-    path: "/",
-  },
-  {
-    icon: <ListIcon />,
-    name: "Business Assessment",
-    path: "/assessment",
-  },
-  {
-    icon: <PieChartIcon />,
-    name: "Market Intelligence",
-    path: "/market-analysis",
-  },
-  {
-    icon: <DollarLineIcon />,
-    name: "Financial Calculator",
-    path: "/financial-planner",
-  },
-  {
-    icon: <TableIcon />,
-    name: "Scheme Router",
-    path: "/scheme-router",
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Repayment Schedule",
-    path: "/repayment-schedule",
-  },
-  {
-    icon: <ChatIcon />,
-    name: "AI Business Advisor",
-    path: "/ai-advisor",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "SWOT & Risk Matrix",
-    path: "/swot-matrix",
-  },
-  {
-    icon: <PageIcon />,
-    name: "Final Feasibility Report",
-    path: "/final-report",
-  },
-];
-
-const othersItems: NavItem[] = [
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Sign In",
-    path: "/signin",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "Sign Up",
-    path: "/signup",
-  },
-];
-
 const AppSidebar: React.FC = () => {
+  const { t } = useTranslation();
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
+
+  const navItems: NavItem[] = [
+    {
+      icon: <GridIcon />,
+      name: t("nav.dashboard"),
+      path: "/",
+    },
+    {
+      icon: <ListIcon />,
+      name: t("nav.assessment"),
+      path: "/assessment",
+    },
+    {
+      icon: <PieChartIcon />,
+      name: t("nav.marketAnalysis"),
+      path: "/market-analysis",
+    },
+    {
+      icon: <DollarLineIcon />,
+      name: t("nav.financialPlanner"),
+      path: "/financial-planner",
+    },
+    {
+      icon: <TableIcon />,
+      name: t("nav.schemeRouter"),
+      path: "/scheme-router",
+    },
+    {
+      icon: <CalenderIcon />,
+      name: t("nav.repaymentSchedule"),
+      path: "/repayment-schedule",
+    },
+    {
+      icon: <ChatIcon />,
+      name: t("nav.aiAdvisor"),
+      path: "/ai-advisor",
+    },
+    {
+      icon: <BoxCubeIcon />,
+      name: t("nav.swotMatrix"),
+      path: "/swot-matrix",
+    },
+    {
+      icon: <PageIcon />,
+      name: t("nav.finalReport"),
+      path: "/final-report",
+    },
+  ];
+
+  const othersItems: NavItem[] = [
+    {
+      icon: <UserCircleIcon />,
+      name: t("nav.profile"),
+      path: "/profile",
+    },
+  ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -324,7 +316,7 @@ const AppSidebar: React.FC = () => {
                   Vyapar<span className="text-emerald-600 dark:text-emerald-400">Mitra</span>
                 </span>
                 <span className="text-[10px] font-bold text-gray-500 dark:text-emerald-300/90 tracking-wider uppercase mt-1">
-                  Plan • Grow • Prosper
+                  {t("common.appTagline")}
                 </span>
               </div>
             </div>
@@ -351,7 +343,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  t("common.menu")
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
@@ -367,7 +359,7 @@ const AppSidebar: React.FC = () => {
                 }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  t("common.others")
                 ) : (
                   <HorizontaLDots />
                 )}

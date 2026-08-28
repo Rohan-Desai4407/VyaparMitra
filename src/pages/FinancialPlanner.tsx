@@ -1,4 +1,5 @@
 import { useVyapar } from "../context/VyaparContext";
+import { useTranslation } from "react-i18next";
 import PageMeta from "../components/common/PageMeta";
 import ComponentCard from "../components/common/ComponentCard";
 import { useFinancialSchemes } from "../hooks/useFinancialSchemes";
@@ -6,12 +7,12 @@ import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 export default function FinancialPlanner() {
-  const { financials, updateInput, input } = useVyapar();
+  const { t } = useTranslation();
+  const { updateInput, input } = useVyapar();
   const { data, loading, error, refetch } = useFinancialSchemes();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const activeScheme = data?.recommendedScheme;
-  const isEligible = activeScheme?.status === 'ELIGIBLE' || activeScheme?.status === 'POTENTIALLY_ELIGIBLE';
   const fData = activeScheme?.financials;
 
   const handleRefresh = async () => {
@@ -23,8 +24,8 @@ export default function FinancialPlanner() {
   return (
     <>
       <PageMeta
-        title="Smart Financial Calculator & Scheme Router | VyaparMitra"
-        description="Real verified government scheme eligibility engine and loan calculator."
+        title={`${t("financial.pageTitle")} | VyaparMitra`}
+        description={t("financial.pageDesc")}
       />
 
       <div className="space-y-6">
@@ -32,17 +33,17 @@ export default function FinancialPlanner() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Smart Financial Calculator
+              {t("financial.pageTitle")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Evaluates actual government scheme eligibility based on location, category, and capital.
+              {t("financial.pageDesc")}
             </p>
           </div>
           <button 
              onClick={handleRefresh} 
              disabled={loading || isRefreshing}
              className="rounded-full bg-white p-2 text-gray-500 shadow-sm hover:bg-gray-50 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-brand-400 transition-all duration-200"
-             title="Refresh Financial Schemes"
+             title={t("common.refresh")}
           >
              <RefreshCw className={`h-5 w-5 ${(loading || isRefreshing) ? "animate-spin text-brand-500" : ""}`} />
           </button>
@@ -55,12 +56,12 @@ export default function FinancialPlanner() {
         )}
 
         {/* Interactive Margin Capital Slider */}
-        <ComponentCard title="Interactive Margin Capital & Project Cost Simulator">
+        <ComponentCard title={t("financial.simulatorTitle")}>
           <div className="space-y-6">
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  Available Margin Capital (Self Contribution):
+                  {t("financial.selfContribution")}
                 </label>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-500">₹</span>
@@ -90,34 +91,34 @@ export default function FinancialPlanner() {
             {/* Main Financial Result Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
-                <span className="text-xs text-gray-500 dark:text-gray-400">User Margin ({fData?.marginPercentage || '...'})</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{t("financial.userMargin")} ({fData?.marginPercentage || '10%'})</span>
                 <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">
-                  {loading ? '...' : (fData?.userContribution ? `₹${fData.userContribution.toLocaleString("en-IN")}` : '₹0')}
+                  {loading ? '...' : (fData?.userContribution ? `₹${fData.userContribution.toLocaleString("en-IN")}` : `₹${input.marginCapital.toLocaleString("en-IN")}`)}
                 </p>
-                <p className="mt-1 text-xs text-gray-400">Required scheme contribution</p>
+                <p className="mt-1 text-xs text-gray-400">{t("financial.outOfPocket")}</p>
               </div>
 
               <div className="rounded-xl border border-brand-200 bg-brand-50/40 p-4 dark:border-brand-900/50 dark:bg-brand-950/20">
                 <span className="text-xs font-semibold text-brand-700 dark:text-brand-300">
-                  Maximum Eligible Project Cost
+                  {t("financial.totalFeasibleCost")}
                 </span>
                 <p className="mt-1 text-3xl font-black text-brand-600 dark:text-brand-400">
-                  {loading ? '...' : (fData?.projectCost ? `₹${fData.projectCost.toLocaleString("en-IN")}` : '₹0')}
+                  {loading ? '...' : (fData?.projectCost ? `₹${fData.projectCost.toLocaleString("en-IN")}` : `₹${(input.marginCapital * 10).toLocaleString("en-IN")}`)}
                 </p>
                 <p className="mt-1 text-xs text-brand-600 dark:text-brand-400">
-                  Derived from scheme bounds
+                  {t("financial.formulaCost")}
                 </p>
               </div>
 
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20">
                 <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                  Maximum Eligible Loan Amount
+                  {t("financial.eligibleLoan")}
                 </span>
                 <p className="mt-1 text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                  {loading ? '...' : (fData?.loanAmount ? `₹${fData.loanAmount.toLocaleString("en-IN")}` : '₹0')}
+                  {loading ? '...' : (fData?.loanAmount ? `₹${fData.loanAmount.toLocaleString("en-IN")}` : `₹${(input.marginCapital * 9).toLocaleString("en-IN")}`)}
                 </p>
                 <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
-                  {fData?.financingPercentage} Financing
+                  {t("financial.govFinancingShare")}
                 </p>
               </div>
             </div>
@@ -125,9 +126,9 @@ export default function FinancialPlanner() {
         </ComponentCard>
 
         {/* Auto Selected Scheme Details */}
-        <ComponentCard title="Auto-Selected Government Loan Scheme">
+        <ComponentCard title={t("scheme.autoRecTitle")}>
           {loading ? (
-             <div className="py-10 text-center text-gray-500">Loading verified schemes...</div>
+             <div className="py-10 text-center text-gray-500">{t("common.loading")}</div>
           ) : !activeScheme ? (
              <div className="py-10 text-center text-red-500">No verified matching government scheme found.</div>
           ) : (
@@ -154,45 +155,45 @@ export default function FinancialPlanner() {
               </p>
               
               <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/60 rounded text-xs text-gray-600 dark:text-gray-400">
-                <p><strong>Official Ministry:</strong> {activeScheme.ministry}</p>
-                <p><strong>Source:</strong> <a href={activeScheme.sourceUrl} target="_blank" className="text-brand-500 hover:underline">{activeScheme.sourceUrl}</a></p>
-                <p><strong>Last Verified:</strong> {new Date(activeScheme.lastVerified).toLocaleDateString()}</p>
+                <p><strong>{t("scheme.officialMinistry")}</strong> {activeScheme.ministry}</p>
+                <p><strong>{t("scheme.source")}</strong> <a href={activeScheme.sourceUrl} target="_blank" className="text-brand-500 hover:underline">{activeScheme.sourceUrl}</a></p>
+                <p><strong>{t("scheme.lastVerified")}</strong> {new Date(activeScheme.lastVerified).toLocaleDateString()}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/60 lg:w-96">
               <div>
-                <span className="text-xs text-gray-400">Interest Rate</span>
+                <span className="text-xs text-gray-400">{t("scheme.interestRate")}</span>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {fData?.interestRate ? `${fData.interestRate}% p.a.` : 'Lender Dependent'}
+                  {fData?.interestRate ? `${fData.interestRate}% ${t("common.perAnnum")}` : 'Lender Dependent'}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-400">Repayment Tenure</span>
+                <span className="text-xs text-gray-400">{t("scheme.repaymentTenure")}</span>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {fData?.tenureMonths} Months
+                  {fData?.tenureMonths} {t("common.months")}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-400">Moratorium Period</span>
+                <span className="text-xs text-gray-400">{t("scheme.moratoriumPeriod")}</span>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {fData?.moratoriumMonths} Months
+                  {fData?.moratoriumMonths} {t("common.months")}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-400">Est. EMI</span>
+                <span className="text-xs text-gray-400">{t("dashboard.estMonthlyEmi")}</span>
                 <p className="text-lg font-bold text-brand-600 dark:text-brand-400">
                   ₹{fData?.emi?.toLocaleString("en-IN")}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-400">Gov. Subsidy</span>
+                <span className="text-xs text-gray-400">{t("dashboard.subsidyAmount")}</span>
                 <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                   ₹{fData?.subsidy?.toLocaleString("en-IN")}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-400">Total Repayment</span>
+                <span className="text-xs text-gray-400">{t("repayment.totalRepayment")}</span>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
                   ₹{fData?.totalRepayment?.toLocaleString("en-IN")}
                 </p>
