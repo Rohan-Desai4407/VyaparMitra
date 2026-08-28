@@ -18,7 +18,7 @@ export function useAssessmentAPI() {
           setStates(Object.keys(indianLocations).map((name, i) => ({ id: `s-${i}`, name })));
         }
       })
-      .catch((err) => {
+      .catch(() => {
         console.warn('API down, using local fallback states');
         setStates(Object.keys(indianLocations).map((name, i) => ({ id: `s-${i}`, name })));
       });

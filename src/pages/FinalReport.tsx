@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useVyapar } from "../context/VyaparContext";
 import { useFinalFeasibilityReport } from "../hooks/useFinalFeasibilityReport";
 import PageMeta from "../components/common/PageMeta";
 import { RefreshCw, Download } from "lucide-react";
 
 export default function FinalReport() {
+  const { t } = useTranslation();
   const { input } = useVyapar();
-  const { report, loading, error, refetchAll } = useFinalFeasibilityReport();
+  const { report, loading, refetchAll } = useFinalFeasibilityReport();
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [showScoreBreakdown, setShowScoreBreakdown] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -28,9 +30,9 @@ export default function FinalReport() {
   if (!input.stateId || !input.categoryId) {
     return (
       <div className="mx-auto max-w-4xl text-center py-20">
-        <h2 className="text-xl font-bold mb-4">Complete Business Assessment to generate the Final Feasibility Report.</h2>
+        <h2 className="text-xl font-bold mb-4">{t("assessment.selectStateFirst")}</h2>
         <Link to="/assessment" className="text-brand-500 hover:underline">
-          Go to Business Assessment &rarr;
+          {t("assessment.pageTitle")} &rarr;
         </Link>
       </div>
     );
@@ -39,7 +41,7 @@ export default function FinalReport() {
   if (loading) {
     return (
       <div className="mx-auto max-w-4xl text-center py-20">
-        <h2 className="text-xl font-bold mb-4 text-brand-600 animate-pulse">Generating Final Feasibility Report...</h2>
+        <h2 className="text-xl font-bold mb-4 text-brand-600 animate-pulse">{t("common.loading")}</h2>
       </div>
     );
   }
@@ -48,7 +50,7 @@ export default function FinalReport() {
     return (
       <div className="mx-auto max-w-4xl text-center py-20">
         <h2 className="text-xl font-bold mb-4 text-red-600">Failed to generate report.</h2>
-        <button onClick={refetchAll} className="px-4 py-2 bg-brand-500 text-white rounded">Retry</button>
+        <button onClick={refetchAll} className="px-4 py-2 bg-brand-500 text-white rounded">{t("common.refresh")}</button>
       </div>
     );
   }
@@ -56,8 +58,8 @@ export default function FinalReport() {
   return (
     <>
       <PageMeta
-        title="Final Feasibility & Financial Report | VyaparMitra"
-        description="Consolidated AI feasibility recommendation report with financial eligibility, scheme details, market findings, and repayment roadmap."
+        title={`${t("report.pageTitle")} | VyaparMitra`}
+        description={t("report.pageDesc")}
       />
 
       <div className="space-y-6 print:m-0 print:p-0 text-sm">
@@ -65,10 +67,10 @@ export default function FinalReport() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Final Feasibility Report
+              {t("report.pageTitle")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Consolidated hyper-local recommendation and financial structuring report ready for bank submission.
+              {t("report.pageDesc")}
             </p>
           </div>
 
@@ -77,7 +79,7 @@ export default function FinalReport() {
               onClick={handleRefresh}
               disabled={loading || isRefreshing}
               className="rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-              title="Regenerate Report"
+              title={t("report.recalculate")}
             >
               <RefreshCw className={`h-4 w-4 ${loading || isRefreshing ? 'animate-spin text-brand-500' : ''}`} />
             </button>
@@ -85,7 +87,7 @@ export default function FinalReport() {
               onClick={handlePrint}
               disabled={isDownloading}
               className="rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-              title="Print / Download PDF Report"
+              title={t("report.printReport")}
             >
               <Download className={`h-4 w-4 ${isDownloading ? 'animate-bounce text-brand-500' : ''}`} />
             </button>
@@ -124,9 +126,9 @@ export default function FinalReport() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-4 bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800 cursor-pointer" onClick={() => setShowScoreBreakdown(!showScoreBreakdown)}>
                 <div className="text-center">
-                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Viability Score</span>
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">{t("report.viabilityScore")}</span>
                   <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                    {report.scoring.overall}/100
+                    {report.scoring.overall}{t("report.outOf100")}
                   </p>
                 </div>
                 <div className="h-10 w-[1px] bg-emerald-200 dark:bg-emerald-800" />
@@ -153,7 +155,7 @@ export default function FinalReport() {
 
           {/* Section 1 */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">1. Executive Summary & AI Recommendation</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">1. {t("report.executiveSummary")}</h3>
             <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-800 dark:bg-gray-800/40 dark:text-gray-200 leading-relaxed border border-gray-100 dark:border-gray-800">
               {report.executiveSummary}
             </div>
@@ -161,76 +163,49 @@ export default function FinalReport() {
 
           {/* Section 2 */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">2. Financial Structuring & Scheme Auto-Router</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">2. {t("report.projectCostBreakdown")}</h3>
             {!report.financial?.financials ? (
                <div className="text-red-500 text-xs font-bold">Financial calculation unavailable.</div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">Available Margin ({report.financial.financials.marginPercentage})</span>
+                    <span className="text-xs text-gray-400">{t("financial.userMargin")} ({report.financial.financials.marginPercentage})</span>
                     <p className="text-lg font-bold text-gray-900 dark:text-white">₹{report.financial.financials.userContribution?.toLocaleString("en-IN")}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">Feasible Project Cost</span>
+                    <span className="text-xs text-gray-400">{t("financial.totalFeasibleCost")}</span>
                     <p className="text-lg font-bold text-brand-600 dark:text-brand-400">₹{report.financial.financials.projectCost?.toLocaleString("en-IN")}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">Auto-Selected Scheme</span>
+                    <span className="text-xs text-gray-400">{t("scheme.autoRecTitle")}</span>
                     <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{report.financial.schemeName}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">Eligible Loan ({report.financial.financials.financingPercentage})</span>
+                    <span className="text-xs text-gray-400">{t("financial.eligibleLoan")} ({report.financial.financials.financingPercentage})</span>
                     <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{report.financial.financials.loanAmount?.toLocaleString("en-IN")}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-lg">
-                  <span><strong>Interest:</strong> {report.financial.financials.interestRate}% p.a.</span>
-                  <span><strong>Tenure:</strong> {report.financial.financials.tenureMonths / 12} Years</span>
-                  <span><strong>Moratorium:</strong> {report.financial.financials.moratoriumMonths} Months</span>
-                  <span><strong>Monthly EMI:</strong> ₹{report.financial.financials.emi?.toLocaleString("en-IN")}</span>
+                  <span><strong>{t("scheme.interestRate")}:</strong> {report.financial.financials.interestRate}% {t("common.perAnnum")}</span>
+                  <span><strong>{t("scheme.repaymentTenure")}:</strong> {report.financial.financials.tenureMonths / 12} {t("common.years")}</span>
+                  <span><strong>{t("scheme.moratoriumPeriod")}:</strong> {report.financial.financials.moratoriumMonths} {t("common.months")}</span>
+                  <span><strong>{t("dashboard.estMonthlyEmi")}:</strong> ₹{report.financial.financials.emi?.toLocaleString("en-IN")}</span>
                 </div>
               </>
             )}
           </div>
 
-          {/* Section 5: Repayment Summary (moved up for flow) */}
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">3. Repayment Summary</h3>
-            {!report.repayment?.loanCalculation ? (
-               <div className="text-red-500 text-xs font-bold">Repayment schedule unavailable.</div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-                <div className="p-3 border border-gray-100 dark:border-gray-800 rounded-lg">
-                  <div className="text-gray-500 dark:text-gray-400">Total Loan</div>
-                  <div className="font-bold dark:text-gray-200">₹{report.repayment.loanCalculation?.loanAmount?.toLocaleString("en-IN")}</div>
-                </div>
-                <div className="p-3 border border-gray-100 dark:border-gray-800 rounded-lg">
-                  <div className="text-gray-500 dark:text-gray-400">Total Interest</div>
-                  <div className="font-bold dark:text-gray-200">₹{report.repayment.loanCalculation?.totalInterest?.toLocaleString("en-IN")}</div>
-                </div>
-                <div className="p-3 border border-gray-100 dark:border-gray-800 rounded-lg">
-                  <div className="text-gray-500 dark:text-gray-400">Total Payment</div>
-                  <div className="font-bold dark:text-gray-200">₹{report.repayment.loanCalculation?.totalRepayment?.toLocaleString("en-IN")}</div>
-                </div>
-                <div className="p-3 border border-gray-100 dark:border-gray-800 rounded-lg">
-                  <div className="text-gray-500 dark:text-gray-400">Monthly EMI</div>
-                  <div className="font-bold dark:text-gray-200">₹{report.repayment.loanCalculation?.emi?.toLocaleString("en-IN")}</div>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Section 3: Market */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">4. Hyper-Local Market Intelligence</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">3. {t("report.marketInsights")}</h3>
             {!report.market ? (
                <div className="text-red-500 text-xs font-bold">Live market intelligence is currently unavailable.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/20">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Consumer Base & Pricing</span>
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{t("market.potentialConsumers")}</span>
                     <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{report.dataQuality.market}</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
@@ -240,7 +215,7 @@ export default function FinalReport() {
                 </div>
                 <div className="p-4 rounded-xl border border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/20">
                   <div className="flex justify-between items-center">
-                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Underserved Market Gap</span>
+                     <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{t("market.unservedNiches")}</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                     High potential for: {report.market.opportunities?.opportunities?.map((o:any)=>o.name).join(", ") || 'N/A'}.
@@ -250,44 +225,10 @@ export default function FinalReport() {
             )}
           </div>
 
-          {/* Section 4: Business Opportunity */}
-          {report.market?.opportunities?.recommendation && (
-            <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">5. Top Business Opportunity</h3>
-              <div className="p-4 bg-brand-50/50 dark:bg-brand-900/20 border border-brand-100 dark:border-brand-800/50 rounded-xl">
-                 <h4 className="font-bold text-brand-800 dark:text-brand-300">{report.market.opportunities.recommendation.name}</h4>
-                 <div className="flex gap-4 mt-2 mb-2 text-xs">
-                    <div><span className="text-gray-500 dark:text-gray-400">Score:</span> <strong className="dark:text-gray-200">{report.market.opportunities.recommendation.score}/100</strong></div>
-                    <div><span className="text-gray-500 dark:text-gray-400">Capital Fit:</span> <strong className="text-green-600 dark:text-green-400">{report.market.opportunities.recommendation.capitalFit}</strong></div>
-                 </div>
-                 <p className="text-xs text-gray-700 dark:text-gray-300">{report.market.opportunities.recommendation.why}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Section 6: AI SWOT */}
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">6. AI Risk Analysis</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/50 rounded-lg">
-                  <span className="text-xs font-bold text-red-800 dark:text-red-400 block mb-2">Key Risks</span>
-                  <ul className="list-disc pl-4 text-xs text-red-900 dark:text-red-300 space-y-1">
-                     {(report.swot?.threats || []).concat(report.swot?.localRisks || []).slice(0, 3).map((t: string, i: number) => <li key={i}>{t}</li>)}
-                  </ul>
-               </div>
-               <div className="p-3 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/50 rounded-lg">
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 block mb-2">Key Strengths</span>
-                  <ul className="list-disc pl-4 text-xs text-emerald-900 dark:text-emerald-300 space-y-1">
-                     {(report.swot?.strengths || []).slice(0, 3).map((t: string, i: number) => <li key={i}>{t}</li>)}
-                  </ul>
-               </div>
-            </div>
-          </div>
-
-          {/* Section 7 & 8: Actions and Checklists */}
+          {/* Section 4 & 5: Actions and Checklists */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">7. Key Action Items</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">4. {t("report.actionItems")}</h3>
               <ol className="space-y-2">
                 {report.actionItems.map((item: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-3 text-xs text-gray-800 dark:text-gray-200 font-medium">
@@ -301,13 +242,13 @@ export default function FinalReport() {
               </ol>
             </div>
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">8. Bank Submission Checklist</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">5. {t("report.bankChecklist")}</h3>
               <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-                 <li className="flex gap-2"><span>[✓]</span> Business Assessment</li>
-                 <li className="flex gap-2"><span>[!]</span> Project Quotations / Estimates</li>
-                 <li className="flex gap-2"><span>[✓]</span> Scheme Eligibility Printout</li>
-                 <li className="flex gap-2"><span>[!]</span> Identity & Address Proof</li>
-                 <li className="flex gap-2"><span>[!]</span> Land/Lease Documents</li>
+                 <li className="flex gap-2"><span>[✓]</span> {t("report.checklist1")}</li>
+                 <li className="flex gap-2"><span>[✓]</span> {t("report.checklist2")}</li>
+                 <li className="flex gap-2"><span>[✓]</span> {t("report.checklist3")}</li>
+                 <li className="flex gap-2"><span>[✓]</span> {t("report.checklist4")}</li>
+                 <li className="flex gap-2"><span>[!]</span> {t("report.checklist5")}</li>
               </ul>
             </div>
           </div>

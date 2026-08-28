@@ -1,15 +1,17 @@
 import { useVyapar } from "../context/VyaparContext";
+import { useTranslation } from "react-i18next";
 import PageMeta from "../components/common/PageMeta";
 import ComponentCard from "../components/common/ComponentCard";
 
 export default function SwotMatrix() {
+  const { t } = useTranslation();
   const { input, swot } = useVyapar();
 
   return (
     <>
       <PageMeta
-        title="SWOT Matrix & Risk Advisor | VyaparMitra"
-        description="Comprehensive SWOT matrix analysis, local bottlenecks, and risk assessment for your business."
+        title={`${t("swot.pageTitle")} | VyaparMitra`}
+        description={t("swot.pageDesc", { category: input.category })}
       />
 
       <div className="space-y-6">
@@ -17,10 +19,10 @@ export default function SwotMatrix() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              SWOT Matrix & Risk Advisor
+              {t("swot.pageTitle")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Structured strategic evaluation across Strengths, Weaknesses, Opportunities, Threats, and Local Bottlenecks for {input.category}.
+              {t("swot.pageDesc", { category: input.category })}
             </p>
           </div>
         </div>
@@ -30,7 +32,7 @@ export default function SwotMatrix() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <span className="text-xs font-semibold uppercase text-brand-600 dark:text-brand-400">
-                Evaluation Target
+                {t("swot.target")}
               </span>
               <h3 className="text-base font-bold text-gray-900 dark:text-white">
                 {input.category} — {input.village}, {input.block} ({input.district}, {input.state})
@@ -38,7 +40,7 @@ export default function SwotMatrix() {
             </div>
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
-                Risk Rating: Low-to-Moderate
+                {t("swot.riskRating")}
               </span>
             </div>
           </div>
@@ -47,9 +49,9 @@ export default function SwotMatrix() {
         {/* SWOT Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Strengths */}
-          <ComponentCard title="💪 Key Business Strengths">
+          <ComponentCard title={t("swot.strengths")}>
             <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-              Internal advantages and localized operational strengths.
+              {t("swot.strengthsSub")}
             </p>
             <ul className="space-y-2.5">
               {swot.strengths.map((item, idx) => (
@@ -65,9 +67,9 @@ export default function SwotMatrix() {
           </ComponentCard>
 
           {/* Weaknesses */}
-          <ComponentCard title="⚠️ Operational Weaknesses">
+          <ComponentCard title={t("swot.weaknesses")}>
             <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-              Internal operational gaps or capital-intensive requirements.
+              {t("swot.weaknessesSub")}
             </p>
             <ul className="space-y-2.5">
               {swot.weaknesses.map((item, idx) => (
@@ -83,9 +85,9 @@ export default function SwotMatrix() {
           </ComponentCard>
 
           {/* Opportunities */}
-          <ComponentCard title="🚀 Local Market Opportunities">
+          <ComponentCard title={t("swot.opportunities")}>
             <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-              External market trends, government incentives, and demand growth.
+              {t("swot.opportunitiesSub")}
             </p>
             <ul className="space-y-2.5">
               {swot.opportunities.map((item, idx) => (
@@ -101,9 +103,9 @@ export default function SwotMatrix() {
           </ComponentCard>
 
           {/* Threats */}
-          <ComponentCard title="🛑 Market Threats">
+          <ComponentCard title={t("swot.threats")}>
             <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
-              External competitors, raw material volatility, and external market shifts.
+              {t("swot.threatsSub")}
             </p>
             <ul className="space-y-2.5">
               {swot.threats.map((item, idx) => (
@@ -120,7 +122,7 @@ export default function SwotMatrix() {
         </div>
 
         {/* Local Bottlenecks & Risk Mitigation Section */}
-        <ComponentCard title="🛡️ Hyper-Local Risk Assessment & Mitigation Strategies">
+        <ComponentCard title={t("swot.localRisks")}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {swot.localRisks.map((risk, idx) => (
               <div
@@ -131,7 +133,7 @@ export default function SwotMatrix() {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600 dark:bg-red-900/50 dark:text-red-300">
                     {idx + 1}
                   </span>
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">Identified Risk</h4>
+                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">{t("swot.identifiedRisk")}</h4>
                 </div>
                 <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
                   {risk}

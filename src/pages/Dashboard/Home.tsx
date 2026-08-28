@@ -1,9 +1,10 @@
-import React from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useVyapar } from "../../context/VyaparContext";
 import PageMeta from "../../components/common/PageMeta";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { input, financials, report } = useVyapar();
 
   // Financial Snapshot Estimates
@@ -16,7 +17,7 @@ export default function Home() {
   return (
     <>
       <PageMeta
-        title="VyaparMitra — Business Feasibility & Financial Dashboard"
+        title={t("dashboard.title")}
         description="AI-driven hyper-local business advisory dashboard and smart financial calculator."
       />
 
@@ -25,22 +26,22 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center rounded-2xl bg-gradient-to-r from-gray-900 via-brand-900 to-gray-900 p-6 text-white shadow-md">
           <div className="space-y-1">
             <span className="text-xs uppercase font-bold text-brand-400 tracking-wider">
-              Hyper-Local Business Feasibility Dashboard
+              {t("dashboard.subtitle")}
             </span>
             <h1 className="text-2xl font-bold">
-              {input.category} Venture — {input.village}, {input.block}
+              {input.category} — {input.village}, {input.block}
             </h1>
             <p className="text-xs opacity-80">
-              State: {input.state} • District: {input.district} • Language: {input.language}
+              {t("dashboard.state")}: {input.state} • {t("dashboard.district")}: {input.district} • {t("dashboard.language")}: {input.language}
             </p>
           </div>
 
           <div className="mt-4 md:mt-0 flex gap-3">
             <Link to="/assessment" className="rounded-xl bg-white/10 px-4 py-2.5 text-xs font-semibold text-white hover:bg-white/20 transition">
-              Modify Inputs
+              {t("dashboard.modifyInputs")}
             </Link>
             <Link to="/final-report" className="rounded-xl bg-white text-gray-900 px-4 py-2.5 text-xs font-semibold hover:bg-gray-100 transition">
-              View Full Report →
+              {t("dashboard.viewFullReport")}
             </Link>
           </div>
         </div>
@@ -48,7 +49,7 @@ export default function Home() {
         {/* TOP KPI ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Viability</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("dashboard.overallViability")}</span>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{report.viabilityScore}</span>
               <span className="text-sm font-normal text-gray-400">/ 100</span>
@@ -59,17 +60,17 @@ export default function Home() {
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Available Capital</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("dashboard.availableMargin")}</span>
             <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">₹{financials.userContribution.toLocaleString("en-IN")}</p>
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project Cost</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("dashboard.totalProjectCost")}</span>
             <p className="mt-2 text-3xl font-black text-gray-900 dark:text-white">₹{financials.projectCost.toLocaleString("en-IN")}</p>
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Loan Eligibility</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t("dashboard.maxLoanEligibility")}</span>
             <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400">₹{financials.maxLoanAmount.toLocaleString("en-IN")}</p>
           </div>
         </div>
@@ -129,126 +130,77 @@ export default function Home() {
         {/* 2-COLUMN SECTION: MARKET & FINANCIAL */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">LOCAL MARKET SNAPSHOT</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">{t("dashboard.localMarketIntel")}</span>
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4">
               <div><span className="text-gray-500 block text-xs">Demand:</span><span className="font-bold text-emerald-600">HIGH</span></div>
               <div><span className="text-gray-500 block text-xs">Competition:</span><span className="font-bold text-amber-600">MEDIUM</span></div>
-              <div><span className="text-gray-500 block text-xs">Potential Buyers:</span><span className="font-bold text-gray-900 dark:text-white">18,500</span></div>
+              <div><span className="text-gray-500 block text-xs">{t("dashboard.potentialBuyers")}:</span><span className="font-bold text-gray-900 dark:text-white">18,500</span></div>
               <div><span className="text-gray-500 block text-xs">Price Range:</span><span className="font-bold text-gray-900 dark:text-white">₹58–₹64/L</span></div>
             </div>
             <div className="bg-brand-50 dark:bg-brand-900/20 p-3 rounded-xl border border-brand-100 dark:border-brand-900/30 mb-4 flex-grow">
-              <span className="block text-xs font-bold text-brand-700 dark:text-brand-300 mb-1">Opportunity:</span>
+              <span className="block text-xs font-bold text-brand-700 dark:text-brand-300 mb-1">{t("dashboard.unservedOpportunities")}:</span>
               <span className="text-sm text-brand-900 dark:text-brand-100 font-medium">Value-added dairy products</span>
             </div>
-            <Link to="/market-analysis" className="text-xs font-semibold text-brand-600">View Market Analysis →</Link>
+            <Link to="/market-analysis" className="text-xs font-semibold text-brand-600">{t("dashboard.fullDetails")}</Link>
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">FINANCIAL SNAPSHOT</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">{t("financial.pageTitle")}</span>
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4 flex-grow">
-              <div><span className="text-gray-500 block text-xs">Revenue:</span><span className="font-bold text-gray-900 dark:text-white">₹{estMonthlyRevenue.toLocaleString('en-IN')}/month</span></div>
-              <div><span className="text-gray-500 block text-xs">Profit:</span><span className="font-bold text-emerald-600">₹{estMonthlyProfit.toLocaleString('en-IN')}/month</span></div>
+              <div><span className="text-gray-500 block text-xs">{t("dashboard.estMonthlyRevenue")}:</span><span className="font-bold text-gray-900 dark:text-white">₹{estMonthlyRevenue.toLocaleString('en-IN')}/month</span></div>
+              <div><span className="text-gray-500 block text-xs">{t("dashboard.estMonthlyProfit")}:</span><span className="font-bold text-emerald-600">₹{estMonthlyProfit.toLocaleString('en-IN')}/month</span></div>
               <div><span className="text-gray-500 block text-xs">Margin:</span><span className="font-bold text-gray-900 dark:text-white">{profitMargin}%</span></div>
-              <div><span className="text-gray-500 block text-xs">Break-even:</span><span className="font-bold text-gray-900 dark:text-white">{breakEvenMonths} months</span></div>
+              <div><span className="text-gray-500 block text-xs">Break-even:</span><span className="font-bold text-gray-900 dark:text-white">{breakEvenMonths} {t("common.months")}</span></div>
             </div>
-            <Link to="/financial-planner" className="text-xs font-semibold text-brand-600 block mt-auto pt-4">Open Financial Planner →</Link>
+            <Link to="/financial-planner" className="text-xs font-semibold text-brand-600 block mt-auto pt-4">{t("financial.simulatorTitle")} →</Link>
           </div>
         </div>
 
         {/* 2-COLUMN SECTION: RISK & SUPPORT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">RISK SUMMARY</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">{t("swot.pageTitle")}</span>
             <div className="mb-4">
-              <span className="text-gray-500 block text-xs mb-1">Overall Risk:</span>
-              <span className="text-lg font-black text-amber-600">MEDIUM</span>
+              <span className="text-gray-500 block text-xs mb-1">{t("swot.target")}:</span>
+              <span className="text-lg font-black text-amber-600">{input.category}</span>
             </div>
             <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100 dark:border-amber-900/20 mb-4 flex-grow">
-              <span className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Main Risk:</span>
+              <span className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">{t("swot.identifiedRisk")}:</span>
               <span className="text-sm text-amber-900 dark:text-amber-100 font-medium">Raw material price fluctuations</span>
             </div>
-            <Link to="/ai-advisor" className="text-xs font-semibold text-brand-600 mt-auto">Ask AI Advisor →</Link>
+            <Link to="/ai-advisor" className="text-xs font-semibold text-brand-600 mt-auto">{t("dashboard.launchAiAssistant")}</Link>
           </div>
 
           <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
-            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">GOVERNMENT SUPPORT</span>
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">{t("scheme.pageTitle")}</span>
             <div className="mb-4">
-              <span className="text-sm font-bold text-gray-900 dark:text-white block mb-1">3 potentially relevant schemes</span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white block mb-1">{t("scheme.autoRecTitle")}</span>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/20 mb-4 space-y-2 flex-grow">
               <div>
-                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Best Match:</span>
+                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">{t("scheme.optimalMatch")}:</span>
                 <span className="text-sm text-emerald-900 dark:text-emerald-100 font-bold">{financials.scheme.name}</span>
               </div>
               <div>
-                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">Potential Financing:</span>
+                <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">{t("dashboard.maxLoanEligibility")}:</span>
                 <span className="text-sm text-emerald-900 dark:text-emerald-100 font-bold">₹{financials.maxLoanAmount.toLocaleString('en-IN')}</span>
               </div>
             </div>
-            <Link to="/financial-planner" className="text-xs font-semibold text-brand-600 mt-auto">View Scheme Details →</Link>
+            <Link to="/scheme-router" className="text-xs font-semibold text-brand-600 mt-auto">{t("dashboard.exploreSchemeDetails")}</Link>
           </div>
-        </div>
-
-        {/* SMART ALERTS */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">SMART ALERTS</span>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-red-500">⚠</span>
-              <span className="text-gray-700 dark:text-gray-300"><strong>Capital gap:</strong> ₹{(financials.projectCost - financials.userContribution).toLocaleString('en-IN')}</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-brand-500">💡</span>
-              <span className="text-gray-700 dark:text-gray-300"><strong>Opportunity:</strong> High local demand for value-added dairy products</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-emerald-500">🏦</span>
-              <span className="text-gray-700 dark:text-gray-300"><strong>Support:</strong> 3 potentially relevant schemes identified</span>
-            </div>
-          </div>
-        </div>
-
-        {/* NEXT ACTIONS */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-          <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-4">NEXT ACTIONS</span>
-          <div className="space-y-4 mb-5 text-gray-700 dark:text-gray-300">
-            <div className="flex gap-4 items-start">
-              <span className="text-lg font-black text-gray-300 dark:text-gray-600">01</span>
-              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Apply for suitable financing</span></div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <span className="text-lg font-black text-gray-300 dark:text-gray-600">02</span>
-              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Secure local supplier agreement</span></div>
-            </div>
-            <div className="flex gap-4 items-start">
-              <span className="text-lg font-black text-gray-300 dark:text-gray-600">03</span>
-              <div className="mt-1"><span className="text-sm font-semibold text-gray-900 dark:text-white">Validate demand with retailers</span></div>
-            </div>
-          </div>
-          <Link to="/final-report" className="text-xs font-semibold text-brand-600">View Full Action Plan →</Link>
         </div>
 
         {/* FINAL REPORT CTA */}
         <div className="rounded-2xl border-2 border-brand-500 bg-brand-50 dark:bg-brand-900/10 p-6 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
           <div>
-            <h3 className="text-lg font-black text-brand-900 dark:text-brand-100 uppercase mb-2">YOUR FEASIBILITY REPORT IS READY</h3>
+            <h3 className="text-lg font-black text-brand-900 dark:text-brand-100 uppercase mb-2">{t("report.pageTitle")}</h3>
             <p className="text-sm text-brand-700 dark:text-brand-300 max-w-xl">
-              View the complete business feasibility analysis, financial details, market analysis, risk assessment, scheme matching and recommendations.
+              {t("report.pageDesc")}
             </p>
           </div>
           <Link to="/final-report" className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-md whitespace-nowrap">
-            View Full Report →
+            {t("dashboard.viewFullReport")}
           </Link>
-        </div>
-
-        {/* DATA TRANSPARENCY */}
-        <div className="flex justify-between items-center text-[10px] text-gray-400 pt-4 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex flex-wrap gap-4">
-            <span>Data Sources</span>
-            <span>Model Version: 1.2</span>
-            <span>Last Updated: Today</span>
-          </div>
-          <button className="hover:text-gray-600 dark:hover:text-gray-300">View Details</button>
         </div>
 
       </div>

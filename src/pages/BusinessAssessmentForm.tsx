@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import { useAssessmentAPI } from "../hooks/useAssessmentAPI";
 import CustomSelect from "../components/common/CustomSelect";
+import { supportedLanguages } from "../i18n";
 
 export default function BusinessAssessmentForm() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { updateInput } = useVyapar(); // Still useful to sync local context quickly
   const api = useAssessmentAPI();
@@ -36,8 +39,6 @@ export default function BusinessAssessmentForm() {
 
   const debounceTimer = useRef<any>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const languages = ["English", "Hindi (हिंदी)", "Marathi (मराठी)", "Gujarati (ગુજરાતી)"];
 
   const defaultCategories = [
     { id: 'mock-1', name: 'Dairy & Livestock' },
@@ -252,28 +253,33 @@ export default function BusinessAssessmentForm() {
   return (
     <>
       <PageMeta
-        title="Business Assessment Form | VyaparMitra"
-        description="Enter location, available margin capital, and business category for hyper-local feasibility analysis."
+        title={`${t("assessment.pageTitle")} | VyaparMitra`}
+        description={t("assessment.pageDesc")}
       />
 
       <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              User & Business Assessment
+              {t("assessment.pageTitle")}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Provide your location and available margin capital to compute scheme eligibility and hyper-local market feasibility.
+              {t("assessment.pageDesc")}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Language:</span>
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t("dashboard.language")}:</span>
             <div className="w-44">
               <CustomSelect
-                value={formData.language}
-                onChange={(v) => setFormData({ ...formData, language: v })}
-                options={languages.map((l) => ({ value: l, label: l }))}
+                value={i18n.language ? i18n.language.split('-')[0] : 'en'}
+                onChange={(v) => {
+                  i18n.changeLanguage(v);
+                  localStorage.setItem("i18nextLng", v);
+                  const found = supportedLanguages.find(l => l.code === v);
+                  setFormData({ ...formData, language: found?.name || v });
+                }}
+                options={supportedLanguages.map((l) => ({ value: l.code, label: `${l.nativeName} (${l.name})` }))}
                 placeholder="Select Language"
               />
             </div>
@@ -288,7 +294,7 @@ export default function BusinessAssessmentForm() {
 
         {submitted && (
           <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-900/50 dark:bg-green-900/20 dark:text-green-300">
-            ✓ Assessment generated successfully! Redirecting to Dashboard...
+            ✓ {t("assessment.successTitle")}
           </div>
         )}
 
@@ -299,7 +305,7 @@ export default function BusinessAssessmentForm() {
               <div className="flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">1</span>
                 <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Location Details (Rural / Semi-Urban)
+                  {t("assessment.locationDetails")}
                 </h2>
               </div>
               <button
@@ -308,14 +314,14 @@ export default function BusinessAssessmentForm() {
                 disabled={fetchingLocation}
                 className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition disabled:opacity-50"
               >
-                {fetchingLocation ? 'Detecting...' : 'Use Live Location'}
+                {fetchingLocation ? t("common.loading") : '📍 Use Live Location'}
               </button>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  State <span className="text-red-500">*</span>
+                  {t("assessment.stateLabel")} <span className="text-red-500">*</span>
                 </label>
                 <CustomSelect
                   required
@@ -325,13 +331,13 @@ export default function BusinessAssessmentForm() {
                     setFormData({ ...formData, stateId: st?.id || "", state: st?.name || "" });
                   }}
                   options={api.states.map(s => ({ value: s.id, label: s.name }))}
-                  placeholder="Select State"
+                  placeholder={t("assessment.selectState")}
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  District <span className="text-red-500">*</span>
+                  {t("assessment.districtLabel")} <span className="text-red-500">*</span>
                 </label>
                 <CustomSelect
                   required
@@ -342,13 +348,13 @@ export default function BusinessAssessmentForm() {
                     setFormData({ ...formData, districtId: dt?.id || "", district: dt?.name || "" });
                   }}
                   options={districts.map(d => ({ value: d.id, label: d.name }))}
-                  placeholder={formData.stateId ? "Select District" : "Select a State first"}
+                  placeholder={formData.stateId ? t("assessment.selectDistrict") : t("assessment.selectStateFirst")}
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Block / Taluka <span className="text-red-500">*</span>
+                  {t("assessment.blockLabel")} <span className="text-red-500">*</span>
                 </label>
                 <CustomSelect
                   required
@@ -359,13 +365,13 @@ export default function BusinessAssessmentForm() {
                     setFormData({ ...formData, subDistrictId: bk?.id || "", block: bk?.name || "" });
                   }}
                   options={blocks.map(b => ({ value: b.id, label: b.name }))}
-                  placeholder={formData.districtId ? "Select Taluka / Sub-District" : "Select a District first"}
+                  placeholder={formData.districtId ? t("assessment.selectBlock") : t("assessment.selectDistrictFirst")}
                 />
               </div>
 
               <div ref={wrapperRef} className="relative">
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Village / Town Name <span className="text-red-500">*</span>
+                  {t("assessment.villageLabel")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -414,14 +420,14 @@ export default function BusinessAssessmentForm() {
             <div className="mb-4 flex items-center gap-2 border-b border-gray-100 pb-3 dark:border-gray-800">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">2</span>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                Proposed Business & Margin Capital
+                {t("assessment.businessDetails")}
               </h2>
             </div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Proposed Business Category <span className="text-red-500">*</span>
+                  {t("assessment.categoryLabel")} <span className="text-red-500">*</span>
                 </label>
                 <CustomSelect
                   required
@@ -431,13 +437,13 @@ export default function BusinessAssessmentForm() {
                     setFormData({ ...formData, categoryId: v, category: cat?.name || "" });
                   }}
                   options={displayCategories.map(cat => ({ value: cat.id, label: cat.name }))}
-                  placeholder="Select a Category"
+                  placeholder={t("assessment.selectCategory")}
                 />
               </div>
 
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Available Margin Capital (₹ INR) <span className="text-red-500">*</span>
+                  {t("assessment.marginLabel")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-2.5 text-sm font-semibold text-gray-500">₹</span>
@@ -465,7 +471,7 @@ export default function BusinessAssessmentForm() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <span className="text-xs uppercase tracking-wider text-brand-700 dark:text-brand-400 font-semibold">
-                      Auto-Routed Loan Scheme Preview
+                      {t("scheme.autoRecTitle")}
                     </span>
                     <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                       {preview.bestScheme.name}
@@ -494,7 +500,7 @@ export default function BusinessAssessmentForm() {
               disabled={loading}
               className="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 disabled:opacity-50"
             >
-              Cancel
+              {t("common.back")}
             </button>
             <button
               type="submit"
@@ -504,10 +510,10 @@ export default function BusinessAssessmentForm() {
               {loading ? (
                 <>
                   <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Generating Feasibility Report...
+                  {t("assessment.submitting")}
                 </>
               ) : (
-                'Generate Feasibility Report & Financial Roadmap →'
+                t("assessment.submitBtn")
               )}
             </button>
           </div>
