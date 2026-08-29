@@ -32,10 +32,10 @@ export const LanguageSelector: React.FC<{ variant?: "header" | "auth" }> = ({ va
         <button
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Select Language"
-          className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-white dark:bg-gray-900 px-4 py-2 rounded-full border border-gray-200 dark:border-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
         >
           <svg
-            className="w-4 h-4 text-gray-500 shrink-0"
+            className="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -49,7 +49,7 @@ export const LanguageSelector: React.FC<{ variant?: "header" | "auth" }> = ({ va
             />
           </svg>
           <span>{currentLang.nativeName} ({currentLang.name})</span>
-          <span className={`text-[10px] text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
+          <span className={`text-[10px] text-gray-400 dark:text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
         </button>
       ) : (
         <button

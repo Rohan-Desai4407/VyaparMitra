@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import { Bell } from "lucide-react";
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
   CalenderIcon,
   ChatIcon,
   ChevronDownIcon,
@@ -15,7 +15,6 @@ import {
   PageIcon,
   PieChartIcon,
   TableIcon,
-  UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -71,6 +70,11 @@ const AppSidebar: React.FC = () => {
       icon: <PageIcon />,
       name: t("nav.finalReport"),
       path: "/final-report",
+    },
+    {
+      icon: <Bell className="w-5 h-5" />,
+      name: t("nav.notifications", "Notifications"),
+      path: "/notifications",
     },
   ];
 

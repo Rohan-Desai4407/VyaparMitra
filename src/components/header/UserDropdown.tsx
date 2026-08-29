@@ -134,7 +134,12 @@ export default function UserDropdown() {
           </li>
         </ul>
         <Link
-          to="/signin"
+          to="/"
+          onClick={() => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.dispatchEvent(new Event("storage"));
+          }}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-red-600 bg-red-50 rounded-lg group text-theme-sm hover:bg-red-100 hover:text-red-700 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:hover:text-red-300"
         >
           <svg
