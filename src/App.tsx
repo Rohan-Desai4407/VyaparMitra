@@ -13,6 +13,7 @@ import FinancialPlanner from "./pages/FinancialPlanner";
 import SchemeRouter from "./pages/SchemeRouter";
 import RepaymentSchedule from "./pages/RepaymentSchedule";
 import AiAdvisor from "./pages/AiAdvisor";
+import WhatIfSimulator from "./pages/WhatIfSimulator";
 import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
 import Notifications from "./pages/Notifications";
@@ -69,6 +70,7 @@ export default function App() {
               <Route path="/scheme-router" element={<SchemeRouter />} />
               <Route path="/repayment-schedule" element={<RepaymentSchedule />} />
               <Route path="/ai-advisor" element={<AiAdvisor />} />
+              <Route path="/what-if-simulator" element={<WhatIfSimulator />} />
               <Route path="/swot-matrix" element={<SwotMatrix />} />
               <Route path="/final-report" element={<FinalReport />} />
               <Route path="/notifications" element={<Notifications />} />

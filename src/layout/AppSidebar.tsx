@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Bell } from "lucide-react";
 
 // Assume these icons are imported from an icon library
+import { Sliders } from "lucide-react";
 import {
   CalenderIcon,
   ChatIcon,
@@ -65,6 +66,11 @@ const AppSidebar: React.FC = () => {
       icon: <ChatIcon />,
       name: t("nav.aiAdvisor"),
       path: "/ai-advisor",
+    },
+    {
+      icon: <Sliders className="w-5 h-5" />,
+      name: t("nav.whatIfSimulator", "What-if Simulator"),
+      path: "/what-if-simulator",
     },
     {
       icon: <PageIcon />,
