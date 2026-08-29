@@ -34,7 +34,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GridIcon />,
       name: t("nav.dashboard"),
-      path: "/",
+      path: "/dashboard",
     },
     {
       icon: <ListIcon />,

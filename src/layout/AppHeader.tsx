@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
@@ -8,8 +8,23 @@ import { LanguageSelector } from "../components/common/LanguageSelector";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 
+// Command palette navigation items
+const COMMAND_ROUTES = [
+  { key: "dashboard", path: "/dashboard" },
+  { key: "assessment", path: "/assessment" },
+  { key: "marketAnalysis", path: "/market-analysis" },
+  { key: "financialPlanner", path: "/financial-planner" },
+  { key: "schemeRouter", path: "/scheme-router" },
+  { key: "repaymentSchedule", path: "/repayment-schedule" },
+  { key: "aiAdvisor", path: "/ai-advisor" },
+  { key: "finalReport", path: "/final-report" },
+  { key: "notifications", path: "/notifications" },
+  { key: "profile", path: "/profile" },
+] as const;
+
 const AppHeader: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -27,21 +42,86 @@ const AppHeader: React.FC = () => {
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
+  // Filtered command results
+  const filteredCommands = useMemo(() => {
+    if (!searchQuery.trim()) return COMMAND_ROUTES;
+    const q = searchQuery.toLowerCase();
+    return COMMAND_ROUTES.filter((cmd) => {
+      const name = t(`nav.${cmd.key}`, cmd.key).toLowerCase();
+      return name.includes(q) || cmd.path.includes(q) || cmd.key.toLowerCase().includes(q);
+    });
+  }, [searchQuery, t]);
+
+  // Reset selection when results change
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filteredCommands.length]);
+
+  // Global Ctrl+K handler
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         inputRef.current?.focus();
+        setShowResults(true);
+      }
+      // Escape to close
+      if (event.key === "Escape") {
+        setShowResults(false);
+        setSearchQuery("");
+        inputRef.current?.blur();
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        resultsRef.current &&
+        !resultsRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (filteredCommands[selectedIndex]) {
+        navigate(filteredCommands[selectedIndex].path);
+        setShowResults(false);
+        setSearchQuery("");
+        inputRef.current?.blur();
+      }
+    }
+  };
+
+  const handleCommandSelect = (path: string) => {
+    navigate(path);
+    setShowResults(false);
+    setSearchQuery("");
+    inputRef.current?.blur();
+  };
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
@@ -119,39 +199,104 @@ const AppHeader: React.FC = () => {
             </svg>
           </button>
 
-          <div className="hidden lg:block">
-            <form>
-              <div className="relative">
-                <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
-                  <svg
-                    className="fill-gray-500 dark:fill-gray-400"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z"
-                      fill=""
-                    />
-                  </svg>
-                </span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder={t("common.search")}
-                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
-                />
+          {/* Command Palette Search Bar */}
+          <div className="hidden lg:block relative">
+            <div className="relative">
+              <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
+                <svg
+                  className="fill-gray-500 dark:fill-gray-400"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M3.04175 9.37363C3.04175 5.87693 5.87711 3.04199 9.37508 3.04199C12.8731 3.04199 15.7084 5.87693 15.7084 9.37363C15.7084 12.8703 12.8731 15.7053 9.37508 15.7053C5.87711 15.7053 3.04175 12.8703 3.04175 9.37363ZM9.37508 1.54199C5.04902 1.54199 1.54175 5.04817 1.54175 9.37363C1.54175 13.6991 5.04902 17.2053 9.37508 17.2053C11.2674 17.2053 13.003 16.5344 14.357 15.4176L17.177 18.238C17.4699 18.5309 17.9448 18.5309 18.2377 18.238C18.5306 17.9451 18.5306 17.4703 18.2377 17.1774L15.418 14.3573C16.5365 13.0033 17.2084 11.2669 17.2084 9.37363C17.2084 5.04817 13.7011 1.54199 9.37508 1.54199Z"
+                    fill=""
+                  />
+                </svg>
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowResults(true);
+                }}
+                onFocus={() => setShowResults(true)}
+                onKeyDown={handleInputKeyDown}
+                placeholder={t("common.search")}
+                className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]"
+                role="combobox"
+                aria-expanded={showResults}
+                aria-haspopup="listbox"
+                aria-label="Search or navigate to a page"
+                autoComplete="off"
+              />
 
-                <button className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
-                  <span> ⌘ </span>
-                  <span> K </span>
-                </button>
+              <button
+                className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400"
+                onClick={() => {
+                  inputRef.current?.focus();
+                  setShowResults(true);
+                }}
+                tabIndex={-1}
+                type="button"
+              >
+                <span> ⌘ </span>
+                <span> K </span>
+              </button>
+            </div>
+
+            {/* Command Results Dropdown */}
+            {showResults && (
+              <div
+                ref={resultsRef}
+                className="absolute top-full left-0 mt-1.5 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-theme-lg z-9999 overflow-hidden"
+                role="listbox"
+              >
+                <div className="max-h-[320px] overflow-y-auto py-1">
+                  {filteredCommands.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">
+                      No matching pages found
+                    </div>
+                  ) : (
+                    filteredCommands.map((cmd, idx) => (
+                      <button
+                        key={cmd.path}
+                        type="button"
+                        role="option"
+                        aria-selected={idx === selectedIndex}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left ${
+                          idx === selectedIndex
+                            ? "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400"
+                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                        }`}
+                        onClick={() => handleCommandSelect(cmd.path)}
+                        onMouseEnter={() => setSelectedIndex(idx)}
+                      >
+                        <span className="text-gray-400 dark:text-gray-500">→</span>
+                        <span className="font-medium">
+                          {t(`nav.${cmd.key}`, cmd.key)}
+                        </span>
+                        <span className="ml-auto text-xs text-gray-400 dark:text-gray-500 font-mono">
+                          {cmd.path}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+                <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-3">
+                  <span>↑↓ navigate</span>
+                  <span>↵ open</span>
+                  <span>esc close</span>
+                </div>
               </div>
-            </form>
+            )}
           </div>
         </div>
         <div

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { LanguageSelector } from "../components/common/LanguageSelector";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
+import { supportedLanguages, setAppLanguage } from "../i18n";
 
 export default function LandingPage() {
   const { t, i18n } = useTranslation();
@@ -30,18 +31,7 @@ export default function LandingPage() {
   };
 
   // Language pill helper
-  const languagesList = [
-    { code: "en", name: "English", nativeName: "English" },
-    { code: "hi", name: "Hindi", nativeName: "हिन्दी" },
-    { code: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
-    { code: "mr", name: "Marathi", nativeName: "मराठी" },
-    { code: "bn", name: "Bengali", nativeName: "বাংলা" },
-    { code: "ta", name: "Tamil", nativeName: "தமிழ்" },
-    { code: "te", name: "Telugu", nativeName: "తెలుగు" },
-    { code: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
-    { code: "ml", name: "Malayalam", nativeName: "മലയാളം" },
-    { code: "or", name: "Odia", nativeName: "ଓଡ଼ିଆ" }
-  ];
+  const languagesList = supportedLanguages;
 
   return (
     <div className="min-h-screen bg-[#fcfbfa] text-gray-900 font-sans antialiased transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100 selection:bg-emerald-500 selection:text-white">
@@ -681,9 +671,7 @@ export default function LandingPage() {
                 <button
                   key={lang.code}
                   onClick={() => {
-                    i18n.changeLanguage(lang.code);
-                    localStorage.setItem("vyaparmitra_language", lang.code);
-                    localStorage.setItem("i18nextLng", lang.code);
+                    setAppLanguage(lang.code);
                   }}
                   className={`px-5 py-3 rounded-full text-sm font-bold border transition shadow-sm hover:scale-105 ${
                     isActive
@@ -860,11 +848,11 @@ export default function LandingPage() {
             <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 tracking-wide">
               {t("landing.footerCopyright")}
             </span>
-            <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            <div className="flex flex-wrap justify-center md:justify-end gap-x-4 gap-y-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
               {languagesList.map((lang) => (
                 <button
                   key={lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
+                  onClick={() => setAppLanguage(lang.code)}
                   className="hover:text-emerald-600 transition"
                 >
                   {lang.name}
