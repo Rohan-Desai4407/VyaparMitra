@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+// @ts-ignore
 import 'leaflet.heat';
 import { renderToString } from 'react-dom/server';
 import { Store, Droplet, Shirt, Wrench, Pill, Wheat, Home, ShoppingCart, Scissors, MapPin } from 'lucide-react';

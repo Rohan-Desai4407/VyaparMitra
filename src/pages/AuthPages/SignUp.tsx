@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle2, Shield } from 'lucide-react';
 import { LanguageSelector } from '../../components/common/LanguageSelector';
+import { ThemeToggleButton } from '../../components/common/ThemeToggleButton';
 import { GoogleAccountModal } from '../../components/auth/GoogleAccountModal';
 
 export default function SignUp() {
@@ -198,14 +199,14 @@ export default function SignUp() {
             </div>
 
             {/* Notifications / Feedback Messages */}
-            {error && (
+            {statusMsg?.isError && (
               <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs rounded-xl font-medium text-center border border-red-100 dark:border-red-800/50">
-                {error}
+                {statusMsg.text}
               </div>
             )}
-            {successMsg && (
+            {statusMsg && !statusMsg.isError && (
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs rounded-xl font-medium text-center border border-emerald-200 dark:border-emerald-800/50">
-                {successMsg}
+                {statusMsg.text}
               </div>
             )}
 

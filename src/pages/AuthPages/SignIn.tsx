@@ -63,11 +63,19 @@ export default function SignIn() {
       setError(t('auth.enterCredentials'));
       return;
     }
-    setError('');
     let parsedName = email.split('@')[0];
-      parsedName = parsedName === 'admin' ? 'Musharof' : parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
-      localStorage.setItem('userName', parsedName);
-      navigate('/');
+    parsedName = parsedName === 'admin' ? 'Entrepreneur' : parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
+    localStorage.setItem('userName', parsedName);
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    if (provider === 'Google') {
+      try {
+        googleLoginTrigger();
+      } catch (e) {
+        setIsGoogleModalOpen(true);
+      }
+    }
   };
 
   return (

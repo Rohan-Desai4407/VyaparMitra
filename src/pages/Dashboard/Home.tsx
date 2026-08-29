@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Leaf, Wallet, TrendingUp, Landmark, MessageCircle } from "lucide-react";
 import React from 'react';
 import { useTranslation } from "react-i18next";
 import { useVyapar } from "../../context/VyaparContext";
 import { useNotifications } from "../../context/NotificationContext";
 import PageMeta from "../../components/common/PageMeta";
 import {
+  Leaf,
+  Wallet,
+  MessageCircle,
   ChevronRight,
   ClipboardList,
   Calculator,
@@ -108,6 +110,12 @@ export default function Home() {
   const { input, financials, market, report, isGenerating } = useVyapar();
   const { notifications } = useNotifications();
   const [showComparison, setShowComparison] = useState(false);
+
+  const opportunities = [
+    { rank: 1, name: "Solar Installation", score: 92, demand: "HIGH", competition: "LOW", investment: "MODERATE" },
+    { rank: 2, name: "Agri-tech Services", score: 85, demand: "HIGH", competition: "MODERATE", investment: "LOW" },
+    { rank: 3, name: "Organic Food Supply", score: 78, demand: "MODERATE", competition: "MODERATE", investment: "LOW" },
+  ];
 
   // Financial Snapshot Estimates
   const estMonthlyRevenue = financials.projectCost * 0.15; 
