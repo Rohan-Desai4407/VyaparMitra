@@ -10,7 +10,7 @@ export class AmortizationEngine {
     stateId: string;
   }) {
     // 1. Calculate base scheme params using existing logic
-    const { SchemeEligibilityEngine } = await import('./SchemeEligibilityEngine');
+    const { SchemeEligibilityEngine } = await import('./SchemeEligibilityEngine.js');
     const schemes = await SchemeEligibilityEngine.evaluateSchemes(params.capital, params.projectCost);
     
     if (!schemes || schemes.length === 0) {

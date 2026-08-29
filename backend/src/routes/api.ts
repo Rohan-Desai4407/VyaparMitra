@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { CalculationService } from '../services/CalculationService';
-import { SchemeMatcher } from '../services/SchemeMatcher';
-import { MarketIntelligenceEngine } from '../services/MarketIntelligenceEngine';
-import { SchemeEligibilityEngine } from '../services/SchemeEligibilityEngine';
-import { AmortizationEngine } from '../services/AmortizationEngine';
+import { CalculationService } from '../services/CalculationService.js';
+import { SchemeMatcher } from '../services/SchemeMatcher.js';
+import { MarketIntelligenceEngine } from '../services/MarketIntelligenceEngine.js';
+import { callGeminiApi } from "../config/gemini.js";
+import { SchemeEligibilityEngine } from '../services/SchemeEligibilityEngine.js';
+import { AmortizationEngine } from '../services/AmortizationEngine.js';
+import { SwotService } from '../services/SwotService.js';
 const router = Router();
 const prisma = new PrismaClient();
 
@@ -12,7 +14,6 @@ const prisma = new PrismaClient();
 router.get('/market-intelligence/summary', async (req, res) => {
   const { stateId, districtId, subDistrictId, villageId, businessCategoryId, availableCapital, radius } = req.query;
   
-  // Basic validation
   if (!stateId || !businessCategoryId) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
@@ -20,6 +21,7 @@ router.get('/market-intelligence/summary', async (req, res) => {
   try {
     const state = stateId && stateId !== 'mock' ? await prisma.state.findUnique({ where: { id: String(stateId) } }) : null;
     const district = districtId && districtId !== 'mock' ? await prisma.district.findUnique({ where: { id: String(districtId) } }) : null;
+    const village = villageId && String(villageId) !== 'mock' ? await prisma.village.findUnique({ where: { id: String(villageId) } }) : null;
     const category = businessCategoryId && !String(businessCategoryId).includes('mock') ? await prisma.businessCategory.findUnique({ where: { id: String(businessCategoryId) } }) : null;
 
     const rad = parseInt(String(radius)) || 10;
@@ -27,30 +29,68 @@ router.get('/market-intelligence/summary', async (req, res) => {
     
     const sName = state ? state.name : (req.query.stateName ? String(req.query.stateName) : "Unknown State");
     const dName = district ? district.name : (req.query.districtName ? String(req.query.districtName) : sName);
-    const cName = category ? category.name : (req.query.categoryName ? String(req.query.categoryName) : "General Business");
+    const vName = village ? village.name : (req.query.villageName ? String(req.query.villageName) : dName);
+    
+    // Trust the explicit categoryName passed by the frontend first, because frontend state might be unsynced with the DB ID
+    const cName = req.query.categoryName ? String(req.query.categoryName) : (category ? category.name : "General Business");
 
-    const consumer = MarketIntelligenceEngine.getConsumerProfile(dName, sName, cName, rad);
-    const competitor = MarketIntelligenceEngine.getCompetitorDensity(cName, rad);
+    // Geocode once for efficiency
+    const geocoded = await MarketIntelligenceEngine.geocodeLocation(vName, dName, sName);
+
+    // Consumer reach
+    let consumer = null;
+    let consumerError = null;
+    try {
+      consumer = MarketIntelligenceEngine.getConsumerProfile(dName, sName, cName, rad);
+    } catch (err: any) {
+      consumerError = err.message || "Consumer reach data unavailable";
+    }
+
+    // Competitor density
+    let competitor = null;
+    let competitorError = null;
+    try {
+      const cLat = geocoded ? (geocoded as any).lat : 22.98;
+      const cLng = geocoded ? (geocoded as any).lng : 72.38;
+      competitor = await MarketIntelligenceEngine.getCompetitorDensity(cName, rad, cLat, cLng);
+    } catch (err: any) {
+      competitorError = err.message || "Competitor data unavailable";
+    }
+
+    // Consumer heatmap points
+    let heatmapPoints: any[] = [];
+    if (consumer && consumer.consumerBase > 0 && geocoded) {
+       heatmapPoints = await MarketIntelligenceEngine.getConsumerHeatmapPoints((geocoded as any).lat, (geocoded as any).lng, rad);
+    }
+
+    const centerCoords = geocoded ? { lat: (geocoded as any).lat, lng: (geocoded as any).lng } : null;
+
     const purchasing = MarketIntelligenceEngine.getPurchasingPower(sName);
     const pricing = MarketIntelligenceEngine.getPricing(cName);
     const dist = MarketIntelligenceEngine.getDistributionChannels(cName);
-    const opps = MarketIntelligenceEngine.getOpportunities(cName, cap);
+    const opps = MarketIntelligenceEngine.getOpportunities(cName, cap, vName, consumer?.consumerBase || 0, competitor?.count || 0);
+    const growth = MarketIntelligenceEngine.getGrowthTactics(cName, vName);
 
     res.json({
       consumer,
+      consumerError,
       competitor,
+      competitorError,
+      heatmapPoints,
       purchasing,
       pricing,
       distribution: dist,
-      opportunities: opps
+      opportunities: opps,
+      growth,
+      centerCoords
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// GET /api/business-categories
+// GET /business-categories
 router.get('/business-categories', async (req, res) => {
   const categories = await prisma.businessCategory.findMany({ orderBy: { name: 'asc' } });
   res.json(categories);
@@ -151,7 +191,7 @@ router.post('/assessment/preview', async (req, res) => {
     bestScheme: bestSchemeMatch ? {
       name: bestSchemeMatch.scheme.name,
       matchScore: bestSchemeMatch.score,
-      interestRate: bestSchemeMatch.scheme.interestRate
+      interestRate: (bestSchemeMatch.scheme as any).interestRate
     } : null
   });
 });
@@ -230,14 +270,31 @@ router.get('/assessments/latest', async (req, res) => {
     orderBy: { createdAt: 'desc' },
     include: {
       result: { include: { scheme: true } },
-      location: true,
       businessCategory: true
     }
   });
 
   if (!assessment) return res.status(404).json({ error: 'No assessment found' });
-  res.json(assessment);
+  
+  let state = null;
+  let district = null;
+  let subDistrict = null;
+  let village = null;
+
+  if (assessment.stateId && assessment.stateId !== 'mock') state = await prisma.state.findUnique({ where: { id: assessment.stateId } });
+  if (assessment.districtId && assessment.districtId !== 'mock') district = await prisma.district.findUnique({ where: { id: assessment.districtId } });
+  if (assessment.subDistrictId && assessment.subDistrictId !== 'mock') subDistrict = await prisma.subDistrict.findUnique({ where: { id: assessment.subDistrictId } });
+  if (assessment.villageId && assessment.villageId !== 'mock') village = await prisma.village.findUnique({ where: { id: assessment.villageId } });
+
+  res.json({
+    ...assessment,
+    state: state ? { name: state.name } : undefined,
+    district: district ? { name: district.name } : undefined,
+    subDistrict: subDistrict ? { name: subDistrict.name } : undefined,
+    village: village ? { name: village.name } : undefined
+  });
 });
+
 // GET /api/financial/schemes
 router.get('/financial/schemes', async (req, res) => {
   try {
@@ -250,7 +307,7 @@ router.get('/financial/schemes', async (req, res) => {
       recommendedScheme: schemes.length > 0 ? schemes[0] : null,
       generatedAt: new Date()
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error evaluating schemes:', error);
     res.status(500).json({ error: 'Failed to evaluate financial schemes' });
   }
@@ -272,9 +329,52 @@ router.post('/financial/calculate-schedule', async (req, res) => {
     });
 
     res.json(schedule);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error calculating schedule:', error);
     res.status(500).json({ error: 'Failed to calculate repayment schedule' });
+  }
+});
+
+
+// POST /api/ai/explain-point
+router.post('/ai/explain-point', async (req, res) => {
+  const { point, category, location, businessType } = req.body;
+  if (!point || !businessType) return res.status(400).json({ error: "Missing parameters" });
+
+  try {
+    const prompt = `
+You are an expert rural business advisor.
+Business: ${businessType}
+Location: ${location}
+Point (${category}): "${point}"
+
+Explain this point deeply but concisely (3-4 sentences max) in the context of this specific business and location. Why is this important? How does it specifically affect the business operations or revenue? Use simple, easy-to-understand language. Format with bolding for key terms if helpful. Do NOT use markdown headers, just return the explanation text.
+`;
+
+    const aiText = await callGeminiApi(prompt);
+    
+    if (aiText) {
+      res.json({ explanation: aiText });
+    } else {
+      res.json({ explanation: "This point highlights a critical factor for your business success in the local area. Focus on leveraging local networks and understanding seasonal demand patterns to optimize operations." });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to generate explanation" });
+  }
+});
+
+
+// POST /api/swot/analyze
+router.post('/swot/analyze', async (req, res) => {
+  const { assessmentId } = req.body;
+  if (!assessmentId) return res.status(400).json({ error: "Missing assessmentId" });
+
+  try {
+    const analysis = await SwotService.analyze(assessmentId);
+    res.json(analysis);
+  } catch (error: any) {
+    console.error("SWOT error:", error);
+    res.status(500).json({ error: error.message || "Failed to generate SWOT analysis" });
   }
 });
 

@@ -60,7 +60,7 @@ export interface FeasibilityReport {
   keyActionItems: string[];
 }
 
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = "http://localhost:3001/api";
 
 export const apiService = {
   async submitBusinessInput(input: BusinessInputData) {
@@ -220,6 +220,32 @@ export const financeService = {
 };
 
 export const authApiService = {
+  async register(payload: { name: string; email: string; password: string; preferredLanguage?: string }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message || "Unable to connect to server" };
+    }
+  },
+
+  async login(payload: { email: string; password: string }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message || "Unable to connect to server" };
+    }
+  },
+
   async forgotPassword(email: string) {
     const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: "POST",
@@ -260,6 +286,29 @@ export const authApiService = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ credential }),
+    });
+    return res.json();
+  },
+
+  async getProfile(token: string) {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    });
+    return res.json();
+  },
+
+  async updateProfile(token: string, updates: any) {
+    const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+      method: "PUT",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(updates),
     });
     return res.json();
   },

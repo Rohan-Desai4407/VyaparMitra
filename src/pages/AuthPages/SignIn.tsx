@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff, Mail, Lock, CheckCircle2, Map, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, CheckCircle2, Shield } from 'lucide-react';
 import { LanguageSelector } from '../../components/common/LanguageSelector';
+import { ThemeToggleButton } from '../../components/common/ThemeToggleButton';
+import { authApiService } from '../../services/apiServices';
+
+import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleAccountModal } from '../../components/auth/GoogleAccountModal';
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -11,19 +16,62 @@ export default function SignIn() {
   const [email, setEmail] = useState('admin@vyaparmitra.in');
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Clear session when arriving at SignIn page
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.dispatchEvent(new Event("storage"));
+  }, []);
+
+  const googleLoginTrigger = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const userInfo = await userInfoRes.json();
+        
+        const googleUser = {
+          name: userInfo.name || "Google User",
+          email: userInfo.email,
+          picture: userInfo.picture,
+          authProvider: "Google",
+        };
+
+        try {
+          await authApiService.googleLogin(tokenResponse.access_token);
+        } catch (e) {}
+
+        localStorage.setItem("token", tokenResponse.access_token || `google_token_${Date.now()}`);
+        localStorage.setItem("user", JSON.stringify(googleUser));
+        window.dispatchEvent(new Event("storage"));
+        navigate('/dashboard');
+      } catch (err) {
+        setIsGoogleModalOpen(true);
+      }
+    },
+    onError: () => {
+      setIsGoogleModalOpen(true);
+    },
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError(t('auth.enterCredentials'));
       return;
     }
     setError('');
-    navigate('/');
+    let parsedName = email.split('@')[0];
+      parsedName = parsedName === 'admin' ? 'Musharof' : parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
+      localStorage.setItem('userName', parsedName);
+      navigate('/');
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative font-sans overflow-hidden bg-[#f6f3eb]">
+    <div className="min-h-screen flex flex-col relative font-sans overflow-hidden bg-[#f6f3eb] dark:bg-gray-900 transition-colors duration-300">
 
       {/* Background Image */}
       <div
@@ -36,9 +84,9 @@ export default function SignIn() {
         }}
       >
         {/* Top fade to blend sky into page */}
-        <div className="absolute top-0 left-0 right-0 h-[35vh] bg-gradient-to-b from-[#f6f3eb] via-[#f6f3eb]/60 to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-[35vh] bg-gradient-to-b from-[#f6f3eb] via-[#f6f3eb]/60 to-transparent dark:from-gray-900 dark:via-gray-900/60 pointer-events-none" />
         {/* Right fade for login card readability */}
-        <div className="absolute inset-0 bg-gradient-to-l from-white/65 via-white/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-l from-white/65 via-white/10 to-transparent dark:from-gray-900/90 dark:via-gray-900/50 pointer-events-none" />
       </div>
 
       {/* ── PAGE CONTENT ── */}
@@ -48,26 +96,36 @@ export default function SignIn() {
         <div className="w-full lg:w-7/12 flex flex-col p-8 lg:p-12 xl:p-16 opacity-0" style={{ animation: 'slide-up 0.8s ease-out forwards' }}>
           <div className="max-w-3xl">
             {/* Logo */}
-            <div className="mb-8">
-              <img src="/logo.png" alt="VyaparMitra"
-                className="h-20 lg:h-24 object-contain"
-                style={{ mixBlendMode: 'multiply' }} />
+            <div className="mb-8 flex items-center gap-4">
+              <img
+                src="/images/logo/vyapar-mitra-icon.png"
+                alt="VyaparMitra Logo"
+                className="h-16 lg:h-20 object-contain drop-shadow-md"
+              />
+              <div className="flex flex-col">
+                <span className="text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 leading-none drop-shadow-sm">
+                  Vyapar<span className="text-emerald-700">Mitra</span>
+                </span>
+                <span className="text-xs font-bold text-gray-700 tracking-widest uppercase mt-2 drop-shadow-sm">
+                  Plan • Grow • Prosper
+                </span>
+              </div>
             </div>
 
-            <h2 className="text-3xl lg:text-4xl xl:text-[2.5rem] font-extrabold text-gray-900 leading-[1.2]">
+            <h2 className="text-3xl lg:text-4xl xl:text-[2.5rem] font-extrabold text-gray-900 dark:text-white leading-[1.2]">
               {t('auth.heroTitle1')}{' '}
-              <span className="text-green-700">{t('auth.heroHighlight1')}</span>
+              <span className="text-green-700 dark:text-emerald-400">{t('auth.heroHighlight1')}</span>
               <br/>
               <span className="whitespace-nowrap">
                 {t('auth.heroTitle2')}{' '}
-                <span className="text-gray-900">{t('auth.heroHighlight2')}</span>
+                <span className="text-gray-900 dark:text-gray-100">{t('auth.heroHighlight2')}</span>
               </span>
             </h2>
           </div>
         </div>
 
         {/* STATS BAR — bottom-left above footer */}
-        <div className="hidden lg:flex absolute bottom-[52px] left-8 xl:left-12 z-30 bg-[#0A4222] text-white px-4 py-4 rounded-2xl items-center shadow-2xl border border-green-800/30">
+        <div className="hidden lg:flex absolute bottom-[52px] left-8 xl:left-12 z-30 bg-[#0A4222] dark:bg-emerald-950/90 text-white px-4 py-4 rounded-2xl items-center shadow-2xl border border-green-800/30 dark:border-emerald-800/50 backdrop-blur-md">
           {[
             { val: t('auth.stat1Val'), label: t('auth.stat1Label') },
             { val: t('auth.stat2Val'), label: t('auth.stat2Label') },
@@ -75,9 +133,9 @@ export default function SignIn() {
             { val: t('auth.stat4Val'), label: t('auth.stat4Label') },
           ].map((s, i, arr) => (
             <div key={i}
-              className={`text-center px-5 hover:scale-105 transition-transform cursor-default ${i < arr.length - 1 ? 'border-r border-green-700/50' : ''}`}>
+              className={`text-center px-5 hover:scale-105 transition-transform cursor-default ${i < arr.length - 1 ? 'border-r border-green-700/50 dark:border-emerald-700/50' : ''}`}>
               <div className="font-bold text-[1.5rem] leading-none">{s.val}</div>
-              <div className="text-[9px] uppercase tracking-wider text-green-100/80 mt-1.5 font-semibold whitespace-pre-line">{s.label}</div>
+              <div className="text-[9px] uppercase tracking-wider text-green-100/80 dark:text-emerald-200/80 mt-1.5 font-semibold whitespace-pre-line">{s.label}</div>
             </div>
           ))}
         </div>
@@ -85,71 +143,72 @@ export default function SignIn() {
         {/* RIGHT — Sign In Card */}
         <div className="w-full lg:w-5/12 flex flex-col justify-center items-center p-6 lg:p-8 relative z-20">
 
-          {/* Language Selector */}
-          <div className="absolute top-8 right-8 z-30">
+          {/* Language Selector & Theme Toggle */}
+          <div className="absolute top-6 right-6 lg:top-8 lg:right-8 z-30 flex items-center gap-3">
             <LanguageSelector variant="auth" />
+            <ThemeToggleButton />
           </div>
 
-          <div className="bg-white rounded-[2rem] p-8 lg:p-10 w-full max-w-[420px] shadow-[0_20px_50px_rgb(0,0,0,0.08)] border border-gray-100 mt-12 lg:mt-0 opacity-0" style={{ animation: 'slide-up 0.8s ease-out 0.2s forwards' }}>
+          <div className="bg-white rounded-[2rem] p-8 lg:p-10 w-full max-w-[420px] shadow-[0_20px_50px_rgb(0,0,0,0.08)] border border-gray-100 mt-12 lg:mt-0 opacity-0" style={{ animation: 'slide-up 0.8s ease-out 0.2s forwards, border-glow-once 1.5s ease-out 1s forwards' }}>
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">
+              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
                 {t('auth.welcomeBack')}
               </h2>
-              <p className="text-gray-500 text-sm font-medium">
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
                 {t('auth.loginSubtitle')}
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               {error && (
-                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl font-medium text-center border border-red-100">
+                <div className="p-3 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-sm rounded-xl font-medium text-center border border-red-100 dark:border-red-800/50">
                   {error}
                 </div>
               )}
               <div className="group">
-                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 group-focus-within:text-green-700 transition-colors">
+                <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1.5 group-focus-within:text-green-700 dark:group-focus-within:text-emerald-400 transition-colors">
                   {t('auth.emailOrMobile')}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-green-600 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-green-600 dark:group-focus-within:text-emerald-400 transition-colors">
                     <Mail size={18} strokeWidth={2.5} />
                   </div>
                   <input type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-green-600 placeholder-gray-400 transition-all bg-gray-50/50 focus:bg-white text-gray-900 text-sm font-medium outline-none"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-600 dark:focus:border-emerald-500 placeholder-gray-400 dark:placeholder-gray-500 transition-all bg-gray-50/50 dark:bg-gray-900/60 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white text-sm font-medium outline-none"
                     placeholder={t('auth.emailOrMobilePlaceholder')} />
                 </div>
               </div>
 
               <div className="group">
-                <label className="block text-[13px] font-semibold text-gray-700 mb-1.5 group-focus-within:text-green-700 transition-colors">
+                <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-1.5 group-focus-within:text-green-700 dark:group-focus-within:text-emerald-400 transition-colors">
                   {t('auth.password')}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-green-600 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-green-600 dark:group-focus-within:text-emerald-400 transition-colors">
                     <Lock size={18} strokeWidth={2.5} />
                   </div>
                   <input type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:border-green-600 placeholder-gray-400 transition-all bg-gray-50/50 focus:bg-white text-gray-900 text-sm font-medium outline-none"
+                    className="block w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-green-600 dark:focus:border-emerald-500 placeholder-gray-400 dark:placeholder-gray-500 transition-all bg-gray-50/50 dark:bg-gray-900/60 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-white text-sm font-medium outline-none"
                     placeholder={t('auth.passwordPlaceholder')} />
                   <button type="button"
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-green-600 transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-green-600 dark:hover:text-emerald-400 transition-colors"
                     onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff size={18} strokeWidth={2.5} /> : <Eye size={18} strokeWidth={2.5} />}
                   </button>
                 </div>
                 <div className="flex justify-end mt-2">
-                  <a href="#" className="text-[12px] text-green-700 font-bold hover:text-green-800 transition-colors">
+                  <a href="#" className="text-[12px] text-green-700 dark:text-emerald-400 font-bold hover:text-green-800 dark:hover:text-emerald-300 transition-colors">
                     {t('auth.forgotPassword')}
                   </a>
                 </div>
               </div>
 
               <button type="submit"
-                className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-[#0A4222] hover:bg-green-900 transition-all mt-6 tracking-wide hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2">
+                className="w-full flex justify-center items-center py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-[#0A4222] dark:bg-emerald-600 hover:bg-green-900 dark:hover:bg-emerald-500 transition-all mt-6 tracking-wide hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-green-700 dark:focus:ring-emerald-500 focus:ring-offset-2">
                 <CheckCircle2 size={18} strokeWidth={2.5} className="mr-2 opacity-90" /> {t('auth.loginButton')}
               </button>
             </form>
@@ -157,27 +216,24 @@ export default function SignIn() {
             <div className="mt-8">
               <div className="relative mb-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-100" />
+                  <div className="w-full border-t border-gray-100 dark:border-gray-700" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="px-4 bg-white text-gray-400 font-medium">{t('auth.orContinueWith')}</span>
+                  <span className="px-4 bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-400 font-medium">{t('auth.orContinueWith')}</span>
                 </div>
               </div>
               <div className="space-y-3">
-                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                <button type="button" onClick={() => handleSocialLogin('Google')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   {t('auth.continueWithGoogle')}
                 </button>
-                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 rounded-xl bg-white text-[13px] font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                  <Map size={18} className="text-gray-500 group-hover:text-green-600 transition-all" strokeWidth={2.5} />
-                  {t('auth.continueWithMobile')}
-                </button>
+                
               </div>
             </div>
 
-            <p className="mt-8 text-center text-[13px] font-medium text-gray-600">
+            <p className="mt-8 text-center text-[13px] font-medium text-gray-600 dark:text-gray-400">
               {t('auth.noAccount')}{' '}
-              <Link to="/signup" className="font-bold text-green-700 hover:text-green-800 ml-1 transition-colors">
+              <Link to="/signup" className="font-bold text-green-700 dark:text-emerald-400 hover:text-green-800 dark:hover:text-emerald-300 ml-1 transition-colors">
                 {t('auth.signup')}
               </Link>
             </p>
@@ -186,15 +242,15 @@ export default function SignIn() {
       </div>
 
       {/* FOOTER */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200/60 py-3.5 px-8 lg:px-16 flex flex-col md:flex-row justify-between items-center z-30">
+      <div className="absolute bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-t border-gray-200/60 dark:border-gray-800/80 py-3.5 px-8 lg:px-16 flex flex-col md:flex-row justify-between items-center z-30">
         <div className="flex items-center gap-2.5 mb-3 md:mb-0">
-          <Shield className="text-gray-400" size={18} strokeWidth={2.5} />
+          <Shield className="text-gray-400 dark:text-gray-500" size={18} strokeWidth={2.5} />
           <div>
-            <p className="text-[13px] font-bold text-gray-800 leading-tight">{t('auth.dataSafe')}</p>
-            <p className="text-[11px] text-gray-500 font-medium">{t('auth.dataSafeDesc')}</p>
+            <p className="text-[13px] font-bold text-gray-800 dark:text-gray-200 leading-tight">{t('auth.dataSafe')}</p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{t('auth.dataSafeDesc')}</p>
           </div>
         </div>
-        <div className="flex gap-5 text-[11px] font-bold text-gray-500 tracking-wide">
+        <div className="flex gap-5 text-[11px] font-bold text-gray-500 dark:text-gray-400 tracking-wide">
           {[
             { key: 'about', label: t('auth.aboutUs') },
             { key: 'privacy', label: t('auth.privacyPolicy') },
@@ -202,13 +258,20 @@ export default function SignIn() {
             { key: 'contact', label: t('auth.contactUs') }
           ].map((item, i, arr) => (
             <React.Fragment key={item.key}>
-              <a href="#" className="hover:text-green-700 transition-colors">{item.label}</a>
-              {i < arr.length - 1 && <span className="text-gray-300">|</span>}
+              <a href="#" className="hover:text-green-700 dark:hover:text-emerald-400 transition-colors">{item.label}</a>
+              {i < arr.length - 1 && <span className="text-gray-300 dark:text-gray-700">|</span>}
             </React.Fragment>
           ))}
         </div>
       </div>
 
+      {/* Google Account Modal */}
+      <GoogleAccountModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+      />
     </div>
   );
 }
+
+

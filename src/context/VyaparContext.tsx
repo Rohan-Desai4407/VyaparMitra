@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import { authApiService } from "../services/apiServices";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { aiAdvisorService } from "../services/aiAdvisorService";
 
 export interface BusinessInputData {
+  assessmentId?: string;
   stateId: string;
   state: string;
   districtId: string;
@@ -10,7 +12,7 @@ export interface BusinessInputData {
   block: string;
   villageId: string;
   village: string;
-  marginCapital: number; // in INR (e.g. 15000)
+  marginCapital: number;
   categoryId: string;
   category: string;
   language: string;
@@ -57,7 +59,7 @@ export interface SwotAndRisk {
 }
 
 export interface FeasibilityReport {
-  viabilityScore: number; // 0 to 100
+  viabilityScore: number;
   overallVerdict: "Highly Viable" | "Moderately Viable" | "Requires Restructuring" | "High Risk";
   recommendation: string;
   marketInsights: string;
@@ -74,18 +76,18 @@ interface VyaparContextType {
   updateInput: (fields: Partial<BusinessInputData>) => void;
   generateReport: (data: BusinessInputData) => Promise<void>;
   isGenerating: boolean;
+  profile: any;
+  updateUserProfile: (updates: any) => Promise<void>;
+  isProfileLoading: boolean;
 }
 
-// Helper to compute financial calculations according to PRD Rules
 export const computeFinancials = (margin: number): FinancialCalculation => {
-  // Core calculation: Project Cost = Available Margin Capital / 10%
   const projectCost = margin / 0.1;
   const rawLoan = projectCost * 0.9;
 
   let scheme: SchemeDetails;
 
   if (projectCost <= 140000) {
-    // Micro Finance Scheme (Up to 1.40 lakh project cost)
     scheme = {
       name: "Micro Finance Scheme",
       maxProjectCost: "Up to ₹1.40 Lakh",
@@ -97,7 +99,6 @@ export const computeFinancials = (margin: number): FinancialCalculation => {
       code: "MICRO",
     };
   } else {
-    // Term Loan Scheme (₹1.40 Lakh to ₹50 Lakh)
     scheme = {
       name: "Term Loan Scheme",
       maxProjectCost: "₹1.40 Lakh to ₹50 Lakh",
@@ -114,7 +115,6 @@ export const computeFinancials = (margin: number): FinancialCalculation => {
   const r = scheme.interestRate / 100 / 12;
   const n = scheme.tenureYears * 12;
   
-  // Standard EMI formula
   const monthlyEmi = Math.round((maxLoanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) || 0;
   const quarterlyEmi = monthlyEmi * 3;
   const totalRepayment = monthlyEmi * n;
@@ -132,9 +132,9 @@ export const computeFinancials = (margin: number): FinancialCalculation => {
 };
 
 const defaultInput: BusinessInputData = {
-  stateId: "cm0az9s8700010cl3f9660dta", // Gujarat dummy ID
+  stateId: "cm0az9s8700010cl3f9660dta",
   state: "Gujarat",
-  districtId: "cm0az9s8l00q50cl3db306rtt", // Ahmedabad dummy ID
+  districtId: "cm0az9s8l00q50cl3db306rtt",
   district: "Ahmedabad",
   subDistrictId: "cm0az9saf08v90cl336dta1a9",
   block: "Sanand",
@@ -189,13 +189,12 @@ const defaultReport: FeasibilityReport = {
     "The proposed Dairy & Livestock unit in Sanand block has strong demand parameters and high consumer density within a 7 km radius. Available margin capital of ₹25,000 unlocks a total feasible project setup of ₹2,50,000 under the Term Loan Scheme with 90% agency financing (₹2,25,000 loan at 8.0% interest).",
   marketInsights:
     "Local market analysis reveals underserved demand for packaged quality milk and paneer near regional highway food hubs.",
-  keyActionItems:
-    [
-      "Apply for Term Loan Scheme via local Gramin Bank branch",
-      "Secure supply contract with local dairy collection hub",
-      "Invest ₹40,000 of project cost in solar power backup for chilling",
-      "Utilize the 6-month moratorium period to build stable herd capacity",
-    ],
+  keyActionItems: [
+    "Apply for Term Loan Scheme via local Gramin Bank branch",
+    "Secure supply contract with local dairy collection hub",
+    "Invest ₹40,000 of project cost in solar power backup for chilling",
+    "Utilize the 6-month moratorium period to build stable herd capacity",
+  ],
 };
 
 const VyaparContext = createContext<VyaparContextType | undefined>(undefined);
@@ -208,6 +207,76 @@ export const VyaparProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [swot, setSwot] = useState<SwotAndRisk>(defaultSwot);
   const [report, setReport] = useState<FeasibilityReport>(defaultReport);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const res = await authApiService.getProfile(token);
+          if (res.success && res.data) {
+            setProfile(res.data);
+            
+            // Sync with default inputs based on profile data
+            const newInput = { ...defaultInput };
+            if (res.data.locationDetails?.state) newInput.state = res.data.locationDetails.state;
+            if (res.data.locationDetails?.city) newInput.district = res.data.locationDetails.city;
+            if (res.data.businessDetails?.industry) newInput.category = res.data.businessDetails.industry;
+            
+            try {
+              const assRes = await fetch("http://localhost:3001/api/assessments/latest", {
+                headers: { "Authorization": `Bearer ${token}` }
+              });
+              if (assRes.ok) {
+                const ass = await assRes.json();
+                if (ass && !ass.error) {
+                  if (ass.businessCategoryId) newInput.categoryId = ass.businessCategoryId;
+                  if (ass.businessCategory?.name) newInput.category = ass.businessCategory.name;
+                  if (ass.availableMarginCapital) newInput.marginCapital = ass.availableMarginCapital;
+                  if (ass.stateId) newInput.stateId = ass.stateId;
+                  if (ass.districtId) newInput.districtId = ass.districtId;
+                  if (ass.subDistrictId) newInput.subDistrictId = ass.subDistrictId;
+                  if (ass.villageId) newInput.villageId = ass.villageId;
+                  if (ass.state?.name) newInput.state = ass.state.name;
+                  if (ass.district?.name) newInput.district = ass.district.name;
+                  if (ass.subDistrict?.name) newInput.block = ass.subDistrict.name;
+                  if (ass.village?.name) newInput.village = ass.village.name;
+                }
+              }
+            } catch(e) {
+              console.warn("Failed to fetch latest assessment", e);
+            }
+            
+            setInput(newInput);
+            setFinancials(computeFinancials(newInput.marginCapital));
+          }
+        } catch (error) {
+          console.error("Failed to fetch profile", error);
+        }
+      }
+      setIsProfileLoading(false);
+    };
+
+    fetchProfile();
+    
+    // Also listen for auth changes
+    const handleAuthChange = () => fetchProfile();
+    window.addEventListener('userUpdated', handleAuthChange);
+    return () => window.removeEventListener('userUpdated', handleAuthChange);
+  }, []);
+
+  const updateUserProfile = async (updates: any) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+    const res = await authApiService.updateProfile(token, updates);
+    if (res.success && res.data) {
+      setProfile(res.data);
+      localStorage.setItem('user', JSON.stringify(res.data));
+      window.dispatchEvent(new Event('userUpdated'));
+    }
+  };
 
   const updateInput = (fields: Partial<BusinessInputData>) => {
     setInput((prev) => {
@@ -228,7 +297,6 @@ export const VyaparProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setReport(generated.feasibilityReport);
     } catch (error) {
       console.error("Failed to generate report:", error);
-      // Fallback to defaults or keep existing state
     } finally {
       setIsGenerating(false);
     }
@@ -245,7 +313,10 @@ export const VyaparProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         report,
         updateInput,
         generateReport,
-        isGenerating
+        isGenerating,
+        profile,
+        updateUserProfile,
+        isProfileLoading
       }}
     >
       {children}

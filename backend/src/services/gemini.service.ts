@@ -5,7 +5,7 @@ import { generateAiPrompt } from "../utils/prompts.js";
 export const geminiService = {
   async getAiAdvice(payload: any) {
     // Gather assessment context
-    const assessment = await assessmentService.analyzeFeasibility(payload);
+    const assessment: any = await assessmentService.analyzeFeasibility(payload);
 
     const prompt = generateAiPrompt({
       business: assessment.businessInput,

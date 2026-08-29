@@ -78,7 +78,7 @@ export default function AiAdvisor() {
         description={t("advisor.pageDesc")}
       />
 
-      <div className="space-y-6">
+      <div className="space-y-6 stagger-slide-up">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -102,7 +102,7 @@ export default function AiAdvisor() {
             </div>
             
             {/* Message History */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 space-y-6 stagger-slide-up">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
@@ -177,3 +177,5 @@ export default function AiAdvisor() {
     </>
   );
 }
+
+

@@ -6,11 +6,13 @@ import PageMeta from "../components/common/PageMeta";
 import { useAssessmentAPI } from "../hooks/useAssessmentAPI";
 import CustomSelect from "../components/common/CustomSelect";
 import { supportedLanguages } from "../i18n";
+import { MapPin } from "lucide-react";
 
 export default function BusinessAssessmentForm() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { updateInput } = useVyapar(); // Still useful to sync local context quickly
+  const { input, updateInput, isProfileLoading } = useVyapar();
+  const [hasPrefilled, setHasPrefilled] = useState(false);
   const api = useAssessmentAPI();
 
   const [formData, setFormData] = useState({
@@ -50,9 +52,19 @@ export default function BusinessAssessmentForm() {
     { id: 'mock-7', name: 'Poultry & Fisheries' },
     { id: 'mock-8', name: 'Construction Materials & Hardware' },
     { id: 'mock-9', name: 'Beauty Parlor & Personal Care' },
+    { id: 'mock-10', name: 'Mobile & Electronics Repair' },
+    { id: 'mock-11', name: 'Furniture & Carpentry' },
+    { id: 'mock-12', name: 'Bakery & Sweets Shop' },
+    { id: 'mock-13', name: 'Event Management & Catering' },
+    { id: 'mock-14', name: 'Medical Store / Pharmacy' },
+    { id: 'mock-15', name: 'Logistics & Transport' },
+    { id: 'mock-16', name: 'Printing & Stationery' },
   ];
 
-  const displayCategories = api.categories.length > 0 ? api.categories : defaultCategories;
+  const displayCategories = [
+    ...(api.categories.length > 0 ? api.categories : defaultCategories),
+    { id: 'other', name: 'Other (Add Manually)' }
+  ];
 
   // Handle location cascading
   useEffect(() => {
@@ -92,6 +104,28 @@ export default function BusinessAssessmentForm() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Pre-fill form from context once profile finishes loading
+  useEffect(() => {
+    if (!isProfileLoading && !hasPrefilled) {
+      setFormData(prev => ({
+        ...prev,
+        stateId: input.stateId || prev.stateId,
+        state: input.state || prev.state,
+        districtId: input.districtId || prev.districtId,
+        district: input.district || prev.district,
+        subDistrictId: input.subDistrictId || prev.subDistrictId,
+        block: input.block || prev.block,
+        villageId: input.villageId || prev.villageId,
+        village: input.village || prev.village,
+        categoryId: input.categoryId || prev.categoryId,
+        category: input.category || prev.category,
+        marginCapital: input.marginCapital || 25000,
+        language: input.language || prev.language
+      }));
+      setHasPrefilled(true);
+    }
+  }, [input, isProfileLoading, hasPrefilled]);
 
   // Search Debounce for Villages
   useEffect(() => {
@@ -205,9 +239,15 @@ export default function BusinessAssessmentForm() {
     e.preventDefault();
     setError("");
 
-    if (!formData.categoryId && displayCategories.length > 0) {
-      setFormData(p => ({ ...p, categoryId: displayCategories[0].id, category: displayCategories[0].name }));
+    let finalCategoryId = formData.categoryId;
+    let finalCategoryName = formData.category;
+
+    if (!finalCategoryId && displayCategories.length > 0) {
+      finalCategoryId = displayCategories[0].id;
+      finalCategoryName = displayCategories[0].name;
+      setFormData(p => ({ ...p, categoryId: finalCategoryId, category: finalCategoryName }));
     }
+
     if (!formData.villageId) {
       setError("Please select a valid village/town from the dropdown.");
       return;
@@ -216,38 +256,54 @@ export default function BusinessAssessmentForm() {
     setLoading(true);
 
     try {
-      await api.submitAssessment({
+      let newAssessmentId = "";
+      const res = await api.submitAssessment({
         stateId: formData.stateId || 'mock',
         districtId: formData.districtId || 'mock',
         subDistrictId: formData.subDistrictId || 'mock',
         villageId: formData.villageId || 'mock',
-        businessCategoryId: formData.categoryId || 'mock-category-id',
+        businessCategoryId: finalCategoryId,
         availableMarginCapital: formData.marginCapital,
         preferredLanguage: formData.language
       });
+      if (res && res.id) newAssessmentId = res.id;
       setSubmitted(true);
+      
+      updateInput({
+        assessmentId: newAssessmentId || undefined,
+        stateId: formData.stateId,
+        state: formData.state,
+        districtId: formData.districtId,
+        district: formData.district,
+        subDistrictId: formData.subDistrictId,
+        block: formData.block,
+        villageId: formData.villageId,
+        village: formData.village,
+        categoryId: finalCategoryId,
+        category: finalCategoryName,
+        marginCapital: formData.marginCapital,
+        language: formData.language
+      });
     } catch (err: any) {
       console.warn("Backend API not reachable. Using local fallback.", err);
       setSubmitted(true); 
+      
+      updateInput({
+        stateId: formData.stateId,
+        state: formData.state,
+        districtId: formData.districtId,
+        district: formData.district,
+        subDistrictId: formData.subDistrictId,
+        block: formData.block,
+        villageId: formData.villageId,
+        village: formData.village,
+        categoryId: finalCategoryId,
+        category: finalCategoryName,
+        marginCapital: formData.marginCapital,
+        language: formData.language
+      });
     }
-
-    updateInput({
-      stateId: formData.stateId,
-      state: formData.state,
-      districtId: formData.districtId,
-      district: formData.district,
-      subDistrictId: formData.subDistrictId,
-      block: formData.block,
-      villageId: formData.villageId,
-      village: formData.village,
-      categoryId: formData.categoryId,
-      category: formData.category || displayCategories[0].name,
-      marginCapital: formData.marginCapital,
-      language: formData.language
-    });
-
-    setLoading(false);
-    setTimeout(() => navigate("/"), 1500);
+    navigate("/");
   };
 
   return (
@@ -257,7 +313,7 @@ export default function BusinessAssessmentForm() {
         description={t("assessment.pageDesc")}
       />
 
-      <div className="mx-auto max-w-4xl space-y-6">
+      <div className="mx-auto max-w-4xl space-y-6 stagger-slide-up">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -268,22 +324,7 @@ export default function BusinessAssessmentForm() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">{t("dashboard.language")}:</span>
-            <div className="w-44">
-              <CustomSelect
-                value={i18n.language ? i18n.language.split('-')[0] : 'en'}
-                onChange={(v) => {
-                  i18n.changeLanguage(v);
-                  localStorage.setItem("i18nextLng", v);
-                  const found = supportedLanguages.find(l => l.code === v);
-                  setFormData({ ...formData, language: found?.name || v });
-                }}
-                options={supportedLanguages.map((l) => ({ value: l.code, label: `${l.nativeName} (${l.name})` }))}
-                placeholder="Select Language"
-              />
-            </div>
-          </div>
+          
         </div>
 
         {error && (
@@ -298,9 +339,9 @@ export default function BusinessAssessmentForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 stagger-slide-up">
           {/* Location Section */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="relative z-30 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-3 dark:border-gray-800">
               <div className="flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">1</span>
@@ -314,7 +355,7 @@ export default function BusinessAssessmentForm() {
                 disabled={fetchingLocation}
                 className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition disabled:opacity-50"
               >
-                {fetchingLocation ? t("common.loading") : '📍 Use Live Location'}
+                {fetchingLocation ? t("common.loading") : <><MapPin className="h-3.5 w-3.5" /> Use Live Location</>}
               </button>
             </div>
 
@@ -416,7 +457,7 @@ export default function BusinessAssessmentForm() {
           </div>
 
           {/* Business & Capital Section */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+          <div className="relative z-20 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
             <div className="mb-4 flex items-center gap-2 border-b border-gray-100 pb-3 dark:border-gray-800">
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-50 text-xs font-bold text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">2</span>
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -439,6 +480,19 @@ export default function BusinessAssessmentForm() {
                   options={displayCategories.map(cat => ({ value: cat.id, label: cat.name }))}
                   placeholder={t("assessment.selectCategory")}
                 />
+                
+                {formData.categoryId === 'other' && (
+                  <div className="mt-3">
+                    <input 
+                      type="text" 
+                      required 
+                      value={formData.category === 'Other (Add Manually)' ? '' : formData.category} 
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })} 
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      placeholder="Enter your custom category"
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -522,3 +576,7 @@ export default function BusinessAssessmentForm() {
     </>
   );
 }
+
+
+
+

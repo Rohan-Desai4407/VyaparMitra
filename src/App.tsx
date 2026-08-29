@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { useState, useEffect } from "react";
 import { VyaparProvider } from "./context/VyaparContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 
@@ -11,45 +13,56 @@ import FinancialPlanner from "./pages/FinancialPlanner";
 import SchemeRouter from "./pages/SchemeRouter";
 import RepaymentSchedule from "./pages/RepaymentSchedule";
 import AiAdvisor from "./pages/AiAdvisor";
+import WhatIfSimulator from "./pages/WhatIfSimulator";
 import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
+import Notifications from "./pages/Notifications";
 
 // Other Pages
 import UserProfiles from "./pages/UserProfiles";
 import NotFound from "./pages/OtherPage/NotFound";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
+import ForgotPassword from "./pages/AuthPages/ForgotPassword";
 
 export default function App() {
   return (
     <VyaparProvider>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Dashboard Main Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
-            <Route path="/assessment" element={<BusinessAssessmentForm />} />
-            <Route path="/market-analysis" element={<MarketAnalysis />} />
-            <Route path="/financial-planner" element={<FinancialPlanner />} />
-            <Route path="/scheme-router" element={<SchemeRouter />} />
-            <Route path="/repayment-schedule" element={<RepaymentSchedule />} />
-            <Route path="/ai-advisor" element={<AiAdvisor />} />
-            <Route path="/swot-matrix" element={<SwotMatrix />} />
-            <Route path="/final-report" element={<FinalReport />} />
+      <NotificationProvider>
+        <Router>
+          <ScrollToTop />
+          <Routes>
+            {/* Public Root Route */}
+            <Route path="/" element={<RootRoute />} />
 
-            {/* Profile & Settings */}
-            <Route path="/profile" element={<UserProfiles />} />
-          </Route>
+            {/* Dashboard Main Layout */}
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<Home />} />
+              <Route path="/assessment" element={<BusinessAssessmentForm />} />
+              <Route path="/market-analysis" element={<MarketAnalysis />} />
+              <Route path="/financial-planner" element={<FinancialPlanner />} />
+              <Route path="/scheme-router" element={<SchemeRouter />} />
+              <Route path="/repayment-schedule" element={<RepaymentSchedule />} />
+              <Route path="/ai-advisor" element={<AiAdvisor />} />
+              <Route path="/what-if-simulator" element={<WhatIfSimulator />} />
+              <Route path="/swot-matrix" element={<SwotMatrix />} />
+              <Route path="/final-report" element={<FinalReport />} />
+              <Route path="/notifications" element={<Notifications />} />
 
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+            {/* Auth Layout */}
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+
+            {/* Fallback Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Router>
+      </NotificationProvider>
     </VyaparProvider>
   );
 }

@@ -12,6 +12,7 @@ import te from './locales/te.json';
 import kn from './locales/kn.json';
 import ml from './locales/ml.json';
 import pa from './locales/pa.json';
+import or from './locales/or.json';
 
 export const supportedLanguages = [
   { code: 'en', name: 'English', nativeName: 'English' },
@@ -24,6 +25,7 @@ export const supportedLanguages = [
   { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
   { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം' },
   { code: 'pa', name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'or', name: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
 ];
 
 const resources = {
@@ -37,6 +39,7 @@ const resources = {
   kn: { translation: kn },
   ml: { translation: ml },
   pa: { translation: pa },
+  or: { translation: or },
 };
 
 const getInitialLanguage = (): string => {

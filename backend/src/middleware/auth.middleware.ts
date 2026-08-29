@@ -4,10 +4,7 @@ import { config } from "../config/env.js";
 import { sendError } from "../utils/response.js";
 
 export interface AuthenticatedRequest extends Request {
-  user?: {
-    userId: string;
-    email: string;
-  };
+  user?: any;
 }
 
 export const authenticateJwt = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

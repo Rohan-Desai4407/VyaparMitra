@@ -215,6 +215,7 @@ model Assessment {
   businessCategory BusinessCategory @relation(fields: [businessCategoryId], references: [id])
   
   result AssessmentResult?
+  swot             SwotAnalysis?
 }
 
 model AssessmentResult {
@@ -277,4 +278,24 @@ model RepaymentScheduleItem {
   status              String   @default("SCHEDULED") // e.g., MORATORIUM, ACTIVE
 
   schedule            RepaymentSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+}
+
+model SwotAnalysis {
+  id               String   @id @default(uuid())
+  assessmentId     String   @unique
+  inputHash        String
+  strengths        String   // Stored as JSON string
+  weaknesses       String   // Stored as JSON string
+  opportunities    String   // Stored as JSON string
+  threats          String   // Stored as JSON string
+  recommendations  String   // Stored as JSON string
+  riskFactors      String   // Stored as JSON string
+  overallRiskScore Int
+  overallAssessment String?
+  sources          String   // Stored as JSON string
+  modelName        String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 }

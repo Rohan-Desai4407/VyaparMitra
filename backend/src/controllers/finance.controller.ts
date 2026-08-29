@@ -12,4 +12,13 @@ export const financeController = {
       return sendError(res, (error as Error).message, 400);
     }
   },
+
+  async simulateWhatIf(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = financeService.simulateWhatIf(req.body);
+      return sendSuccess(res, result, "What-if financial simulation completed successfully");
+    } catch (error) {
+      return sendError(res, (error as Error).message, 400);
+    }
+  },
 };

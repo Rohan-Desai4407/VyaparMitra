@@ -27,6 +27,7 @@ export default function SignInForm() {
       if (res.success && res.data?.token) {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
+          window.dispatchEvent(new Event('userUpdated'));
         setStatusMsg({ text: "Signed in with Google successfully!", isError: false });
         setTimeout(() => navigate("/"), 1000);
       } else {
@@ -59,6 +60,7 @@ export default function SignInForm() {
       if (data.success && data.data?.token) {
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
+          window.dispatchEvent(new Event('userUpdated'));
         setStatusMsg({ text: "Logged in successfully!", isError: false });
         setTimeout(() => navigate("/"), 1000);
       } else {

@@ -62,7 +62,7 @@ export default function FinalReport() {
         description={t("report.pageDesc")}
       />
 
-      <div className="space-y-6 print:m-0 print:p-0 text-sm">
+      <div className="space-y-6 print:m-0 print:p-0 text-sm stagger-slide-up">
         {/* Print & Action Bar */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between print:hidden">
           <div>
@@ -104,7 +104,7 @@ export default function FinalReport() {
         )}
 
         {/* Report Card Header */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900 space-y-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 dark:border-gray-800 dark:bg-gray-900 space-y-6 stagger-slide-up">
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-6 dark:border-gray-800 gap-4">
             <div>
@@ -305,3 +305,5 @@ export default function FinalReport() {
     </>
   );
 }
+
+

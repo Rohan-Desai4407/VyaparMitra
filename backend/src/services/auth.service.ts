@@ -14,11 +14,39 @@ export const authService = {
   async register(name: string, email: string, password: string, preferredLanguage: string = "en") {
     const existingUser = await User.findOne({ email }).catch(() => inMemoryUsers.get(email));
     if (existingUser) {
+      if (!existingUser.isVerified) {
+        const passwordHash = await bcrypt.hash(password, 10);
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+        const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        
+        existingUser.name = name;
+        existingUser.passwordHash = passwordHash;
+        existingUser.verificationToken = verificationToken;
+        existingUser.verificationTokenExpires = verificationTokenExpires;
+        
+        if (typeof existingUser.save === 'function') {
+          await existingUser.save();
+        }
+        
+        await emailService.sendVerificationEmail(email, verificationToken);
+        
+        const token = jwt.sign({ userId: existingUser._id ? existingUser._id.toString() : 'temp', email: existingUser.email }, config.jwtSecret, { expiresIn: "7d" });
+        return {
+          user: {
+            id: existingUser._id ? existingUser._id.toString() : 'temp',
+            name: existingUser.name,
+            email: existingUser.email,
+            preferredLanguage: existingUser.preferredLanguage,
+            isVerified: existingUser.isVerified,
+          },
+          token,
+        };
+      }
       throw new Error("User with this email already exists.");
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
     let newUser: any;
@@ -184,7 +212,19 @@ export const authService = {
       await user.save();
     }
 
-    return { message: "Email verified successfully! You can now log in." };
+    
+    const jwtToken = jwt.sign({ userId: user._id, email: user.email }, config.jwtSecret, { expiresIn: "7d" });
+    return { 
+      message: "Email verified successfully! You can now log in.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        preferredLanguage: user.preferredLanguage,
+        isVerified: user.isVerified
+      },
+      token: jwtToken
+    };
   },
 
   async resendVerification(email: string) {
@@ -197,7 +237,7 @@ export const authService = {
       throw new Error("This account is already verified.");
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     user.verificationToken = verificationToken;
@@ -244,7 +284,7 @@ export const authService = {
       return { message: "If an account with that email exists, password reset instructions have been sent." };
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
     const resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     user.resetPasswordToken = resetToken;
@@ -289,24 +329,108 @@ export const authService = {
 
     if (typeof user.save === "function") {
       await user.save();
-    }
-
-    return { message: "Password updated successfully. You can now log in with your new password." };
+    };
   },
 
   async getProfile(userId: string) {
-    const user: any = await User.findById(userId).catch(() => null);
+    const user: any = await User.findById(userId).lean().catch(() => null);
     if (user) {
-      return { id: user._id, name: user.name, email: user.email, preferredLanguage: user.preferredLanguage, isVerified: user.isVerified, picture: user.picture };
+      return { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        preferredLanguage: user.preferredLanguage, 
+        isVerified: user.isVerified, 
+        picture: user.picture,
+        personalDetails: user.personalDetails || {},
+        businessDetails: user.businessDetails || {},
+        locationDetails: user.locationDetails || {},
+        financialDetails: user.financialDetails || {},
+        kycDetails: user.kycDetails || {},
+        preferences: user.preferences || {},
+        documents: user.documents || []
+      };
+    }
+    // Check in-memory
+    const memoryUser = Array.from(inMemoryUsers.values()).find(u => u._id === userId);
+    if (memoryUser) {
+      return {
+        id: memoryUser._id,
+        name: memoryUser.name,
+        email: memoryUser.email,
+        preferredLanguage: memoryUser.preferredLanguage,
+        isVerified: memoryUser.isVerified,
+        picture: memoryUser.picture,
+        personalDetails: memoryUser.personalDetails || {},
+        businessDetails: memoryUser.businessDetails || {},
+        locationDetails: memoryUser.locationDetails || {},
+        financialDetails: memoryUser.financialDetails || {},
+        kycDetails: memoryUser.kycDetails || {},
+        preferences: memoryUser.preferences || {},
+        documents: memoryUser.documents || []
+      };
     }
     return { id: userId, name: "Demo Entrepreneur", email: "user@vyaparmitra.in", preferredLanguage: "en", isVerified: true };
   },
 
-  async updateProfile(userId: string, updates: { name?: string; preferredLanguage?: string }) {
-    const user: any = await User.findByIdAndUpdate(userId, updates, { new: true }).catch(() => null);
+  async updateProfile(userId: string, updates: any) {
+    // We do a manual fetch, merge, and save to handle nested objects properly
+    let user: any = await User.findById(userId).catch(() => null);
+    
     if (user) {
-      return { id: user._id, name: user.name, email: user.email, preferredLanguage: user.preferredLanguage, isVerified: user.isVerified, picture: user.picture };
+      // Merge top level
+      if (updates.name !== undefined) user.name = updates.name;
+      if (updates.preferredLanguage !== undefined) user.preferredLanguage = updates.preferredLanguage;
+      if (updates.picture !== undefined) user.picture = updates.picture;
+
+      // Merge nested
+      const mergeNested = (source: any, target: any) => {
+          if (!source) return target || {};
+          if (!target) return source;
+          // sanitize source
+          for (const key in source) {
+            if (source[key] === "" || source[key] === null) {
+               delete source[key];
+            }
+          }
+          return { ...target, ...source };
+        };
+        
+      user.personalDetails = mergeNested(updates.personalDetails, user.personalDetails?.toObject ? user.personalDetails.toObject() : user.personalDetails);
+      user.businessDetails = mergeNested(updates.businessDetails, user.businessDetails?.toObject ? user.businessDetails.toObject() : user.businessDetails);
+      user.locationDetails = mergeNested(updates.locationDetails, user.locationDetails?.toObject ? user.locationDetails.toObject() : user.locationDetails);
+      user.financialDetails = mergeNested(updates.financialDetails, user.financialDetails?.toObject ? user.financialDetails.toObject() : user.financialDetails);
+      user.kycDetails = mergeNested(updates.kycDetails, user.kycDetails?.toObject ? user.kycDetails.toObject() : user.kycDetails);
+      user.preferences = mergeNested(updates.preferences, user.preferences?.toObject ? user.preferences.toObject() : user.preferences);
+
+      if (updates.documents) {
+        user.documents = updates.documents;
+      }
+
+      if (typeof user.save === "function") {
+        await user.save();
+      }
+      return this.getProfile(userId);
     }
+    
+    // In-memory update
+    const memoryUser = Array.from(inMemoryUsers.values()).find(u => u._id === userId);
+    if (memoryUser) {
+      if (updates.name !== undefined) memoryUser.name = updates.name;
+      if (updates.preferredLanguage !== undefined) memoryUser.preferredLanguage = updates.preferredLanguage;
+      if (updates.picture !== undefined) memoryUser.picture = updates.picture;
+
+      memoryUser.personalDetails = { ...(memoryUser.personalDetails || {}), ...(updates.personalDetails || {}) };
+      memoryUser.businessDetails = { ...(memoryUser.businessDetails || {}), ...(updates.businessDetails || {}) };
+      memoryUser.locationDetails = { ...(memoryUser.locationDetails || {}), ...(updates.locationDetails || {}) };
+      memoryUser.financialDetails = { ...(memoryUser.financialDetails || {}), ...(updates.financialDetails || {}) };
+      memoryUser.kycDetails = { ...(memoryUser.kycDetails || {}), ...(updates.kycDetails || {}) };
+      memoryUser.preferences = { ...(memoryUser.preferences || {}), ...(updates.preferences || {}) };
+      if (updates.documents) memoryUser.documents = updates.documents;
+
+      return this.getProfile(userId);
+    }
+
     return { id: userId, name: updates.name || "Demo Entrepreneur", email: "user@vyaparmitra.in", preferredLanguage: updates.preferredLanguage || "en", isVerified: true };
   },
 };

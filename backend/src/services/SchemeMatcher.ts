@@ -27,7 +27,7 @@ export class SchemeMatcher {
       score += 30;
 
       // Rural eligibility
-      if (params.isRural && scheme.ruralEligible) {
+      if (params.isRural && (scheme as any).ruralEligible) {
         score += 20;
       } else if (!params.isRural) {
         // Assume urban
@@ -35,7 +35,7 @@ export class SchemeMatcher {
       }
 
       // Project cost range
-      if (params.projectCost.toNumber() >= scheme.minProjectCost && params.projectCost.toNumber() <= scheme.maxProjectCost) {
+      if (params.projectCost.toNumber() >= ((scheme as any).minProjectCost || 0) && params.projectCost.toNumber() <= ((scheme as any).maxProjectCost || Infinity)) {
         score += 25;
       }
 
@@ -50,7 +50,7 @@ export class SchemeMatcher {
 
     if (!bestScheme) {
       // Fallback to a default if no specific category match
-      const defaultScheme = await prisma.scheme.findFirst({
+      const defaultScheme = await prisma.governmentScheme.findFirst({
         where: { schemeCode: 'DEFAULT_TERM_LOAN' }
       });
       if (defaultScheme) {

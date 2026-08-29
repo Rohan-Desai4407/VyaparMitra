@@ -25,24 +25,22 @@ class EmailService {
   }
 
   public async sendVerificationEmail(toEmail: string, token: string): Promise<boolean> {
-    const verificationUrl = `${config.frontendUrl}/verify-email?token=${token}`;
     
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
         <h2 style="color: #2563eb;">Verify Your VyaparMitra Account</h2>
-        <p>Thank you for joining VyaparMitra! Please click the button below to verify your email address and activate your account:</p>
+        <p>Thank you for joining VyaparMitra! Please use the following OTP to verify your email address:</p>
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+          <span style="background-color: #f3f4f6; color: #111827; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 24px; letter-spacing: 4px; border: 1px dashed #d1d5db;">${token}</span>
         </div>
-        <p>Or copy and paste this link into your browser:</p>
-        <p style="word-break: break-all; color: #4b5563;"><a href="${verificationUrl}">${verificationUrl}</a></p>
-        <p>This verification link will expire in 24 hours.</p>
+        <p>This OTP will expire in 24 hours.</p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;" />
         <p style="font-size: 12px; color: #6b7280;">If you did not request this email, please ignore it.</p>
       </div>
     `;
 
-    return this.sendMail(toEmail, "Verify Your VyaparMitra Account", html, `Verification Link: ${verificationUrl}`);
+
+    return this.sendMail(toEmail, "Verify Your VyaparMitra Account", html, `Verification OTP: ${token}`);
   }
 
   public async sendPasswordResetEmail(toEmail: string, token: string): Promise<boolean> {

@@ -3,9 +3,11 @@ import { useVyapar } from '../context/VyaparContext';
 import { useMarketIntelligence } from './useMarketIntelligence';
 import { useFinancialSchemes } from './useFinancialSchemes';
 import { useRepaymentSchedule } from './useRepaymentSchedule';
+import { useSwotAnalysis } from './useSwotAnalysis';
 
 export function useFinalFeasibilityReport() {
-  const { input, swot } = useVyapar();
+  const { input } = useVyapar();
+  const { data: swotData, loading: swotLoading, refetch: refetchSwot } = useSwotAnalysis(input.assessmentId);
 
   // Load from upstream hooks
   const { data: marketData, loading: marketLoading, error: marketError, refetch: refetchMarket } = useMarketIntelligence(10);
@@ -38,8 +40,7 @@ export function useFinalFeasibilityReport() {
     let fundingScore = fin ? (fin.userContribution / fin.projectCost) * 100 : 50;
     if (fundingScore > 100) fundingScore = 100;
     
-    let riskScore = 80; // from SWOT logic
-    if ((swot?.threats?.length || 0) > 3) riskScore -= 20;
+    let riskScore = swotData ? 100 - swotData.overallRiskScore : 50; // Inverse of risk factor
 
     const weights = {
       market: 0.35,
@@ -79,7 +80,7 @@ export function useFinalFeasibilityReport() {
       financial: financialData?.recommendedScheme,
       market: marketData,
       repayment: repaymentData,
-      swot: swot,
+      swot: swotData || { strengths: [], weaknesses: [], opportunities: [], threats: [] },
       scoring: {
         overall: overallScore || 0,
         verdict,
@@ -105,10 +106,10 @@ export function useFinalFeasibilityReport() {
       ]
     };
 
-  }, [input, swot, marketData, financialData, repaymentData, loading]);
+  }, [input, swotData, marketData, financialData, repaymentData, loading]);
 
   const refetchAll = async () => {
-    await Promise.all([refetchMarket(), refetchFinancial(), refetchRepayment()]);
+    await Promise.all([refetchMarket(), refetchFinancial(), refetchRepayment(), refetchSwot()]);
   };
 
   return { report, loading, error: marketError || financialError || repaymentError, refetchAll };

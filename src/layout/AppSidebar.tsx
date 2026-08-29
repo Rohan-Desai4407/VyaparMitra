@@ -1,22 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
+import { Bell } from "lucide-react";
 
 // Assume these icons are imported from an icon library
+import { Sliders } from "lucide-react";
 import {
-  BoxCubeIcon,
   CalenderIcon,
   ChatIcon,
   ChevronDownIcon,
   DollarLineIcon,
   GridIcon,
-  HorizontaLDots,
   ListIcon,
   PageIcon,
   PieChartIcon,
   TableIcon,
-  UserCircleIcon,
-} from "../icons";
+  } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {
@@ -35,7 +34,7 @@ const AppSidebar: React.FC = () => {
     {
       icon: <GridIcon />,
       name: t("nav.dashboard"),
-      path: "/",
+      path: "/dashboard",
     },
     {
       icon: <ListIcon />,
@@ -68,9 +67,19 @@ const AppSidebar: React.FC = () => {
       path: "/ai-advisor",
     },
     {
+      icon: <Sliders className="w-5 h-5" />,
+      name: t("nav.whatIfSimulator", "What-if Simulator"),
+      path: "/what-if-simulator",
+    },
+    {
       icon: <PageIcon />,
       name: t("nav.finalReport"),
       path: "/final-report",
+    },
+    {
+      icon: <Bell className="w-5 h-5" />,
+      name: t("nav.notifications", "Notifications"),
+      path: "/notifications",
     },
   ];
 
@@ -324,21 +333,8 @@ const AppSidebar: React.FC = () => {
         <nav className="mb-6">
           <div className="flex flex-col gap-4">
             <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  t("common.menu")
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
               {renderMenuItems(navItems, "main")}
-              </div>
+            </div>
             </div>
           </nav>
         </div>

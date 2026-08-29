@@ -3,9 +3,15 @@ import { useVyapar } from '../context/VyaparContext';
 
 export interface MarketIntelligenceData {
   consumer: any;
+  consumerError?: string;
   competitor: any;
+  competitorError?: string;
+  heatmapPoints?: {lat: number, lng: number, intensity: number}[];
   purchasing: any;
   pricing: any;
+    growth?: any;
+    centerCoords?: any;
+    
   distribution: any;
   opportunities: any;
 }
@@ -33,62 +39,18 @@ export function useMarketIntelligence(radius: number) {
         throw new Error(json?.error || "Failed to fetch market intelligence");
       }
       const json = await res.json();
-      setData(json);
+      if (json.consumerError || json.competitorError) {
+        // Just store the data, we will let frontend render the specific errors!
+        setData(json);
+      } else {
+        setData(json);
+      }
     } catch (err: any) {
       console.error(err);
-      setError("Some local data is unavailable. Regional benchmarks are being used for affected metrics.");
+      setError(err.message || "Market data unavailable");
       
       // Fallback generator in frontend if backend completely fails
-      setData({
-        consumer: {
-          consumerBase: Math.round(18500 * (radius / 10) * (radius / 10)),
-          source: "Regional benchmark",
-          confidence: "Low",
-          dataAvailable: true
-        },
-        competitor: {
-          level: radius > 10 ? "Medium" : "Low",
-          count: Math.round(4 * (radius / 10)),
-          source: "Regional benchmark",
-          confidence: "Low",
-          dataAvailable: true
-        },
-        purchasing: {
-          index: "Moderate",
-          score: 65,
-          source: "Regional benchmark",
-          confidence: "Low",
-          dataAvailable: true
-        },
-        pricing: {
-          recommendedRange: "₹50 - ₹100",
-          margin: "15-20%",
-          source: "Category benchmark",
-          confidence: "Low",
-          dataAvailable: true
-        },
-        distribution: {
-          channels: [
-            { name: "Local Wholesale", demand: "High", reason: "Standard supply channel" },
-            { name: "Direct to Retail", demand: "Medium", reason: "Standard retail" }
-          ],
-          source: "Category benchmark",
-          confidence: "Low",
-          dataAvailable: true
-        },
-        opportunities: {
-          recommendation: {
-            name: "Standard Setup",
-            score: 70,
-            capitalFit: input.marginCapital >= 50000 ? "Fits Current Capital" : "Needs Additional Financing",
-            why: "Standard opportunity based on category benchmark."
-          },
-          opportunities: [],
-          source: "Model estimate",
-          confidence: "Low",
-          dataAvailable: true
-        }
-      });
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -96,7 +58,7 @@ export function useMarketIntelligence(radius: number) {
 
   useEffect(() => {
     fetchIntelligence();
-  }, [input.stateId, input.districtId, input.categoryId, input.marginCapital, radius]);
+  }, [input.stateId, input.districtId, input.subDistrictId, input.villageId, input.categoryId, input.category, input.marginCapital, radius]);
 
   return { data, loading, error, refetch: fetchIntelligence };
 }

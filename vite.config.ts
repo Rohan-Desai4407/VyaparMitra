@@ -16,8 +16,18 @@ export default defineConfig({
     }),
   ],
   server: {
+    port: 5173,
     watch: {
-      ignored: ['**/server/**']
+      ignored: [
+        '**/backend/**',
+        '**/server/**',
+        '**/data/**',
+        '**/scripts/**',
+        '**/*.db',
+        '**/*.sqlite',
+        '**/*.db-journal',
+        '**/.git/**'
+      ]
     }
   }
 });
