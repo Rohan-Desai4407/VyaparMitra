@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock, CheckCircle2, Map, Shield } from 'lucide-react';
 import { LanguageSelector } from '../../components/common/LanguageSelector';
 import { ThemeToggleButton } from '../../components/common/ThemeToggleButton';
+import { authApiService } from '../../services/apiServices';
+
+import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleAccountModal } from '../../components/auth/GoogleAccountModal';
 
 export default function SignIn() {
   const { t } = useTranslation();
@@ -12,6 +16,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('admin@vyaparmitra.in');
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
 
   useEffect(() => {
     // Clear session when arriving at SignIn page
@@ -20,17 +25,83 @@ export default function SignIn() {
     window.dispatchEvent(new Event("storage"));
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const googleLoginTrigger = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        const userInfo = await userInfoRes.json();
+        
+        const googleUser = {
+          name: userInfo.name || "Google User",
+          email: userInfo.email,
+          picture: userInfo.picture,
+          authProvider: "Google",
+        };
+
+        try {
+          await authApiService.googleLogin(tokenResponse.access_token);
+        } catch (e) {}
+
+        localStorage.setItem("token", tokenResponse.access_token || `google_token_${Date.now()}`);
+        localStorage.setItem("user", JSON.stringify(googleUser));
+        window.dispatchEvent(new Event("storage"));
+        navigate('/dashboard');
+      } catch (err) {
+        setIsGoogleModalOpen(true);
+      }
+    },
+    onError: () => {
+      setIsGoogleModalOpen(true);
+    },
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError(t('auth.enterCredentials'));
       return;
     }
     setError('');
-    localStorage.setItem("token", "mock-token");
-    localStorage.setItem("user", JSON.stringify({ name: "Musharof Chowdhury", email: email }));
-    window.dispatchEvent(new Event("storage"));
-    navigate('/');
+
+    try {
+      const res = await authApiService.login({ email: email.trim(), password });
+      if (res.success && res.data) {
+        const token = res.data.token || "mock-token";
+        const userData = res.data.user || { name: "Musharof Chowdhury", email: email };
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(userData));
+        window.dispatchEvent(new Event("storage"));
+        navigate('/dashboard');
+      } else {
+        // Fallback demo login
+        localStorage.setItem("token", "mock-token");
+        localStorage.setItem("user", JSON.stringify({ name: "Musharof Chowdhury", email: email }));
+        window.dispatchEvent(new Event("storage"));
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      localStorage.setItem("token", "mock-token");
+      localStorage.setItem("user", JSON.stringify({ name: "Musharof Chowdhury", email: email }));
+      window.dispatchEvent(new Event("storage"));
+      navigate('/dashboard');
+    }
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    if (provider === 'Google') {
+      try {
+        googleLoginTrigger();
+      } catch (e) {
+        setIsGoogleModalOpen(true);
+      }
+    } else {
+      localStorage.setItem("token", `mobile_token_${Date.now()}`);
+      localStorage.setItem("user", JSON.stringify({ name: `Entrepreneur (${provider})`, email: "entrepreneur@vyaparmitra.in" }));
+      window.dispatchEvent(new Event("storage"));
+      navigate('/dashboard');
+    }
   };
 
   return (
@@ -175,11 +246,11 @@ export default function SignIn() {
                 </div>
               </div>
               <div className="space-y-3">
-                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
+                <button type="button" onClick={() => handleSocialLogin('Google')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   {t('auth.continueWithGoogle')}
                 </button>
-                <button type="button" onClick={() => navigate('/')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
+                <button type="button" onClick={() => handleSocialLogin('Mobile OTP')} className="group w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-[13px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <Map size={18} className="text-gray-500 dark:text-gray-400 group-hover:text-green-600 dark:group-hover:text-emerald-400 transition-all" strokeWidth={2.5} />
                   {t('auth.continueWithMobile')}
                 </button>
@@ -220,6 +291,11 @@ export default function SignIn() {
         </div>
       </div>
 
+      {/* Google Account Modal */}
+      <GoogleAccountModal
+        isOpen={isGoogleModalOpen}
+        onClose={() => setIsGoogleModalOpen(false)}
+      />
     </div>
   );
 }

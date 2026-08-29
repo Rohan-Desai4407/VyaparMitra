@@ -9,7 +9,9 @@ import App from "./App.tsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "your_google_client_id.apps.googleusercontent.com";
+const googleClientId =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  "309270348427-2edbuvphstl51a1v4es85d3m7vh210la.apps.googleusercontent.com";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
