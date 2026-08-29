@@ -269,6 +269,9 @@ export default function SignIn() {
       <GoogleAccountModal
         isOpen={isGoogleModalOpen}
         onClose={() => setIsGoogleModalOpen(false)}
+        onSelectAccount={(account) => {
+          navigate('/signup', { state: { googleAccount: account } });
+        }}
       />
     </div>
   );

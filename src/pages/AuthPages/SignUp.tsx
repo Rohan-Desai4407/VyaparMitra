@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle2, Shield } from 'lucide-react';
 import { LanguageSelector } from '../../components/common/LanguageSelector';
-import { useNavigate } from 'react-router';
+import { GoogleAccountModal } from '../../components/auth/GoogleAccountModal';
 
 export default function SignUp() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -16,10 +17,28 @@ export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
-  
+
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isGoogleModalOpen, setIsGoogleModalOpen] = useState(false);
+
+  const handleGoogleAccountSelected = (account: { name: string; email: string; avatar?: string }) => {
+    const parts = (account.name || '').trim().split(' ');
+    const fName = parts[0] || '';
+    const lName = parts.slice(1).join(' ') || '';
+
+    setFirstName(fName);
+    setLastName(lName);
+    setEmail(account.email || '');
+    setStatusMsg({ text: `✓ Connected Google account (${account.email}). Please enter your mobile number and password to complete registration.`, isError: false });
+  };
+
+  useEffect(() => {
+    if (location.state?.googleAccount) {
+      handleGoogleAccountSelected(location.state.googleAccount);
+    }
+  }, [location.state]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,6 +400,7 @@ export default function SignUp() {
       <GoogleAccountModal
         isOpen={isGoogleModalOpen}
         onClose={() => setIsGoogleModalOpen(false)}
+        onSelectAccount={handleGoogleAccountSelected}
       />
     </div>
   );
