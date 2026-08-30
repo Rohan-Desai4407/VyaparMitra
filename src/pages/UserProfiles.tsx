@@ -53,7 +53,7 @@ export default function UserProfiles() {
   };
 
 
-  useEffect(() => {
+  const resetForm = () => {
     if (profile && Object.keys(profile).length > 0) {
       setFormData(profile);
     } else {
@@ -62,11 +62,18 @@ export default function UserProfiles() {
         if (storedUser) {
           const user = JSON.parse(storedUser);
           setFormData({ name: user.name || "", email: user.email || "" });
+        } else {
+          setFormData({});
         }
-      } catch (e) {}
+      } catch (e) {
+        setFormData({});
+      }
     }
-  }, [profile]);
+  };
 
+  useEffect(() => {
+    resetForm();
+  }, [profile]);
   
   const handleLiveLocation = () => {
     if (!navigator.geolocation) {
@@ -93,13 +100,13 @@ export default function UserProfiles() {
           setFormData((prev: any) => ({
             ...prev,
             locationDetails: {
-              ...(prev.locationDetails || {}),
-              addressLine1: addressLine1 || prev.locationDetails?.addressLine1 || "",
-              state: state || prev.locationDetails?.state || "",
-              district: district || prev.locationDetails?.district || "",
-              taluka: taluka || prev.locationDetails?.taluka || "",
-              village: village || prev.locationDetails?.village || "",
-              pincode: pincode || prev.locationDetails?.pincode || ""
+              ...(prev?.locationDetails || {}),
+              addressLine1: addressLine1 || prev?.locationDetails?.addressLine1 || "",
+              state: state || prev?.locationDetails?.state || "",
+              district: district || prev?.locationDetails?.district || "",
+              taluka: taluka || prev?.locationDetails?.taluka || "",
+              village: village || prev?.locationDetails?.village || "",
+              pincode: pincode || prev?.locationDetails?.pincode || ""
             }
           }));
         }
@@ -144,7 +151,7 @@ export default function UserProfiles() {
       setFormData((prev: any) => ({
         ...prev,
         [section]: {
-          ...(prev[section] || {}),
+          ...(prev?.[section] || {}),
           [field]: value
         }
       }));
@@ -152,6 +159,7 @@ export default function UserProfiles() {
   };
 
   const calculateProgress = () => {
+    if (!formData) return 0;
     let filled = 0;
     let total = 8;
     if (formData.name) filled++;
@@ -165,7 +173,7 @@ export default function UserProfiles() {
   };
 
   const renderInput = (section: string, field: string, label: string, type = "text") => {
-    const val = section ? (formData[section]?.[field] || "") : (formData[field] || "");
+    const val = section ? (formData?.[section]?.[field] || "") : (formData?.[field] || "");
     return (
       <div className="flex flex-col gap-1">
         <Label>{label}</Label>
@@ -180,7 +188,7 @@ export default function UserProfiles() {
   };
 
   const renderCheckbox = (section: string, field: string, label: string) => {
-    const val = section ? (formData[section]?.[field] || false) : (formData[field] || false);
+    const val = section ? (formData?.[section]?.[field] || false) : (formData?.[field] || false);
     return (
       <div className="flex items-center gap-3">
         <input 
@@ -253,7 +261,7 @@ export default function UserProfiles() {
           ) : (
             <div className="flex gap-3">
               <Button size="sm" variant="outline" onClick={() => {
-                setFormData(profile);
+                resetForm();
                 setIsEditing(false);
               }}>Cancel</Button>
               <Button size="sm" onClick={handleSave} disabled={saving}>

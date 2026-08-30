@@ -13,6 +13,10 @@ export interface IUser extends Document {
   resetPasswordToken?: string | null;
   resetPasswordExpires?: Date | null;
   createdAt: Date;
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  status: 'ACTIVE' | 'DISABLED';
+  permissions: string[];
+  lastActive?: Date;
   
   personalDetails?: {
     firstName?: string;
@@ -83,6 +87,10 @@ const UserSchema = new Schema<IUser>({
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
+  role: { type: String, enum: ['USER', 'ADMIN', 'SUPER_ADMIN'], default: 'USER' },
+  status: { type: String, enum: ['ACTIVE', 'DISABLED'], default: 'ACTIVE' },
+  permissions: { type: [String], default: [] },
+  lastActive: { type: Date, default: Date.now },
 
   personalDetails: {
     firstName: { type: String },

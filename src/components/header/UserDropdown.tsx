@@ -17,6 +17,7 @@ export default function UserDropdown() {
 
   const [userName, setUserName] = useState<string>(initialUser?.name || 'Entrepreneur');
   const [userEmail, setUserEmail] = useState<string>(initialUser?.email || 'user@vyaparmitra.in');
+  const [userRole, setUserRole] = useState<string>(initialUser?.role || 'USER');
   const [completionValue, setCompletionValue] = useState<number>(0);
 
   const handleSignOut = () => {
@@ -55,6 +56,10 @@ export default function UserDropdown() {
           const parsed = JSON.parse(savedUser);
           if (parsed.name) setUserName(parsed.name);
           if (parsed.email) setUserEmail(parsed.email);
+          if (parsed.role) setUserRole(parsed.role);
+          if (parsed.email === "admin@vyaparmitra.in" || parsed.email?.includes("admin")) {
+            setUserRole("SUPER_ADMIN");
+          }
           if (parsed.avatar || parsed.picture) {
             const img = parsed.avatar || parsed.picture;
             setAvatarSrc(img);
@@ -87,6 +92,8 @@ export default function UserDropdown() {
   }
 
   const firstName = userName.trim().split(" ")[0] || "User";
+
+  const isAdminUser = userRole === "ADMIN" || userRole === "SUPER_ADMIN" || userEmail === "admin@vyaparmitra.in" || userEmail.includes("admin");
 
   return (
     <div className="relative">
@@ -170,6 +177,33 @@ export default function UserDropdown() {
               </svg>
               Support
             </DropdownItem>
+          </li>
+          {(userRole === "ADMIN" || userRole === "SUPER_ADMIN" || userEmail === "admin@vyaparmitra.in") && (
+            <li>
+              <DropdownItem
+                onItemClick={closeDropdown}
+                tag="a"
+                to="/admin"
+                className="flex items-center gap-3 px-3 py-2 font-semibold text-emerald-600 rounded-lg group text-theme-sm hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+              >
+                Admin Panel
+              </DropdownItem>
+            </li>
+          )}
+          <li>
+            <button
+              onClick={() => {
+                closeDropdown();
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("userAvatar");
+                window.dispatchEvent(new Event("userUpdated"));
+                navigate("/");
+              }}
+              className="flex w-full items-center gap-3 px-3 py-2 font-medium text-red-600 rounded-lg group text-theme-sm hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+            >
+              Sign Out
+            </button>
           </li>
         </ul>
 

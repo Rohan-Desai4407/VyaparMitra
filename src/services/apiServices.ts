@@ -314,5 +314,91 @@ export const authApiService = {
   },
 };
 
+export const adminApiService = {
+  async getStats(token: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/stats`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.json();
+  },
+
+  async getUsers(token: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/users`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.json();
+  },
+
+  async updateUserStatus(token: string, userId: string, status: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify({ status })
+    });
+    return res.json();
+  },
+
+  async getAdmins(token: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/admins`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.json();
+  },
+
+  async assignAdmin(token: string, payload: { userId: string; role: string; permissions: string[] }) {
+    const res = await fetch(`${API_BASE_URL}/admin/admins/assign`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  },
+
+  async updatePermissions(token: string, adminId: string, permissions: string[]) {
+    const res = await fetch(`${API_BASE_URL}/admin/admins/${adminId}/permissions`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify({ permissions })
+    });
+    return res.json();
+  },
+
+  async updateAdminStatus(token: string, adminId: string, status: "ACTIVE" | "DISABLED") {
+    const res = await fetch(`${API_BASE_URL}/admin/admins/${adminId}/status`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}` 
+      },
+      body: JSON.stringify({ status })
+    });
+    return res.json();
+  },
+
+  async revokeAdmin(token: string, adminId: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/admins/${adminId}/revoke`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.json();
+  },
+
+  async getAuditLogs(token: string) {
+    const res = await fetch(`${API_BASE_URL}/admin/audit-logs`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.json();
+  }
+};
+
 
 
