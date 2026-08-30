@@ -8,13 +8,28 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String?
+  role        String   @default("USER") // USER, ADMIN, SUPER_ADMIN
+  status      String   @default("ACTIVE") // ACTIVE, DISABLED
+  permissions String   @default("[]") // JSON string array of permission keys
+  lastActive  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   assessments Assessment[]
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  actorName  String
+  actorEmail String
+  action     String
+  target     String?
+  details    String?
+  timestamp  DateTime @default(now())
 }
 
 model State {
