@@ -17,6 +17,7 @@ import WhatIfSimulator from "./pages/WhatIfSimulator";
 import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
 import Notifications from "./pages/Notifications";
+import About from "./pages/About";
 
 // Other Pages
 import UserProfiles from "./pages/UserProfiles";
@@ -71,6 +72,7 @@ export default function App() {
               <Route path="/swot-matrix" element={<SwotMatrix />} />
               <Route path="/final-report" element={<FinalReport />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/about" element={<About />} />
               <Route path="/profile" element={<UserProfiles />} />
             </Route>
 

@@ -4,6 +4,7 @@ import { useLocation } from "react-router";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import { aiAdvisorService } from "../services/aiAdvisorService";
+import { Bot } from "lucide-react";
 
 interface ChatMessage {
   sender: "user" | "ai";
@@ -105,7 +106,7 @@ export default function AiAdvisor() {
           <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
             <div className="border-b border-gray-100 dark:border-gray-800 p-4 bg-gray-50/50 dark:bg-gray-900">
               <h2 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                🤖 {t("advisor.pageTitle")}
+                <Bot className="w-5 h-5 text-brand-600 dark:text-brand-400" /> {t("advisor.pageTitle")}
               </h2>
             </div>
             

@@ -1,4 +1,4 @@
-import { Decimal } from '@prisma/client/runtime/library';
+﻿import { Decimal } from '@prisma/client/runtime/library';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -51,7 +51,7 @@ export class SchemeMatcher {
     if (!bestScheme) {
       // Fallback to a default if no specific category match
       const defaultScheme = await prisma.governmentScheme.findFirst({
-        where: { schemeCode: 'DEFAULT_TERM_LOAN' }
+        where: { active: true }
       });
       if (defaultScheme) {
         return { scheme: defaultScheme, score: 50 };
@@ -62,3 +62,4 @@ export class SchemeMatcher {
     return { scheme: bestScheme, score: Math.min(highestScore, 100) };
   }
 }
+

@@ -164,33 +164,33 @@ export default function FinalReport() {
           {/* Section 2 */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-3">2. {t("report.projectCostBreakdown")}</h3>
-            {!report.financial?.financials ? (
+            {!report.financial ? (
                <div className="text-red-500 text-xs font-bold">Financial calculation unavailable.</div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">{t("financial.userMargin")} ({report.financial.financials.marginPercentage})</span>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{report.financial.financials.userContribution?.toLocaleString("en-IN")}</p>
+                    <span className="text-xs text-gray-400">{t("financial.userMargin")} ({Math.round(report.financial.financing?.marginCapital / report.financial.financing?.projectCost * 100)}%)</span>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{report.financial.financing?.marginCapital?.toLocaleString("en-IN")}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("financial.totalFeasibleCost")}</span>
-                    <p className="text-lg font-bold text-brand-600 dark:text-brand-400">₹{report.financial.financials.projectCost?.toLocaleString("en-IN")}</p>
+                    <p className="text-lg font-bold text-brand-600 dark:text-brand-400">₹{report.financial.financing?.projectCost?.toLocaleString("en-IN")}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("scheme.autoRecTitle")}</span>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{report.financial.schemeName}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{report.financial.name}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <span className="text-xs text-gray-400">{t("financial.eligibleLoan")} ({report.financial.financials.financingPercentage})</span>
-                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{report.financial.financials.loanAmount?.toLocaleString("en-IN")}</p>
+                    <span className="text-xs text-gray-400">{t("financial.eligibleLoan")} ({Math.round(report.financial.financing?.requestedLoan / report.financial.financing?.projectCost * 100)}%)</span>
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{report.financial.financing?.requestedLoan?.toLocaleString("en-IN")}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-lg">
-                  <span><strong>{t("scheme.interestRate")}:</strong> {report.financial.financials.interestRate}% {t("common.perAnnum")}</span>
-                  <span><strong>{t("scheme.repaymentTenure")}:</strong> {report.financial.financials.tenureMonths / 12} {t("common.years")}</span>
-                  <span><strong>{t("scheme.moratoriumPeriod")}:</strong> {report.financial.financials.moratoriumMonths} {t("common.months")}</span>
-                  <span><strong>{t("dashboard.estMonthlyEmi")}:</strong> ₹{report.financial.financials.emi?.toLocaleString("en-IN")}</span>
+                  <span><strong>{t("scheme.interestRate")}:</strong> {report.financial.financials?.interestRate}% {t("common.perAnnum")}</span>
+                  <span><strong>{t("scheme.repaymentTenure")}:</strong> {report.financial.financials?.tenureMonths / 12} {t("common.years")}</span>
+                  <span><strong>{t("scheme.moratoriumPeriod")}:</strong> {report.financial.financials?.moratoriumMonths} {t("common.months")}</span>
+                  <span><strong>{t("dashboard.estMonthlyEmi")}:</strong> ₹{report.repayment?.loanCalculation?.emi?.toLocaleString("en-IN") || 'N/A'}</span>
                 </div>
               </>
             )}

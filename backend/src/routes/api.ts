@@ -1,10 +1,10 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { CalculationService } from '../services/CalculationService.js';
 import { SchemeMatcher } from '../services/SchemeMatcher.js';
 import { MarketIntelligenceEngine } from '../services/MarketIntelligenceEngine.js';
 import { callGeminiApi } from "../config/gemini.js";
-import { SchemeEligibilityEngine } from '../services/SchemeEligibilityEngine.js';
+import { schemeController } from '../controllers/scheme.controller.js';
 import { AmortizationEngine } from '../services/AmortizationEngine.js';
 import { SwotService } from '../services/SwotService.js';
 const router = Router();
@@ -296,23 +296,8 @@ router.get('/assessments/latest', async (req, res) => {
   });
 });
 
-// GET /api/financial/schemes
-router.get('/financial/schemes', async (req, res) => {
-  try {
-    const capital = parseFloat(String(req.query.availableCapital)) || 0;
-    const projectCost = parseFloat(String(req.query.projectCost)) || 0;
-    const schemes = await SchemeEligibilityEngine.evaluateSchemes(capital, projectCost);
-    
-    res.json({
-      schemes,
-      recommendedScheme: schemes.length > 0 ? schemes[0] : null,
-      generatedAt: new Date()
-    });
-  } catch (error: any) {
-    console.error('Error evaluating schemes:', error);
-    res.status(500).json({ error: 'Failed to evaluate financial schemes' });
-  }
-});
+// POST /api/schemes/evaluate - Fully Dynamic Data-Driven Scheme Engine
+router.post('/schemes/evaluate', schemeController.evaluate);
 // POST /api/financial/calculate-schedule
 router.post('/financial/calculate-schedule', async (req, res) => {
   try {
@@ -380,3 +365,5 @@ router.post('/swot/analyze', async (req, res) => {
 });
 
 export default router;
+
+

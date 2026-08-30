@@ -5,6 +5,7 @@ import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import { useAssessmentAPI } from "../hooks/useAssessmentAPI";
 import CustomSelect from "../components/common/CustomSelect";
+import ProjectExpense from "./ProjectExpense/ProjectExpense";
 import { supportedLanguages } from "../i18n";
 import { MapPin } from "lucide-react";
 
@@ -70,7 +71,7 @@ export default function BusinessAssessmentForm() {
   useEffect(() => {
     if (formData.stateId) {
       api.getDistricts(formData.stateId, formData.state).then(setDistricts);
-      setFormData(prev => ({ ...prev, districtId: "", district: "", subDistrictId: "", block: "", villageId: "", village: "" }));
+      
       setVillages([]);
       setVillageSearch("");
     }
@@ -79,7 +80,7 @@ export default function BusinessAssessmentForm() {
   useEffect(() => {
     if (formData.districtId) {
       api.getBlocks(formData.districtId, formData.state, formData.district).then(setBlocks);
-      setFormData(prev => ({ ...prev, subDistrictId: "", block: "", villageId: "", village: "" }));
+      
       setVillages([]);
       setVillageSearch("");
     }
@@ -89,7 +90,7 @@ export default function BusinessAssessmentForm() {
     if (formData.subDistrictId) {
       // Initial fetch of top 20 villages
       api.searchVillages(formData.subDistrictId, formData.state, formData.district, formData.block, "").then(setVillages);
-      setFormData(prev => ({ ...prev, villageId: "", village: "" }));
+      
       setVillageSearch("");
     }
   }, [formData.subDistrictId]);
@@ -302,8 +303,10 @@ export default function BusinessAssessmentForm() {
         marginCapital: formData.marginCapital,
         language: formData.language
       });
+    } finally {
+      setLoading(false);
     }
-    navigate("/");
+    
   };
 
   return (
@@ -313,7 +316,7 @@ export default function BusinessAssessmentForm() {
         description={t("assessment.pageDesc")}
       />
 
-      <div className="mx-auto max-w-4xl space-y-6 stagger-slide-up">
+      <div className="mx-auto max-w-7xl space-y-6 stagger-slide-up">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -369,7 +372,7 @@ export default function BusinessAssessmentForm() {
                   value={formData.stateId}
                   onChange={(v) => {
                     const st = api.states.find(s => s.id === v);
-                    setFormData({ ...formData, stateId: st?.id || "", state: st?.name || "" });
+                    setFormData({ ...formData, stateId: st?.id || "", state: st?.name || "", districtId: "", district: "", subDistrictId: "", block: "", villageId: "", village: "" });
                   }}
                   options={api.states.map(s => ({ value: s.id, label: s.name }))}
                   placeholder={t("assessment.selectState")}
@@ -386,7 +389,7 @@ export default function BusinessAssessmentForm() {
                   disabled={!formData.stateId}
                   onChange={(v) => {
                     const dt = districts.find(d => d.id === v);
-                    setFormData({ ...formData, districtId: dt?.id || "", district: dt?.name || "" });
+                    setFormData({ ...formData, districtId: dt?.id || "", district: dt?.name || "", subDistrictId: "", block: "", villageId: "", village: "" });
                   }}
                   options={districts.map(d => ({ value: d.id, label: d.name }))}
                   placeholder={formData.stateId ? t("assessment.selectDistrict") : t("assessment.selectStateFirst")}
@@ -403,7 +406,7 @@ export default function BusinessAssessmentForm() {
                   disabled={!formData.districtId}
                   onChange={(v) => {
                     const bk = blocks.find(b => b.id === v);
-                    setFormData({ ...formData, subDistrictId: bk?.id || "", block: bk?.name || "" });
+                    setFormData({ ...formData, subDistrictId: bk?.id || "", block: bk?.name || "", villageId: "", village: "" });
                   }}
                   options={blocks.map(b => ({ value: b.id, label: b.name }))}
                   placeholder={formData.districtId ? t("assessment.selectBlock") : t("assessment.selectDistrictFirst")}
@@ -500,7 +503,7 @@ export default function BusinessAssessmentForm() {
                   {t("assessment.marginLabel")} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-sm font-semibold text-gray-500">₹</span>
+                  <span className="absolute left-4 top-2.5 text-sm font-semibold text-gray-500">&#8377;</span>
                   <input
                     type="number"
                     min="1000"
@@ -513,7 +516,7 @@ export default function BusinessAssessmentForm() {
                 </div>
                 {preview && (
                   <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                    At a <strong className="text-gray-700 dark:text-gray-300">{preview.marginPercentage}%</strong> margin contribution, this supports an estimated project size of <strong className="text-brand-600 dark:text-brand-400">₹{preview.feasibleProjectCost?.toLocaleString("en-IN")}</strong>.
+                    At a <strong className="text-gray-700 dark:text-gray-300">{preview.marginPercentage}%</strong> margin contribution, this supports an estimated project size of <strong className="text-brand-600 dark:text-brand-400">&#8377;{preview.feasibleProjectCost?.toLocaleString("en-IN")}</strong>.
                   </p>
                 )}
               </div>
@@ -528,7 +531,7 @@ export default function BusinessAssessmentForm() {
                       {t("scheme.autoRecTitle")}
                     </span>
                     <p className="text-base font-bold text-gray-900 dark:text-white mt-0.5">
-                      {preview.bestScheme.name}
+                      {preview.bestScheme?.name || 'No Matching Scheme'}
                     </p>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
                       Final eligibility is subject to scheme/lender verification.
@@ -536,18 +539,16 @@ export default function BusinessAssessmentForm() {
                   </div>
                   <div className="sm:text-right bg-white dark:bg-gray-900 p-3 rounded-lg shadow-sm border border-brand-100 dark:border-brand-900/30">
                     <span className="inline-flex items-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-300 px-3 py-1 text-xs font-bold mb-1">
-                      {preview.bestScheme.interestRate ? `${preview.bestScheme.interestRate}% Interest` : 'Varies'} • Match: {preview.bestScheme.matchScore}%
+                      {preview.bestScheme?.interestRate ? `${preview.bestScheme.interestRate}% Interest` : 'Varies'} • Match: {preview.bestScheme?.matchScore || 0}%
                     </span>
                     <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
-                      Potential Financing: <strong className="text-gray-900 dark:text-white">₹{preview.potentialFinancing?.toLocaleString("en-IN")}</strong> ({preview.financingPercentage}%)
+                      Potential Financing: <strong className="text-gray-900 dark:text-white">&#8377;{preview.potentialFinancing?.toLocaleString("en-IN")}</strong> ({preview.financingPercentage}%)
                     </p>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="flex items-center justify-end gap-4">
+          </div>          <div className="flex items-center justify-end gap-4 mt-8">
             <button
               type="button"
               onClick={() => navigate("/")}
@@ -571,11 +572,21 @@ export default function BusinessAssessmentForm() {
               )}
             </button>
           </div>
+
+          <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-8">
+            <ProjectExpense overrideInput={formData} />
+          </div>
         </form>
       </div>
     </>
   );
 }
+
+
+
+
+
+
 
 
 

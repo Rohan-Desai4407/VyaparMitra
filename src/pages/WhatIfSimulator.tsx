@@ -32,9 +32,14 @@ export default function WhatIfSimulator() {
 
   // Active Scenario Preset
   const [activePreset, setActivePreset] = useState<"base" | "optimistic" | "inflation" | "slump">("base");
+  const [isResetting, setIsResetting] = useState(false);
 
   // Handle Scenario Presets
   const applyPreset = (preset: "base" | "optimistic" | "inflation" | "slump") => {
+    if (preset === "base") {
+      setIsResetting(true);
+      setTimeout(() => setIsResetting(false), 500);
+    }
     setActivePreset(preset);
     switch (preset) {
       case "base":
@@ -179,36 +184,13 @@ export default function WhatIfSimulator() {
     grid: { borderColor: "#F3F4F6" },
   };
 
-  // Donut Chart for Expense & Profit Breakdown
-  const donutSeries = [
-    Math.max(0, simRawMaterialCost),
-    Math.max(0, simOpex),
-    Math.max(0, simMonthlyEmi),
-    Math.max(0, simNetProfit),
+  // Modern Donut Chart Data
+  const donutSegments = [
+    { label: "Raw Materials", value: Math.max(0, simRawMaterialCost), color: "#EF4444", lightColor: "#FEE2E2", darkColor: "#dc2626" },
+    { label: "OpEx & Labor",  value: Math.max(0, simOpex),            color: "#F59E0B", lightColor: "#FEF3C7", darkColor: "#d97706" },
+    { label: "Loan EMI",      value: Math.max(0, simMonthlyEmi),      color: "#6366F1", lightColor: "#E0E7FF", darkColor: "#4f46e5" },
+    { label: "Net Profit",    value: Math.max(0, simNetProfit),       color: "#10B981", lightColor: "#D1FAE5", darkColor: "#059669" },
   ];
-
-  const donutOptions: ApexOptions = {
-    chart: { type: "donut", height: 280 },
-    labels: ["Raw Materials", "OpEx & Labor", "Loan EMI", "Net Profit"],
-    colors: ["#EF4444", "#F59E0B", "#6366F1", "#10B981"],
-    legend: { position: "bottom" },
-    dataLabels: { enabled: true, formatter: (val: number) => `${val.toFixed(0)}%` },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "65%",
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: "Est. Revenue",
-              formatter: () => `₹${simMonthlyRevenue.toLocaleString("en-IN")}`,
-            },
-          },
-        },
-      },
-    },
-  };
 
   return (
     <>
@@ -240,10 +222,11 @@ export default function WhatIfSimulator() {
 
           <button
             onClick={() => applyPreset("base")}
-            className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            disabled={isResetting}
+            title="Reset to Base Case"
+            className="rounded-xl border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
           >
-            <RotateCcw className="h-4 w-4 text-gray-500" />
-            Reset to Base Case
+            <RotateCcw className={`h-4 w-4 ${isResetting ? 'animate-spin text-brand-500' : ''}`} />
           </button>
         </div>
 
@@ -539,9 +522,11 @@ export default function WhatIfSimulator() {
           {/* Donut Chart: Cost & Margin Breakdown */}
           <div className="lg:col-span-4">
             <ComponentCard title={t("whatif.costBreakdownTitle", "Monthly Cost & Profit Structure")}>
-              <div className="pt-2 flex justify-center">
-                <Chart options={donutOptions} series={donutSeries} type="donut" height={290} />
-              </div>
+              <ModernDonutChart
+                segments={donutSegments}
+                centerLabel="Est. Revenue"
+                centerValue={`₹${simMonthlyRevenue.toLocaleString("en-IN")}`}
+              />
             </ComponentCard>
           </div>
         </div>
@@ -606,5 +591,101 @@ export default function WhatIfSimulator() {
         </ComponentCard>
       </div>
     </>
+  );
+}
+
+// --- Modern Custom SVG Donut Chart ---
+interface DonutSegment {
+  label: string;
+  value: number;
+  color: string;
+  lightColor: string;
+  darkColor: string;
+}
+
+function ModernDonutChart({
+  segments,
+  centerLabel,
+  centerValue,
+}: {
+  segments: DonutSegment[];
+  centerLabel: string;
+  centerValue: string;
+}) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const total = segments.reduce((s, g) => s + g.value, 0);
+  if (total === 0) return (
+    <div className="flex items-center justify-center h-48 text-gray-400 text-sm">No data to display</div>
+  );
+
+  const SIZE = 220, cx = 110, cy = 110, R = 82, ri = 50, GAP = 0.025;
+  let cumAngle = -Math.PI / 2;
+
+  const arcs = segments.map((seg, i) => {
+    const fraction = seg.value / total;
+    const angle = fraction * 2 * Math.PI - GAP;
+    const sa = cumAngle + GAP / 2, ea = sa + angle;
+    cumAngle += fraction * 2 * Math.PI;
+    const la = angle > Math.PI ? 1 : 0;
+    const mid = sa + angle / 2;
+    const d = [
+      `M ${cx + R * Math.cos(sa)} ${cy + R * Math.sin(sa)}`,
+      `A ${R} ${R} 0 ${la} 1 ${cx + R * Math.cos(ea)} ${cy + R * Math.sin(ea)}`,
+      `L ${cx + ri * Math.cos(ea)} ${cy + ri * Math.sin(ea)}`,
+      `A ${ri} ${ri} 0 ${la} 0 ${cx + ri * Math.cos(sa)} ${cy + ri * Math.sin(sa)}`,
+      "Z",
+    ].join(" ");
+    return { ...seg, d, mid, fraction, index: i };
+  });
+
+  return (
+    <div className="flex flex-col items-center gap-4 py-2">
+      <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="drop-shadow-sm">
+        {arcs.map((a) => (
+          <path key={a.index} d={a.d} fill={a.color} stroke="white" strokeWidth="1.5"
+            transform={hovered === a.index ? `translate(${Math.cos(a.mid)*5} ${Math.sin(a.mid)*5})` : undefined}
+            style={{ transition: "transform 0.2s ease", cursor: "pointer" }}
+            onMouseEnter={() => setHovered(a.index)} onMouseLeave={() => setHovered(null)} />
+        ))}
+        {arcs.map((a) => a.fraction > 0.07 && (
+          <text key={`l${a.index}`} x={cx+(R-16)*Math.cos(a.mid)} y={cy+(R-16)*Math.sin(a.mid)}
+            textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="700" fill="white"
+            style={{ pointerEvents:"none" }}>{(a.fraction*100).toFixed(0)}%</text>
+        ))}
+        <circle cx={cx} cy={cy} r={ri-4} fill="white" stroke="#F1F5F9" strokeWidth="1" />
+        <text x={cx} y={cy-10} textAnchor="middle" fontSize="9" fill="#94A3B8" fontWeight="600" letterSpacing="0.08em">{centerLabel.toUpperCase()}</text>
+        <text x={cx} y={cy+7} textAnchor="middle" fontSize="13" fill="#0F172A" fontWeight="800">{hovered !== null ? `₹${arcs[hovered].value.toLocaleString("en-IN")}` : centerValue}</text>
+        {hovered !== null && (<text x={cx} y={cy+22} textAnchor="middle" fontSize="8" fill={arcs[hovered].color} fontWeight="700">{arcs[hovered].label}</text>)}
+      </svg>
+
+      <div className="grid grid-cols-2 gap-x-6 gap-y-2 w-full px-2">
+        {segments.map((seg, i) => {
+          const pct = total > 0 ? ((seg.value / total) * 100).toFixed(1) : "0";
+          return (
+            <div key={i} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${hovered === i ? "bg-gray-50 dark:bg-gray-800" : ""}`}
+              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+              <span className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color, boxShadow: `0 0 4px ${seg.color}80` }} />
+              <div className="min-w-0">
+                <div className="text-[10px] font-semibold text-gray-700 dark:text-gray-200 truncate">{seg.label}</div>
+                <div className="text-[10px] text-gray-400">{`₹${seg.value.toLocaleString("en-IN")} `}<span style={{ color: seg.color }}>{pct}%</span></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="w-full px-2">
+        <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+          <span className="font-semibold uppercase tracking-wide">Cost Distribution</span>
+          <span className="font-bold text-gray-600 dark:text-gray-300">Total ₹{total.toLocaleString("en-IN")}</span>
+        </div>
+        <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
+          {segments.map((seg, i) => (
+            <div key={i} className="h-full transition-all duration-300"
+              style={{ width: `${(seg.value/total)*100}%`, backgroundColor: seg.color, opacity: hovered===null||hovered===i ? 1 : 0.35 }} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

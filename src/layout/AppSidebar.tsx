@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Bell } from "lucide-react";
+import { Bell, HelpCircle } from "lucide-react";
 
 // Assume these icons are imported from an icon library
-import { Sliders } from "lucide-react";
+import { Sliders, Wallet } from "lucide-react";
 import {
   CalenderIcon,
   ChatIcon,
@@ -46,6 +46,7 @@ const AppSidebar: React.FC = () => {
       name: t("nav.marketAnalysis"),
       path: "/market-analysis",
     },
+    
     {
       icon: <DollarLineIcon />,
       name: t("nav.financialPlanner"),
@@ -83,7 +84,13 @@ const AppSidebar: React.FC = () => {
     },
   ];
 
-  const othersItems: NavItem[] = [];
+  const othersItems: NavItem[] = [
+    {
+      icon: <HelpCircle className="w-5 h-5" />,
+      name: t("nav.aboutUs", "About Us"),
+      path: "/about",
+    }
+  ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -197,16 +204,26 @@ const AppSidebar: React.FC = () => {
                 title={(!isExpanded && !isHovered && !isMobileOpen) ? nav.name : undefined}
                 aria-current={isActive(nav.path) ? "page" : undefined}
                 className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  isActive(nav.path) 
+                    ? menuType === 'others'
+                      ? "menu-item-active !bg-amber-50 !text-amber-600 dark:!bg-amber-500/[0.15] dark:!text-amber-400"
+                      : "menu-item-active" 
+                    : "menu-item-inactive"
                 }`}
               >
                 {isActive(nav.path) && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 bg-brand-500 dark:bg-brand-400 rounded-r-full transition-opacity duration-200" />
+                  <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-3/5 rounded-r-full transition-opacity duration-200 ${
+                    menuType === 'others' 
+                      ? 'bg-amber-500 dark:bg-amber-400' 
+                      : 'bg-brand-500 dark:bg-brand-400'
+                  }`} />
                 )}
                 <span
                   className={`menu-item-icon-size ${
                     isActive(nav.path)
-                      ? "menu-item-icon-active"
+                      ? menuType === 'others'
+                        ? "menu-item-icon-active !text-amber-600 dark:!text-amber-400"
+                        : "menu-item-icon-active"
                       : "menu-item-icon-inactive"
                   }`}
                 >
@@ -329,17 +346,29 @@ const AppSidebar: React.FC = () => {
           )}
         </Link>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav className="mb-6">
+      <div className="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar">
+        <nav className="mb-6 flex flex-col flex-1">
           <div className="flex flex-col gap-4">
             <div>
               {renderMenuItems(navItems, "main")}
             </div>
+          </div>
+          
+          <div className="mt-auto flex flex-col gap-4 pt-4">
+            {/* Divider */}
+            <div className={`h-[1px] bg-gray-200 dark:bg-gray-800 mx-2 transition-all duration-300 ${!isExpanded && !isHovered && !isMobileOpen ? 'opacity-50' : 'opacity-100'}`} />
+
+            {/* Others Items */}
+            <div>
+              {renderMenuItems(othersItems, "others")}
             </div>
-          </nav>
-        </div>
+          </div>
+        </nav>
+      </div>
     </aside>
   );
 };
 
 export default AppSidebar;
+
+
