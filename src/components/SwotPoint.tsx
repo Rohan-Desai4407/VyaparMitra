@@ -1,5 +1,6 @@
-﻿import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Check, AlertTriangle, Rocket, X, Star, AlertCircle, Shield, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, Check, AlertTriangle, Rocket, X, Star, AlertCircle, Shield, Info, Bot } from 'lucide-react';
+import { useNavigate } from 'react-router';
 import { SwotItem } from '../hooks/useSwotAnalysis';
 
 interface SwotPointProps {
@@ -13,6 +14,7 @@ interface SwotPointProps {
 
 export default function SwotPoint({ item, category, icon: Icon, iconColorClass, bgColorClass, textColorClass }: SwotPointProps) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   const getImpactBadge = (impact: string) => {
     switch (impact.toLowerCase()) {
@@ -26,6 +28,11 @@ export default function SwotPoint({ item, category, icon: Icon, iconColorClass, 
     if (conf >= 90) return 'text-emerald-600 dark:text-emerald-400';
     if (conf >= 75) return 'text-amber-600 dark:text-amber-400';
     return 'text-red-600 dark:text-red-400';
+  };
+  
+  const handleAskAI = () => {
+    const question = `Can you explain more about this ${category}: "${item.title}"? Specifically, how should I handle the fact that ${item.description.toLowerCase()}`;
+    navigate('/ai-advisor', { state: { initialQuery: question } });
   };
 
   return (
@@ -56,7 +63,7 @@ export default function SwotPoint({ item, category, icon: Icon, iconColorClass, 
             {getImpactBadge(item.impact)}
           </div>
           
-          <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3 border border-black/5 dark:border-white/5">
+          <div className="bg-white/50 dark:bg-black/20 rounded-lg p-3 border border-black/5 dark:border-white/5 mb-3">
             <h5 className="font-bold flex items-center gap-1 mb-1.5 uppercase text-[10px] tracking-wider opacity-60">
               <Info className="w-3 h-3" />
               Verified Evidence
@@ -66,6 +73,14 @@ export default function SwotPoint({ item, category, icon: Icon, iconColorClass, 
               <span className="font-bold">Source:</span> AI Analysis of Canonical Market Data
             </p>
           </div>
+          
+          <button 
+            onClick={handleAskAI}
+            className="w-full mt-1 flex items-center justify-center gap-2 py-2 px-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+          >
+            <Bot className="w-4 h-4" />
+            <span>Ask AI About This</span>
+          </button>
         </div>
       )}
     </div>

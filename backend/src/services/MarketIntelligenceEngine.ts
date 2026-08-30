@@ -1,11 +1,63 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import { getStrategyForCategory } from './businessStrategies.js';
+
+const businessCategoryConfig: Record<string, { searchTerms: string[] }> = {
+  "dairy": { searchTerms: ["dairy", "milk shop", "dairy products", "milk collection center", "paneer"] },
+  "grocery": { searchTerms: ["grocery store", "supermarket", "general store", "kirana", "provision store"] },
+  "restaurant": { searchTerms: ["restaurant", "cafe", "eatery", "food court", "dhaba"] },
+  "clothing": { searchTerms: ["clothing store", "apparel", "garments", "textile", "boutique"] },
+  "hardware": { searchTerms: ["hardware store", "building materials", "sanitary ware", "tools"] },
+  "pharmacy": { searchTerms: ["pharmacy", "medical store", "chemist"] },
+  "salon": { searchTerms: ["salon", "beauty parlor", "barber shop", "haircut"] },
+  "agriculture": { searchTerms: ["agriculture equipment", "fertilizer", "seeds", "tractor"] },
+  "electronics": { searchTerms: ["electronics", "mobile shop", "computer repair", "appliances"] },
+  "furniture": { searchTerms: ["furniture", "wooden craft", "mattress"] },
+  "bakery": { searchTerms: ["bakery", "cake shop", "sweet shop", "mithai"] },
+  "default": { searchTerms: ["retail store", "shop", "business"] }
+};
+
+function getSearchTerms(category: string): string[] {
+  const cat = category.toLowerCase();
+  for (const key of Object.keys(businessCategoryConfig)) {
+    if (cat.includes(key)) {
+      return businessCategoryConfig[key].searchTerms;
+    }
+  }
+  return businessCategoryConfig["default"].searchTerms;
+}
+
+// Haversine formula to calculate geographic distance in km
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 export class MarketIntelligenceEngine {
 
-  static getConsumerProfile(district: string, state: string, category: string, radius: number = 10) {
-    const radiusFactor = (radius / 10) * (radius / 10);
-    const basePopulation = 18500 * radiusFactor;
+  static getConsumerProfile(district: string, state: string, category: string, radius: number = 10, realPopulation: number | null = null) {
+    const areaSqKm = Math.PI * radius * radius;
+    
+    let basePopulation = 0;
+    let methodString = "";
+    
+    if (realPopulation) {
+      // If we have a real district/region population, estimate proportion using radius
+      // We assume an average district is ~3000 sq km (approx for India)
+      // Cap the proportion at 1.0
+      const proportion = Math.min(areaSqKm / 3000.0, 1.0);
+      basePopulation = Math.round(realPopulation * proportion);
+      methodString = `Derived from real OpenStreetMap demographic dataset (Total Region Pop: ${realPopulation.toLocaleString('en-IN')}) proportioned to the ${radius}km circular trade area (Area ≈ ${Math.round(areaSqKm)} sq.km).`;
+    } else {
+      const assumedDensityPerSqKm = 382; // National average
+      basePopulation = Math.round(areaSqKm * assumedDensityPerSqKm);
+      methodString = `Trade-area population estimated using average population density applied to a ${radius}km circular trade area (Area ≈ ${Math.round(areaSqKm)} sq.km).`;
+    }
     
     let targetSegment = "General Consumers";
     if (category.toLowerCase().includes("dairy")) targetSegment = "Local Households & Eateries";
@@ -13,99 +65,125 @@ export class MarketIntelligenceEngine {
     if (category.toLowerCase().includes("agri")) targetSegment = "Farmers, Wholesale Markets";
 
     return {
-      consumerBase: Math.round(basePopulation),
+      consumerBase: basePopulation,
       targetSegment,
-      source: "Benchmark Estimate",
-      confidence: "Medium",
-      method: "Area-based population density approximation.",
-      freshness: "2026"
+      source: realPopulation ? "OpenStreetMap / Census Data" : "Estimated via Demographic Average",
+      confidence: realPopulation ? "High" : "Medium",
+      method: methodString,
+      freshness: "Latest Available"
     };
   }
 
+  private static competitorCache = new Map<string, { timestamp: number, data: any }>();
+
   static async getCompetitorDensity(category: string, radius: number = 10, centerLat: number, centerLng: number) {
+    const cacheKey = `market:${centerLat.toFixed(3)}:${centerLng.toFixed(3)}:${radius}:${category}`;
+    const cached = this.competitorCache.get(cacheKey);
+    // Cache for 24 hours
+    if (cached && Date.now() - cached.timestamp < 24 * 60 * 60 * 1000) {
+      console.log(`[Cache Hit] Competitor Density for ${cacheKey}`);
+      return cached.data;
+    }
+
     let count = 0;
-    let competitorLocations = [];
-    let level = "Medium";
+    let competitorLocations: any[] = [];
+    let level = "Unavailable";
     
-    const queryStr = category + " store";
+    const terms = getSearchTerms(category);
     const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
+    if (!apiKey) {
+      throw new Error("Google Places API Key is not configured.");
+    }
+
     try {
-      if (apiKey) {
-        const res = await axios.post('https://places.googleapis.com/v1/places:searchText', {
-          textQuery: queryStr,
+      const allResults = new Map();
+      let quotaExceeded = false;
+      let apiErrorMessage = "";
+
+      const requests = terms.map(term => 
+        axios.post('https://places.googleapis.com/v1/places:searchText', {
+          textQuery: term,
           locationBias: {
             circle: {
               center: { latitude: centerLat, longitude: centerLng },
-              radius: radius * 1000.0
+              radius: radius * 1000.0 // strictly search within radius
             }
           }
         }, {
           headers: {
             'X-Goog-Api-Key': apiKey,
-            'X-Goog-FieldMask': 'places.displayName,places.location',
+            'X-Goog-FieldMask': 'places.id,places.displayName,places.location,places.rating,places.userRatingCount,places.formattedAddress',
             'Content-Type': 'application/json'
           }
-        });
+        }).catch(err => {
+          console.warn(`Places API Failed for term "${term}":`, err.message);
+          if (err.response && err.response.status === 429) {
+            quotaExceeded = true;
+          }
+          if (err.response && err.response.data && err.response.data.error) {
+            apiErrorMessage = err.response.data.error.message;
+          }
+          return { data: { places: [] } };
+        })
+      );
 
-        if (res.data && res.data.places) {
-          competitorLocations = res.data.places.map((p: any) => ({
-            name: p.displayName?.text,
-            lat: p.location?.latitude,
-            lng: p.location?.longitude
-          }));
-          count = competitorLocations.length;
-          if (count >= 20) count = Math.round(20 * (radius / 5));
-        }
-        level = count > 10 ? "High" : count > 4 ? "Medium" : "Low";
-
-        return {
-          density: level,
-          count: count,
-          competitorLocations,
-          source: "Google Places API Live Data",
-          confidence: "High",
-          method: "Real-time search within radius.",
-          freshness: "Live"
-        };
+      const responses = await Promise.all(requests);
+      
+      if (quotaExceeded) {
+         throw new Error(`Google Places API Quota Exceeded. ${apiErrorMessage}`);
       }
-    } catch (e: any) {
-      console.warn("Places API Failed (Quota Exceeded or Invalid Key). Falling back to mock data.", e.message);
-    }
 
-    const dairyNames = ["Shreeji Dairy", "Amul Parlour", "Gokul Dairy", "Patel Sweets & Dairy", "Bhavani Milk Center", "Mahalaxmi Dairy", "Radhe Dairy"];
-    const retailNames = ["Ganesh Provision Store", "Om Sai Kirana", "Super Mini Mart", "Shakti Traders", "Patel General Store", "Mahavir Retail", "Jalaram Stores"];
-    const foodNames = ["Saraswati Agro", "Kisan Processing Unit", "Jay Bhavani Foods", "Umiya Spices", "Raj Masala & Flour", "Swastik Agro", "Gajanand Foods"];
-    const textileNames = ["Fashion Hub", "Laxmi Textiles", "Shiv Garments", "Radhika Matching Center", "Pooja Sarees", "Umiya Readymade", "Shree Ram Cloth Store"];
-    
-    let fallbackNames = retailNames;
-    if (category.toLowerCase().includes("dairy")) fallbackNames = dairyNames;
-    else if (category.toLowerCase().includes("food") || category.toLowerCase().includes("agro")) fallbackNames = foodNames;
-    else if (category.toLowerCase().includes("cloth") || category.toLowerCase().includes("textile") || category.toLowerCase().includes("garment")) fallbackNames = textileNames;
-
-    count = 8;
-    count = Math.round(count * (radius / 5));
-    level = count > 10 ? "High" : count > 4 ? "Medium" : "Low";
-    
-    for(let i = 0; i < Math.min(count, 5); i++) {
-      const shopName = fallbackNames[i % fallbackNames.length] + (i >= fallbackNames.length ? " " + (i+1) : "");
-      competitorLocations.push({
-        name: shopName,
-        lat: centerLat + (Math.random() - 0.5) * 0.05,
-        lng: centerLng + (Math.random() - 0.5) * 0.05
+      responses.forEach(res => {
+        if (res.data && res.data.places) {
+          res.data.places.forEach((p: any) => {
+            if (p.id && !allResults.has(p.id)) {
+               const dist = calculateDistance(centerLat, centerLng, p.location.latitude, p.location.longitude);
+               if (dist <= radius) {
+                 allResults.set(p.id, {
+                   id: p.id,
+                   name: p.displayName?.text || "Unknown Business",
+                   lat: p.location.latitude,
+                   lng: p.location.longitude,
+                   address: p.formattedAddress || "",
+                   rating: p.rating || 0,
+                   reviews: p.userRatingCount || 0,
+                   distance: dist.toFixed(1)
+                 });
+               }
+            }
+          });
+        }
       });
+
+      competitorLocations = Array.from(allResults.values());
+      competitorLocations.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+      count = competitorLocations.length;
+      
+      const scale = (radius / 5); 
+      const lowThreshold = Math.round(5 * scale);
+      const mediumThreshold = Math.round(15 * scale);
+
+      level = count > mediumThreshold ? "High" : count > lowThreshold ? "Medium" : "Low";
+
+      const result = {
+        level: level,
+        count: count,
+        competitorLocations,
+        source: "Google Places API Live Data",
+        confidence: "High",
+        method: `Real-time search across ${terms.length} category terms within ${radius}km.`,
+        freshness: "Live"
+      };
+
+      this.competitorCache.set(cacheKey, { timestamp: Date.now(), data: result });
+      return result;
+
+    } catch (e: any) {
+      console.error("Competitor Density Error:", e.message);
+      throw new Error("Unable to retrieve nearby business data.");
     }
-
-    return {
-
-      density: level,
-      count: count,
-      competitorLocations,
-      source: "Fallback Estimate",
-      confidence: "Low",
-      method: "Simulated for demonstration (API Quota Exceeded).",
-      freshness: "Mock"
-    };
   }
 
   static getPurchasingPower(state: string) {
@@ -344,19 +422,48 @@ export class MarketIntelligenceEngine {
   }
 
   static async geocodeLocation(village: string, district: string, state: string) {
-    try {
-      const query = `${village}, ${district}, ${state}, India`;
+    const tryGeocode = async (query: string) => {
       const res = await axios.get('https://nominatim.openstreetmap.org/search', {
-        params: { q: query, format: 'json', limit: 1 },
+        params: { q: query, format: 'json', limit: 1, extratags: 1 },
         headers: { 'User-Agent': 'VyaparMitra-Market-Engine' }
       });
       if (res.data && res.data.length > 0) {
-        return { lat: parseFloat(res.data[0].lat), lng: parseFloat(res.data[0].lon) };
+        const pop = res.data[0].extratags?.population ? parseInt(res.data[0].extratags.population) : null;
+        return { 
+          lat: parseFloat(res.data[0].lat), 
+          lng: parseFloat(res.data[0].lon),
+          population: pop
+        };
       }
-      return { lat: 22.98, lng: 72.38 };
+      return null;
+    };
+
+    try {
+      // 1. Try most specific: Village, District, State
+      let result = await tryGeocode(`${village}, ${district}, ${state}, India`);
+      
+      if (result && !result.population) {
+         // Fetch district population as a baseline fallback
+         let distResult = await tryGeocode(`${district}, ${state}, India`);
+         if (distResult && distResult.population) {
+             result.population = distResult.population;
+         }
+      }
+      
+      if (result) return result;
+
+      // 2. Fallback to District, State
+      result = await tryGeocode(`${district}, ${state}, India`);
+      if (result) return result;
+
+      // 3. Fallback to State
+      result = await tryGeocode(`${state}, India`);
+      if (result) return result;
+
+      return { lat: 22.98, lng: 72.38, population: null };
     } catch (error: any) {
       console.error("GEOCODE ERROR:", error.message);
-      return { lat: 22.98, lng: 72.38 };
+      return { lat: 22.98, lng: 72.38, population: null };
     }
   }
 }

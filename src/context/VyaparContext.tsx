@@ -270,10 +270,23 @@ export const VyaparProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const updateUserProfile = async (updates: any) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found");
-    const res = await authApiService.updateProfile(token, updates);
-    if (res.success && res.data) {
-      setProfile(res.data);
-      localStorage.setItem('user', JSON.stringify(res.data));
+    try {
+      const res = await authApiService.updateProfile(token, updates);
+      if (res.success && res.data) {
+        setProfile(res.data);
+        localStorage.setItem('user', JSON.stringify(res.data));
+        window.dispatchEvent(new Event('userUpdated'));
+      } else {
+        throw new Error(res.message || "Failed to update via API");
+      }
+    } catch (e) {
+      console.warn("API failed, using local storage fallback", e);
+      setProfile((prev: any) => {
+        const currentUser = prev || JSON.parse(localStorage.getItem('user') || '{}');
+        const newProfile = { ...currentUser, ...updates };
+        localStorage.setItem('user', JSON.stringify(newProfile));
+        return newProfile;
+      });
       window.dispatchEvent(new Event('userUpdated'));
     }
   };

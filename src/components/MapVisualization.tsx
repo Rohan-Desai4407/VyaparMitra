@@ -20,7 +20,7 @@ function ChangeView({ center }: { center: [number, number] }) {
 }
 
 interface HeatPoint { lat: number; lng: number; intensity: number; }
-interface Competitor { name: string; lat: number; lng: number; }
+interface Competitor { name: string; lat: number; lng: number; distance?: string; address?: string; rating?: number; reviews?: number; }
 
 interface MapProps {
   village: string;
@@ -167,15 +167,24 @@ export default function MapVisualization({ village, district, state, radius, com
             <Popup><b>{village}</b><br />Target Business Location</Popup>
           </Marker>
 
-          {/* Competitors Markers with category-specific icons */}
-          {competitors.map((comp, idx) => {
-            if (!comp.lat || !comp.lng) return null;
-            return (
-              <Marker key={idx} position={[comp.lat, comp.lng]} icon={competitorIcon}>
-                <Popup><b className="capitalize" style={{ whiteSpace: "normal", wordWrap: "break-word", display: "block" }}>{comp.name}</b><span className="text-xs text-gray-500">Identified Unit</span></Popup>
-              </Marker>
-            );
-          })}
+          {/* Competitor Markers */}
+          {competitors && competitors.length > 0 && (
+            <>
+              {competitors.map((comp, idx) => (
+                <Marker key={`comp-${idx}-${comp.name}`} position={[comp.lat, comp.lng]} icon={competitorIcon}>
+                  <Popup className="competitor-popup">
+                    <div className="font-semibold">{comp.name}</div>
+                    <div className="text-xs text-gray-500 mb-1">{category} Business</div>
+                    {comp.distance !== undefined && <div className="text-xs text-brand-600 font-medium mb-1">{comp.distance} km away</div>}
+                    {comp.address && <div className="text-[10px] text-gray-400 leading-tight line-clamp-2 mb-1">{comp.address}</div>}
+                    {comp.rating ? (
+                      <div className="text-[10px] text-amber-500 font-medium mt-1">★ {comp.rating} <span className="text-gray-400 font-normal">({comp.reviews} reviews)</span></div>
+                    ) : null}
+                  </Popup>
+                </Marker>
+              ))}
+            </>
+          )}
         </MapContainer>
       </div>
     </div>

@@ -41,7 +41,8 @@ router.get('/market-intelligence/summary', async (req, res) => {
     let consumer = null;
     let consumerError = null;
     try {
-      consumer = MarketIntelligenceEngine.getConsumerProfile(dName, sName, cName, rad);
+      const realPop = geocoded && (geocoded as any).population ? (geocoded as any).population : null;
+      consumer = MarketIntelligenceEngine.getConsumerProfile(dName, sName, cName, rad, realPop);
     } catch (err: any) {
       consumerError = err.message || "Consumer reach data unavailable";
     }

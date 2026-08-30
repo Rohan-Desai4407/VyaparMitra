@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Mail, Lock, User, Phone, CheckCircle2, Shield } from 'lucide-react';
 import { LanguageSelector } from '../../components/common/LanguageSelector';
-import { useNavigate } from 'react-router';
 
 export default function SignUp() {
     const { t } = useTranslation();
@@ -13,6 +12,8 @@ export default function SignUp() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [mobile, setMobile] = useState('');
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [statusMsg, setStatusMsg] = useState<{ text: string; isError: boolean } | null>(null);
@@ -165,7 +166,7 @@ export default function SignUp() {
           {/* Language Selector & Theme Toggle */}
           <div className="absolute top-6 right-6 lg:top-8 lg:right-8 z-30 flex items-center gap-3">
             <LanguageSelector variant="auth" />
-            <ThemeToggleButton />
+            
           </div>
 
           <div className="bg-white rounded-[2rem] p-8 lg:p-9 w-full max-w-[440px] shadow-[0_20px_50px_rgb(0,0,0,0.08)] border border-gray-100 mt-12 lg:mt-0 opacity-0" style={{ animation: 'slide-up 0.8s ease-out 0.2s forwards, border-glow-once 1.5s ease-out 1s forwards' }}>
@@ -179,12 +180,12 @@ export default function SignUp() {
             </div>
 
             {/* Notifications / Feedback Messages */}
-            {error && (
+            {false && (
               <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs rounded-xl font-medium text-center border border-red-100 dark:border-red-800/50">
                 {error}
               </div>
             )}
-            {successMsg && (
+            {false && (
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs rounded-xl font-medium text-center border border-emerald-200 dark:border-emerald-800/50">
                 {successMsg}
               </div>
@@ -378,10 +379,7 @@ export default function SignUp() {
       )}
 
       {/* Google Account Modal */}
-      <GoogleAccountModal
-        isOpen={isGoogleModalOpen}
-        onClose={() => setIsGoogleModalOpen(false)}
-      />
+      
     </div>
   );
 }

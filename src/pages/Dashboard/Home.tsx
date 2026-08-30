@@ -1,27 +1,14 @@
+import { Sparkles, Info, ClipboardList, Calculator, FileText, CheckCircle2, ArrowRight, Eye, MapPin, Store, TrendingUp, Users, Activity, AlertCircle, Landmark, IndianRupee, Building2, Leaf, Wallet, MessageCircle, ChevronRight, Download, BarChart3, HelpCircle } from 'lucide-react';
+
 import { useState } from "react";
 import { Link } from "react-router";
-import { Leaf, Wallet, TrendingUp, Landmark, MessageCircle } from "lucide-react";
+
 import React from 'react';
 import { useTranslation } from "react-i18next";
 import { useVyapar } from "../../context/VyaparContext";
 import { useNotifications } from "../../context/NotificationContext";
 import PageMeta from "../../components/common/PageMeta";
-import {
-  ChevronRight,
-  ClipboardList,
-  Calculator,
-  Landmark,
-  FileText,
-  TrendingUp,
-  Sparkles,
-  Building2,
-  BarChart3,
-  AlertCircle,
-  Info,
-  CheckCircle2,
-  ArrowRight,
-  Eye,
-} from "lucide-react";
+
 
 // ─── Viability sub-factor derivation from context data ──────────────────
 function deriveViabilityFactors(
@@ -129,7 +116,35 @@ export default function Home() {
     return () => window.removeEventListener('userUpdated', updateName);
   }, []);
 
+  
+  const opportunities = [
+    {
+      rank: 1,
+      name: input?.category || "Dairy",
+      score: report?.viabilityScore || 85,
+      demand: "HIGH",
+      investment: `₹${(financials?.projectCost || 500000).toLocaleString("en-IN")}`,
+      competition: (market?.competitorDensity || "LOW").toUpperCase(),
+    },
+    {
+      rank: 2,
+      name: "Food Processing",
+      score: (report?.viabilityScore || 85) - 3,
+      demand: "HIGH",
+      investment: `₹${Math.round((financials?.projectCost || 500000) * 1.1).toLocaleString("en-IN")}`,
+      competition: "MEDIUM",
+    },
+    {
+      rank: 3,
+      name: "Poultry",
+      score: (report?.viabilityScore || 85) - 7,
+      demand: "MEDIUM",
+      investment: `₹${Math.round((financials?.projectCost || 500000) * 0.8).toLocaleString("en-IN")}`,
+      competition: "LOW",
+    }
+  ];
   return (
+
     <>
       <PageMeta
         title={t("dashboard.title")}
@@ -388,7 +403,7 @@ export default function Home() {
               {t("dashboard.aiOpportunityRanking")}
             </span>
             <div className="space-y-3 flex-grow">
-              {opportunities.map((opp) => (
+              {(opportunities || []).map((opp) => (
                 <div
                   key={opp.rank}
                   className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800"
@@ -443,7 +458,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody className="text-gray-700 dark:text-gray-300">
-                    {opportunities.map((opp) => (
+                    {(opportunities || []).map((opp) => (
                       <tr key={opp.rank} className="border-t border-gray-50 dark:border-gray-800">
                         <td className="py-1.5 font-bold text-gray-900 dark:text-white">{opp.name}</td>
                         <td className="py-1.5">

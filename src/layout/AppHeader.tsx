@@ -220,7 +220,7 @@ const AppHeader: React.FC = () => {
                   <span> K </span>
                 </button>
               </div>
-            )}
+            </form>
           </div>
         </div>
         <div

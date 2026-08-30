@@ -31,7 +31,7 @@ const AppLayout: React.FC = () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/signin" replace />;
   }
 
   return (

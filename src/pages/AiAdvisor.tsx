@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import { aiAdvisorService } from "../services/aiAdvisorService";
@@ -12,6 +13,7 @@ interface ChatMessage {
 
 export default function AiAdvisor() {
   const { t } = useTranslation();
+  const location = useLocation();
   const { input, financials } = useVyapar();
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -31,6 +33,12 @@ export default function AiAdvisor() {
   ]);
 
   const [userInputText, setUserInputText] = useState("");
+
+  useEffect(() => {
+    if (location.state?.initialQuery) {
+      setUserInputText(location.state.initialQuery);
+    }
+  }, [location.state]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

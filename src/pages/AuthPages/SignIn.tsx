@@ -57,6 +57,12 @@ export default function SignIn() {
     },
   });
 
+  const handleSocialLogin = (provider: string) => {
+    if (provider === 'Google') {
+      googleLoginTrigger();
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -64,10 +70,23 @@ export default function SignIn() {
       return;
     }
     setError('');
-    let parsedName = email.split('@')[0];
-      parsedName = parsedName === 'admin' ? 'Musharof' : parsedName.charAt(0).toUpperCase() + parsedName.slice(1);
-      localStorage.setItem('userName', parsedName);
+    
+    // Call the real API to authenticate and get the correct user details
+    const res = await authApiService.login({ email, password });
+    
+    if (res.success && res.data) {
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('userName', res.data.user.name);
+      
+      // Dispatch event so context updates if it listens
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('userUpdated'));
+      
       navigate('/');
+    } else {
+      setError(res.message || 'Invalid email or password');
+    }
   };
 
   return (
@@ -201,9 +220,9 @@ export default function SignIn() {
                   </button>
                 </div>
                 <div className="flex justify-end mt-2">
-                  <a href="#" className="text-[12px] text-green-700 dark:text-emerald-400 font-bold hover:text-green-800 dark:hover:text-emerald-300 transition-colors">
+                  <Link to="/forgot-password" className="text-[12px] text-green-700 dark:text-emerald-400 font-bold hover:text-green-800 dark:hover:text-emerald-300 transition-colors">
                     {t('auth.forgotPassword')}
-                  </a>
+                  </Link>
                 </div>
               </div>
 
