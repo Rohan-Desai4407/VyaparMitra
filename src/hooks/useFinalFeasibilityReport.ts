@@ -22,10 +22,12 @@ export function useFinalFeasibilityReport() {
     // Cross-module validation checks
     const mismatches: string[] = [];
     let isDataConsistent = true;
-    const fin = financialData?.recommendedScheme?.financials;
+    const scheme = financialData?.recommendedScheme;
+    const fin = scheme?.financials;
+    const financing = scheme?.financing;
 
-    if (fin?.loanAmount && repaymentData?.loanCalculation?.loanAmount) {
-      const frLoan = fin.loanAmount;
+    if (financing?.requestedLoan && repaymentData?.loanCalculation?.loanAmount) {
+      const frLoan = financing.requestedLoan;
       const repLoan = repaymentData.loanCalculation.loanAmount;
       
       if (Math.abs(frLoan - repLoan) > 10) {
@@ -37,7 +39,7 @@ export function useFinalFeasibilityReport() {
     // Dynamic Viability Scoring Engine
     let marketScore = marketData?.opportunities?.recommendation?.score || 60;
     let financialScore = 80;
-    let fundingScore = fin ? (fin.userContribution / fin.projectCost) * 100 : 50;
+    let fundingScore = financing && financing.projectCost > 0 ? (financing.marginCapital / financing.projectCost) * 100 : 50;
     if (fundingScore > 100) fundingScore = 100;
     
     let riskScore = swotData ? 100 - swotData.overallRiskScore : 50; // Inverse of risk factor
@@ -70,7 +72,7 @@ export function useFinalFeasibilityReport() {
       overall: isDataConsistent && financialData && marketData ? "High" : "Low"
     };
 
-    const schemeName = financialData?.recommendedScheme?.schemeName || "No Scheme Available";
+    const schemeName = financialData?.recommendedScheme?.name || "No Scheme Available";
 
     return {
       reportId: `VM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -97,7 +99,7 @@ export function useFinalFeasibilityReport() {
         mismatches
       },
       dataQuality,
-      executiveSummary: `The proposed ${input.category} in ${input.village}, ${input.block}, ${input.district} has an estimated addressable market of ${marketData?.consumer?.consumerBase?.toLocaleString('en-IN') || 'N/A'} consumers within 10 km. Based on available margin capital of ₹${input.marginCapital.toLocaleString('en-IN')}, the calculated feasible project cost is ₹${fin?.projectCost?.toLocaleString('en-IN') || 'N/A'}, with an estimated financing requirement of ₹${fin?.loanAmount?.toLocaleString('en-IN') || 'N/A'} under the ${schemeName} scheme.`,
+      executiveSummary: `The proposed ${input.category} in ${input.village}, ${input.block}, ${input.district} has an estimated addressable market of ${marketData?.consumer?.consumerBase?.toLocaleString('en-IN') || 'N/A'} consumers within 10 km. Based on available margin capital of ₹${input.marginCapital.toLocaleString('en-IN')}, the calculated feasible project cost is ₹${financing?.projectCost?.toLocaleString('en-IN') || 'N/A'}, with an estimated financing requirement of ₹${financing?.requestedLoan?.toLocaleString('en-IN') || 'N/A'} under the ${schemeName} scheme.`,
       actionItems: [
         { task: `Apply for ${schemeName}`, status: 'Pending' },
         { task: `Verify margin capital of ₹${input.marginCapital.toLocaleString('en-IN')}`, status: 'Pending' },

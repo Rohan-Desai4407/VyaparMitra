@@ -114,6 +114,7 @@ model BusinessCategory {
   updatedAt   DateTime @updatedAt
 
   assessments Assessment[]
+  projectTemplates ProjectCostTemplate[]
   schemes     SchemeCategoryMatch[]
 }
 
@@ -216,6 +217,7 @@ model Assessment {
   
   result AssessmentResult?
   swot             SwotAnalysis?
+  projectExpenses ProjectExpense[]
 }
 
 model AssessmentResult {
@@ -298,4 +300,69 @@ model SwotAnalysis {
   updatedAt        DateTime @updatedAt
 
   assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// PROJECT EXPENSE & COST BREAKDOWN MODELS
+// ==========================================
+
+model ProjectCostTemplate {
+  id                 String   @id @default(uuid())
+  businessCategoryId String
+  scale              String   @default("MEDIUM") // SMALL, MEDIUM, LARGE
+  name               String
+  description        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  category           BusinessCategory @relation(fields: [businessCategoryId], references: [id])
+  items              TemplateExpenseItem[]
+}
+
+model TemplateExpenseItem {
+  id          String   @id @default(uuid())
+  templateId  String
+  category    String   // CAPEX, WORKING_CAPITAL, CONTINGENCY, etc.
+  itemName    String
+  description String?
+  quantity    Int      @default(1)
+  unit        String   // pcs, kg, months, etc.
+  isRequired  Boolean  @default(true)
+  basePrice   Float    @default(0) // Default benchmark price
+  
+  template    ProjectCostTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model RegionalPricing {
+  id                 String   @id @default(uuid())
+  itemName           String
+  stateId            String?
+  districtId         String?
+  locationAdjustment Float    @default(1.0)
+  minPrice           Float?
+  maxPrice           Float?
+  basePrice          Float
+  source             String?
+  sourceUrl          String?
+  lastUpdated        DateTime @default(now())
+
+  @@index([itemName])
+}
+
+model ProjectExpense {
+  id                 String   @id @default(uuid())
+  assessmentId       String
+  category           String   // CAPEX, WORKING_CAPITAL, CONTINGENCY
+  itemName           String
+  description        String?
+  quantity           Int
+  unit               String
+  unitPrice          Float
+  amount             Float
+  pricingSource      String?
+  pricingSourceUrl   String?
+  lastUpdated        DateTime @default(now())
+  isOptional         Boolean  @default(false)
+
+  assessment         Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
 }

@@ -4,7 +4,7 @@ import PageMeta from "../components/common/PageMeta";
 import ComponentCard from "../components/common/ComponentCard";
 import { Link } from "react-router";
 import { useFinancialSchemes } from "../hooks/useFinancialSchemes";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 
 export default function FinancialPlanner() {
@@ -45,7 +45,8 @@ export default function FinancialPlanner() {
               to="/what-if-simulator"
               className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-xs font-bold text-white hover:bg-brand-600 transition shadow-sm"
             >
-              Launch What-if Simulator 🎛️
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              Launch What-if Simulator
             </Link>
             <button 
                onClick={handleRefresh} 
@@ -145,10 +146,10 @@ export default function FinancialPlanner() {
             <div className="space-y-3 lg:w-1/2">
               <div className="flex items-center gap-3">
                 <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
-                  activeScheme.status === 'ELIGIBLE' ? 'bg-emerald-500 text-white' : 
-                  activeScheme.status === 'POTENTIALLY_ELIGIBLE' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+                  activeScheme.eligibilityStatus === 'ELIGIBLE' ? 'bg-emerald-500 text-white' : 
+                  activeScheme.eligibilityStatus === 'PARTIALLY ELIGIBLE' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
                 }`}>
-                  {activeScheme.status.replace('_', ' ')}
+                  {(activeScheme.eligibilityStatus || '')}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">
                   Score: {activeScheme.score}/100
@@ -160,13 +161,13 @@ export default function FinancialPlanner() {
               </h2>
 
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                {activeScheme.reason}
+                {(activeScheme.reasons ? activeScheme.reasons[0] : '')}
               </p>
               
               <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/60 rounded text-xs text-gray-600 dark:text-gray-400">
-                <p><strong>{t("scheme.officialMinistry")}</strong> {activeScheme.ministry}</p>
-                <p><strong>{t("scheme.source")}</strong> <a href={activeScheme.sourceUrl} target="_blank" className="text-brand-500 hover:underline">{activeScheme.sourceUrl}</a></p>
-                <p><strong>{t("scheme.lastVerified")}</strong> {new Date(activeScheme.lastVerified).toLocaleDateString()}</p>
+                <p><strong>{t("scheme.officialMinistry")}</strong> {activeScheme.source?.ministry}</p>
+                <p><strong>{t("scheme.source")}</strong> <a href={activeScheme.source?.url} target="_blank" className="text-brand-500 hover:underline">{activeScheme.source?.url}</a></p>
+                <p><strong>{t("scheme.lastVerified")}</strong> {new Date(activeScheme.source?.lastVerified).toLocaleDateString()}</p>
               </div>
             </div>
 
@@ -276,5 +277,6 @@ export default function FinancialPlanner() {
     </>
   );
 }
+
 
 

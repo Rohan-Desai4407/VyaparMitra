@@ -182,7 +182,7 @@ export class MarketIntelligenceEngine {
 
     } catch (e: any) {
       console.error("Competitor Density Error:", e.message);
-      throw new Error("Unable to retrieve nearby business data.");
+      throw new Error(e.message || "Unable to retrieve nearby business data.");
     }
   }
 

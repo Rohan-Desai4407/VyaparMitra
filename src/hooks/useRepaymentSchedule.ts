@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useVyapar } from '../context/VyaparContext';
 
 export function useRepaymentSchedule() {
-  const { input } = useVyapar();
+  const { input, financials } = useVyapar();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +18,7 @@ export function useRepaymentSchedule() {
         },
         body: JSON.stringify({
           capital: input.marginCapital,
+          projectCost: financials.projectCost,
           categoryId: input.categoryId,
           stateId: input.stateId
         }),
@@ -36,7 +37,8 @@ export function useRepaymentSchedule() {
 
   useEffect(() => {
     fetchSchedule();
-  }, [input.marginCapital, input.stateId, input.categoryId]);
+  }, [input.marginCapital, financials.projectCost, input.stateId, input.categoryId]);
 
   return { data, loading, error, refetch: fetchSchedule };
 }
+

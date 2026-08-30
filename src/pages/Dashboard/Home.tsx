@@ -14,8 +14,9 @@ import PageMeta from "../../components/common/PageMeta";
 function deriveViabilityFactors(
   viabilityScore: number,
   competitorDensity: string,
-  loanAmount: number,
-  maxLoan: number
+  userContribution: number,
+  projectCost: number,
+  maxLoanAmount: number
 ) {
   // Market Potential — strong if score is high and competition isn't crushing
   const competitionPenalty =
@@ -25,11 +26,11 @@ function deriveViabilityFactors(
     Math.max(40, viabilityScore + 4 - competitionPenalty)
   );
 
-  // Financial Readiness — based on how close actual loan is to max scheme loan
-  const loanUtilization = maxLoan > 0 ? (loanAmount / maxLoan) * 100 : 50;
+  // Financial Readiness — how much of the project cost user can self-fund
+  const selfFundRatio = projectCost > 0 ? (userContribution / projectCost) * 100 : 50;
   const financialReadiness = Math.min(
     100,
-    Math.max(40, Math.round(loanUtilization * 0.85 + 10))
+    Math.max(20, Math.round(selfFundRatio * 3.5 + 30))
   );
 
   // Resource Availability — derived from base viability + competition signal
@@ -38,10 +39,12 @@ function deriveViabilityFactors(
     Math.max(40, viabilityScore + 1 + competitionPenalty * 0.5)
   );
 
-  // Funding Match — how well the scheme covers their needs
+  // Funding Match — how well the scheme loan covers remaining project cost
+  const loanNeeded = projectCost - userContribution;
+  const fundingCoverage = loanNeeded > 0 ? (maxLoanAmount / loanNeeded) * 100 : 100;
   const fundingMatch = Math.min(
     100,
-    Math.max(40, Math.round(loanUtilization * 0.9 + 5))
+    Math.max(20, Math.round(fundingCoverage * 0.85 + 10))
   );
 
   return { marketPotential, financialReadiness, resourceAvailability, fundingMatch };
@@ -103,7 +106,12 @@ export default function Home() {
   const profitMargin = Math.round((estMonthlyProfit / estMonthlyRevenue) * 100) || 0;
   const breakEvenMonths = 14;
   const [userName, setUserName] = React.useState('Guest User');
+  const [mounted, setMounted] = useState(false);
+  
   React.useEffect(() => {
+    // Trigger animation on mount
+    const timer = setTimeout(() => setMounted(true), 100);
+    
     const updateName = () => {
       try {
         const u = localStorage.getItem('user');
@@ -113,7 +121,10 @@ export default function Home() {
     };
     updateName();
     window.addEventListener('userUpdated', updateName);
-    return () => window.removeEventListener('userUpdated', updateName);
+    return () => {
+      window.removeEventListener('userUpdated', updateName);
+      clearTimeout(timer);
+    };
   }, []);
 
   
@@ -233,16 +244,119 @@ export default function Home() {
             </div>
           </div>
         </div>
-        {/* MAIN RECOMMENDATION & AI RANKING */}
+        {/* BUSINESS VIABILITY BREAKDOWN + QUICK ACTIONS */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-2xl border border-emerald-200 bg-emerald-50/30 p-6 dark:border-emerald-900/30 dark:bg-emerald-900/10">
-            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block mb-2">AI BUSINESS RECOMMENDATION</span>
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{input.category}</h2>
-              <span className="text-2xl font-black text-emerald-600">84 <span className="text-sm text-gray-400 font-normal">/ 100</span></span>
+          {/* Viability Breakdown Chart */}
+          <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+            {/* Header with Overall Score Badge */}
+            <div className="flex justify-between items-start mb-1">
+              <div>
+                <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">Business Viability Breakdown</h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">AI-derived factors contributing to your overall score</p>
+              </div>
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5">
+                <div className="text-right">
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Overall Score</span>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-2xl font-black text-emerald-600">{report.viabilityScore}</span>
+                    <span className="text-xs text-gray-400 font-medium">/ 100</span>
+                  </div>
+                </div>
+                <Activity className="w-5 h-5 text-emerald-500" />
+              </div>
+            </div>
+
+            {/* Factor Bars */}
+            <div className="mt-5 space-y-2">
+              {(() => {
+                const factors = deriveViabilityFactors(
+                  report.viabilityScore,
+                  market.competitorDensity,
+                  financials.userContribution,
+                  financials.projectCost,
+                  financials.maxLoanAmount
+                );
+                const items = [
+                  { label: "Market Potential", value: factors.marketPotential, color: "emerald", icon: <TrendingUp className="w-4 h-4" /> },
+                  { label: "Financial Readiness", value: factors.financialReadiness, color: "blue", icon: <Wallet className="w-4 h-4" /> },
+                  { label: "Resource Availability", value: factors.resourceAvailability, color: "amber", icon: <Store className="w-4 h-4" /> },
+                  { label: "Funding Match", value: factors.fundingMatch, color: "purple", icon: <Landmark className="w-4 h-4" /> },
+                ];
+                const colorMap: Record<string, { bg: string; text: string; bar: string; barBg: string }> = {
+                  emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/20", text: "text-emerald-600 dark:text-emerald-400", bar: "bg-emerald-500", barBg: "bg-emerald-100 dark:bg-emerald-900/30" },
+                  blue: { bg: "bg-blue-50 dark:bg-blue-900/20", text: "text-blue-600 dark:text-blue-400", bar: "bg-blue-500", barBg: "bg-blue-100 dark:bg-blue-900/30" },
+                  amber: { bg: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400", bar: "bg-amber-500", barBg: "bg-amber-100 dark:bg-amber-900/30" },
+                  purple: { bg: "bg-purple-50 dark:bg-purple-900/20", text: "text-purple-600 dark:text-purple-400", bar: "bg-purple-500", barBg: "bg-purple-100 dark:bg-purple-900/30" },
+                };
+                return items.map((item) => {
+                  const c = colorMap[item.color];
+                  return (
+                    <div key={item.label} className="flex items-center gap-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3">
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${c.bg} ${c.text}`}>
+                        {item.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1.5">{item.label}</span>
+                        <div className={`w-full h-2 rounded-full overflow-hidden ${c.barBg}`}>
+                          <div className={`h-full rounded-full transition-all duration-1000 ease-out ${c.bar}`} style={{ width: mounted ? `${item.value}%` : '0%' }} />
+                        </div>
+                      </div>
+                      <span className={`text-sm font-black ${c.text} w-12 text-right shrink-0`}>{item.value}%</span>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Monthly Projection — Sparkline Style */}
+            <div className="mt-6 pt-5 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white">Monthly Projection</h4>
+                <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                  <IndianRupee className="w-3 h-3" /> This Month
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "Revenue", value: estMonthlyRevenue, color: "text-emerald-600", stroke: "#10b981", points: "0,28 15,22 30,25 50,18 70,20 85,12 100,8" },
+                  { label: "Expenses", value: estMonthlyExpenses, color: "text-amber-600", stroke: "#f59e0b", points: "0,30 20,25 35,28 55,20 70,22 85,18 100,15" },
+                  { label: "EMI", value: financials.monthlyEmi, color: "text-red-500", stroke: "#ef4444", points: "0,20 20,18 40,22 60,18 80,20 100,16" },
+                  { label: "Profit", value: Math.max(0, estMonthlyProfit), color: "text-blue-600", stroke: "#3b82f6", points: "0,30 18,28 35,22 55,20 72,15 88,12 100,8" },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">{item.label}</span>
+                      <span className={`text-xs font-bold ${item.color}`}>₹{(item.value / 1000).toFixed(0)}K</span>
+                    </div>
+                    <svg viewBox="0 0 100 35" className="w-full h-8 overflow-visible" preserveAspectRatio="none">
+                      <polyline
+                        fill="none"
+                        stroke={item.stroke}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        points={item.points}
+                        strokeDasharray="200"
+                        strokeDashoffset={mounted ? "0" : "200"}
+                        className="transition-all duration-[1500ms] ease-out"
+                      />
+                      <circle 
+                        cx={item.points.split(' ').pop()?.split(',')[0]} 
+                        cy={item.points.split(' ').pop()?.split(',')[1]} 
+                        r="2.5" 
+                        fill={item.stroke} 
+                        className={`transition-opacity duration-500 delay-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}
+                      />
+                    </svg>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 flex flex-col">
+            <h3 className="text-lg font-extrabold text-gray-900 dark:text-white mb-1">Quick Actions</h3>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Jump directly to key tasks</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
             {[
               {
                 icon: <ClipboardList className="w-5 h-5" />,
@@ -320,6 +434,7 @@ export default function Home() {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
