@@ -129,56 +129,58 @@ export default function SchemeRouter() {
           </div>
         </ComponentCard>
 
-        {/* PRD Loan & Financial Rules Comparison Table */}
-        <ComponentCard title={t("scheme.comparisonMatrix")}>
-          <div className="overflow-x-auto">
+        {/* Government Scheme Comparison Table matching Problem Statement */}
+        <ComponentCard title="Government Scheme Comparison Matrix">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
             <table className="min-w-full text-left text-sm text-gray-800 dark:text-gray-200">
-              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50 text-xs uppercase tracking-wider text-gray-500">
+              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/60 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                 <tr>
-                  <th className="px-4 py-3.5 font-semibold">{t("scheme.criteriaHeader")}</th>
-                  <th className={`px-4 py-3.5 font-semibold ${financials.scheme.code === "MICRO" ? "text-brand-600 dark:text-brand-400" : ""}`}>
-                    {t("scheme.microHeader")} {financials.scheme.code === "MICRO" && t("scheme.activeStar")}
-                  </th>
-                  <th className={`px-4 py-3.5 font-semibold ${financials.scheme.code === "TERM" ? "text-brand-600 dark:text-brand-400" : ""}`}>
-                    {t("scheme.termHeader")} {financials.scheme.code === "TERM" && t("scheme.activeStar")}
-                  </th>
+                  <th className="px-4 py-3.5">Scheme</th>
+                  <th className="px-4 py-3.5 text-right">Project Cost</th>
+                  <th className="px-4 py-3.5 text-right">Interest</th>
+                  <th className="px-4 py-3.5 text-right">Tenure</th>
+                  <th className="px-4 py-3.5 text-right">Moratorium</th>
+                  <th className="px-4 py-3.5 text-center">Selection Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowProjectCost")}</td>
-                  <td className="px-4 py-3 font-medium">{t("scheme.upTo140")}</td>
-                  <td className="px-4 py-3 font-medium">{t("scheme.range140to50")}</td>
+                <tr className={(activeScheme?.schemeCode || financials.scheme.code) === "MICRO" ? "bg-emerald-50/50 dark:bg-emerald-950/20" : ""}>
+                  <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-center gap-2">
+                      Micro Finance
+                      {(activeScheme?.schemeCode || financials.scheme.code) === "MICRO" && (
+                        <span className="rounded-full bg-emerald-500 text-white text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wide">Selected</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-right font-medium">Up to ₹1.40L</td>
+                  <td className="px-4 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">6.5%</td>
+                  <td className="px-4 py-3.5 text-right font-medium">3 years</td>
+                  <td className="px-4 py-3.5 text-right font-medium">3 months</td>
+                  <td className="px-4 py-3.5 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${(activeScheme?.schemeCode || financials.scheme.code) === "MICRO" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}>
+                      {(activeScheme?.schemeCode || financials.scheme.code) === "MICRO" ? "Optimal Match" : "Project Cost Exceeded"}
+                    </span>
+                  </td>
                 </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowAgencyFinancing")}</td>
-                  <td className="px-4 py-3">{t("scheme.upTo90")}</td>
-                  <td className="px-4 py-3">{t("scheme.upTo90")}</td>
-                </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowMaxLoan")}</td>
-                  <td className="px-4 py-3">{t("scheme.capMicro")}</td>
-                  <td className="px-4 py-3">{t("scheme.capTerm")}</td>
-                </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowInterestRate")}</td>
-                  <td className="px-4 py-3 text-emerald-600 font-bold dark:text-emerald-400">{t("scheme.rateMicro")}</td>
-                  <td className="px-4 py-3 text-brand-600 font-bold dark:text-brand-400">{t("scheme.rateTerm")}</td>
-                </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowTenure")}</td>
-                  <td className="px-4 py-3">{t("scheme.tenureMicro")}</td>
-                  <td className="px-4 py-3">{t("scheme.tenureTerm")}</td>
-                </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowMoratorium")}</td>
-                  <td className="px-4 py-3">{t("scheme.moraMicro")}</td>
-                  <td className="px-4 py-3">{t("scheme.moraTerm")}</td>
-                </tr>
-                <tr className={financials.scheme.code === "MICRO" ? "bg-brand-50/40 dark:bg-brand-950/20" : ""}>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">{t("scheme.rowInstallment")}</td>
-                  <td className="px-4 py-3">{t("scheme.quarterlyMonthly")}</td>
-                  <td className="px-4 py-3">{t("scheme.quarterlyMonthly")}</td>
+                <tr className={(activeScheme?.schemeCode || financials.scheme.code) === "TERM" ? "bg-brand-50/50 dark:bg-brand-950/20" : ""}>
+                  <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-center gap-2">
+                      Term Loan
+                      {(activeScheme?.schemeCode || financials.scheme.code) === "TERM" && (
+                        <span className="rounded-full bg-brand-500 text-white text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wide">Selected</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-right font-medium">₹1.40L–₹50L</td>
+                  <td className="px-4 py-3.5 text-right font-bold text-brand-600 dark:text-brand-400">8%</td>
+                  <td className="px-4 py-3.5 text-right font-medium">7 years</td>
+                  <td className="px-4 py-3.5 text-right font-medium">6 months</td>
+                  <td className="px-4 py-3.5 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${(activeScheme?.schemeCode || financials.scheme.code) === "TERM" ? "bg-brand-100 text-brand-800 dark:bg-brand-950 dark:text-brand-300" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}>
+                      {(activeScheme?.schemeCode || financials.scheme.code) === "TERM" ? "Optimal Match" : "Requires Scale-Up"}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>

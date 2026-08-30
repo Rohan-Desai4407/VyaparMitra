@@ -42,22 +42,25 @@ export const GoogleAccountModal: React.FC<GoogleAccountModalProps> = ({
     setIsLoading(true);
 
     setTimeout(() => {
-      localStorage.setItem("token", `google_oauth_token_${Date.now()}`);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: account.name,
-          email: account.email,
-          avatar: account.avatar,
-          authProvider: "Google",
-        })
-      );
-      window.dispatchEvent(new Event("storage"));
-      if (onSelectAccount) onSelectAccount(account);
       setIsLoading(false);
       onClose();
-      navigate("/dashboard");
-    }, 700);
+      if (onSelectAccount) {
+        onSelectAccount(account);
+      } else {
+        localStorage.setItem("token", `google_oauth_token_${Date.now()}`);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: account.name,
+            email: account.email,
+            avatar: account.avatar,
+            authProvider: "Google",
+          })
+        );
+        window.dispatchEvent(new Event("storage"));
+        navigate("/dashboard");
+      }
+    }, 500);
   };
 
   return (
