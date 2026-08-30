@@ -192,7 +192,7 @@ export const getTemplates = async (req: Request, res: Response): Promise<void> =
 
 export const getProjectExpenses = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { assessmentId } = req.params;
+    const assessmentId = Array.isArray(req.params.assessmentId) ? req.params.assessmentId[0] : (req.params.assessmentId as string);
     const expenses = await prisma.projectExpense.findMany({ where: { assessmentId } });
     res.status(200).json({ data: expenses });
   } catch (error) {
@@ -203,7 +203,7 @@ export const getProjectExpenses = async (req: Request, res: Response): Promise<v
 
 export const saveProjectExpenses = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { assessmentId } = req.params;
+    const assessmentId = Array.isArray(req.params.assessmentId) ? req.params.assessmentId[0] : (req.params.assessmentId as string);
     const { expenses } = req.body;
 
     if (!Array.isArray(expenses)) {
