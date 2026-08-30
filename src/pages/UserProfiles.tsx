@@ -375,12 +375,30 @@ export default function UserProfiles() {
         </section>
 
         {/* Security & Login */}
-        <section className="p-6 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-800">
-          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Account Actions</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowDeleteModal(true)}>
-            Delete Account
-          </Button>
+        <section className="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-2">Account Actions</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Sign out of your session or manage your account options.</p>
+          <div className="flex flex-wrap gap-4">
+            <Button
+              variant="outline"
+              className="text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+              onClick={() => {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("userName");
+                localStorage.removeItem("userAvatar");
+                window.location.href = "/signin";
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sign Out
+            </Button>
+            <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowDeleteModal(true)}>
+              Delete Account
+            </Button>
+          </div>
         </section>
         
       </div>

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function UserDropdown() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
@@ -17,6 +18,15 @@ export default function UserDropdown() {
   const [userName, setUserName] = useState<string>(initialUser?.name || 'Entrepreneur');
   const [userEmail, setUserEmail] = useState<string>(initialUser?.email || 'user@vyaparmitra.in');
   const [completionValue, setCompletionValue] = useState<number>(0);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userAvatar");
+    closeDropdown();
+    navigate("/signin");
+  };
 
   const calculateProgress = (userObj: any) => {
     if (!userObj) return 0;
@@ -108,7 +118,7 @@ export default function UserDropdown() {
           </span>
         </div>
 
-        <span className="block mr-1 font-medium text-theme-sm">{firstName}</span>
+        <span className="block mr-1.5 font-medium text-theme-sm text-gray-800 dark:text-gray-200">{userName}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           height="20"
@@ -123,10 +133,10 @@ export default function UserDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+        className="absolute right-0 mt-[17px] flex w-[250px] flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
       >
-        <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
+        <div className="pb-3 border-b border-gray-100 dark:border-gray-800/60">
+          <span className="block font-semibold text-gray-800 text-theme-sm dark:text-gray-200">
             {userName}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
@@ -134,18 +144,46 @@ export default function UserDropdown() {
           </span>
         </div>
 
-        <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
+        <ul className="flex flex-col gap-1 py-2">
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
               to="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className="flex items-center gap-3 px-2.5 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-white/5"
             >
-              Profile
+              <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Account
+            </DropdownItem>
+          </li>
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              tag="a"
+              to="/ai-advisor"
+              className="flex items-center gap-3 px-2.5 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100/80 dark:text-gray-300 dark:hover:bg-white/5"
+            >
+              <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              </svg>
+              Support
             </DropdownItem>
           </li>
         </ul>
+
+        <div className="pt-2 border-t border-gray-100 dark:border-gray-800/60">
+          <button
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-3 px-2.5 py-2 font-medium text-red-500 hover:text-red-600 rounded-lg group text-theme-sm hover:bg-red-50/60 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors"
+          >
+            <svg className="w-5 h-5 text-red-500 dark:text-red-400 group-hover:text-red-600" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            Sign out
+          </button>
+        </div>
       </Dropdown>
     </div>
   );

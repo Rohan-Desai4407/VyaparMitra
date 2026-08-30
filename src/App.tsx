@@ -53,6 +53,7 @@ export default function App() {
               <Route path="/swot-matrix" element={<SwotMatrix />} />
               <Route path="/final-report" element={<FinalReport />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/profile" element={<UserProfiles />} />
             </Route>
 
             {/* Auth Layout */}

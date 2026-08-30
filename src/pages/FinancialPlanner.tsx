@@ -212,68 +212,64 @@ export default function FinancialPlanner() {
           )}
         </ComponentCard>
 
-        {/* Real Dynamic Scheme Comparison Table */}
-        <ComponentCard title="Government Scheme Comparison Matrix">
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="py-10 text-center text-gray-500">Loading scheme comparison...</div>
-            ) : (!data?.schemes || data.schemes.length === 0) ? (
-              <div className="py-10 text-center text-gray-500">No schemes to compare.</div>
-            ) : (
+        {/* Government Scheme Comparison Table matching Problem Statement */}
+        <ComponentCard title="Government Scheme Rules & Comparison Matrix">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
             <table className="min-w-full text-left text-sm text-gray-800 dark:text-gray-200">
-              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50 text-xs uppercase tracking-wider text-gray-500">
+              <thead className="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/60 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                 <tr>
-                  <th className="px-4 py-3">Feature</th>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <th key={s.schemeId} className="px-4 py-3">{s.officialName || s.schemeCode}</th>
-                  ))}
+                  <th className="px-4 py-3.5">Scheme</th>
+                  <th className="px-4 py-3.5 text-right">Project Cost</th>
+                  <th className="px-4 py-3.5 text-right">Interest</th>
+                  <th className="px-4 py-3.5 text-right">Tenure</th>
+                  <th className="px-4 py-3.5 text-right">Moratorium</th>
+                  <th className="px-4 py-3.5 text-center">Eligibility Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Eligibility</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className={`px-4 py-3 font-bold ${s.status === 'ELIGIBLE' ? 'text-emerald-500' : s.status === 'POTENTIALLY_ELIGIBLE' ? 'text-amber-500' : 'text-red-500'}`}>
-                      {s.status.replace('_', ' ')}
-                    </td>
-                  ))}
+                <tr className={activeScheme?.schemeCode === "MICRO" ? "bg-emerald-50/50 dark:bg-emerald-950/20" : ""}>
+                  <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-center gap-2">
+                      Micro Finance
+                      {activeScheme?.schemeCode === "MICRO" && (
+                        <span className="rounded-full bg-emerald-500 text-white text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wide">Selected</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-right font-medium">Up to ₹1.40L</td>
+                  <td className="px-4 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">6.5%</td>
+                  <td className="px-4 py-3.5 text-right font-medium">3 years</td>
+                  <td className="px-4 py-3.5 text-right font-medium">3 months</td>
+                  <td className="px-4 py-3.5 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${activeScheme?.schemeCode === "MICRO" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}>
+                      {activeScheme?.schemeCode === "MICRO" ? "Optimal Match" : "Project Cost Exceeded"}
+                    </span>
+                  </td>
                 </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Max Project Cost</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className="px-4 py-3">₹{s.financials.projectCost.toLocaleString("en-IN")}</td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Eligible Loan</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className="px-4 py-3">₹{s.financials.loanAmount.toLocaleString("en-IN")}</td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Gov Subsidy</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className="px-4 py-3">{s.financials.subsidy > 0 ? `₹${s.financials.subsidy.toLocaleString("en-IN")}` : 'None'}</td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Interest Rate</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className="px-4 py-3">{s.financials.interestRate ? `${s.financials.interestRate}%` : 'Variable'}</td>
-                  ))}
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-semibold text-gray-900 dark:text-white">Repayment Tenure</td>
-                  {data.schemes.slice(0, 3).map((s: any) => (
-                    <td key={s.schemeId} className="px-4 py-3">{s.financials.tenureMonths} Months</td>
-                  ))}
+                <tr className={activeScheme?.schemeCode === "TERM" ? "bg-brand-50/50 dark:bg-brand-950/20" : ""}>
+                  <td className="px-4 py-3.5 font-bold text-gray-900 dark:text-white">
+                    <div className="flex items-center gap-2">
+                      Term Loan
+                      {activeScheme?.schemeCode === "TERM" && (
+                        <span className="rounded-full bg-brand-500 text-white text-[10px] font-extrabold px-2 py-0.5 uppercase tracking-wide">Selected</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-right font-medium">₹1.40L–₹50L</td>
+                  <td className="px-4 py-3.5 text-right font-bold text-brand-600 dark:text-brand-400">8%</td>
+                  <td className="px-4 py-3.5 text-right font-medium">7 years</td>
+                  <td className="px-4 py-3.5 text-right font-medium">6 months</td>
+                  <td className="px-4 py-3.5 text-center">
+                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${activeScheme?.schemeCode === "TERM" ? "bg-brand-100 text-brand-800 dark:bg-brand-950 dark:text-brand-300" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"}`}>
+                      {activeScheme?.schemeCode === "TERM" ? "Optimal Match" : "Requires Scale-Up"}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
-            )}
           </div>
           <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-            * Scheme eligibility, loan approval, interest rate and financing terms are subject to the latest official guidelines and lender approval. VyaparMitra provides decision support and does not guarantee loan approval.
+            * Scheme eligibility, loan approval, interest rate and financing terms are subject to the official guidelines. VyaparMitra provides decision support for rural micro-entrepreneurs.
           </p>
         </ComponentCard>
       </div>
