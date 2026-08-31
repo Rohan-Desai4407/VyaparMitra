@@ -139,7 +139,7 @@ export default function FinancialPlanner() {
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
                 <span className="text-xs text-gray-500 dark:text-gray-400">{t("financial.userMargin")} ({fData?.marginPercentage || '10%'})</span>
                 <p className="mt-1 text-2xl font-extrabold text-gray-900 dark:text-white">
-                  {loading ? '...' : (fData?.userContribution ? `₹${fData.userContribution.toLocaleString("en-IN")}` : `₹${input.marginCapital.toLocaleString("en-IN")}`)}
+                  {loading ? '...' : (fData?.userContribution ? `₹${fData.userContribution.toLocaleString('en-IN')}` : `₹${input.marginCapital.toLocaleString('en-IN')}`)}
                 </p>
                 <p className="mt-1 text-xs text-gray-400">{t("financial.outOfPocket")}</p>
               </div>
@@ -149,7 +149,7 @@ export default function FinancialPlanner() {
                   {t("financial.totalFeasibleCost")}
                 </span>
                 <p className="mt-1 text-3xl font-black text-brand-600 dark:text-brand-400">
-                  {loading ? '...' : (fData?.projectCost ? `₹${fData.projectCost.toLocaleString("en-IN")}` : `₹${(input.marginCapital * 10).toLocaleString("en-IN")}`)}
+                  {loading ? '...' : (fData?.projectCost ? `₹${fData.projectCost.toLocaleString('en-IN')}` : `₹${(input.marginCapital * 10).toLocaleString('en-IN')}`)}
                 </p>
                 <p className="mt-1 text-xs text-brand-600 dark:text-brand-400">
                   {t("financial.formulaCost")}
@@ -161,7 +161,7 @@ export default function FinancialPlanner() {
                   {t("financial.eligibleLoan")}
                 </span>
                 <p className="mt-1 text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                  {loading ? '...' : (fData?.loanAmount ? `₹${fData.loanAmount.toLocaleString("en-IN")}` : `₹${(input.marginCapital * 9).toLocaleString("en-IN")}`)}
+                  {loading ? '...' : (fData?.loanAmount ? `₹${fData.loanAmount.toLocaleString('en-IN')}` : `₹${(input.marginCapital * 9).toLocaleString('en-IN')}`)}
                 </p>
                 <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
                   {t("financial.govFinancingShare")}

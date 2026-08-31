@@ -136,11 +136,11 @@ export default function PricingModal({ category, onClose }: Props) {
                     {/* Price range */}
                     <div className="col-span-3 text-center">
                       <span className="text-sm font-bold text-brand-600 dark:text-brand-400">
-                        ₹{p.priceMin.toLocaleString("en-IN")}
+                        ₹{p.priceMin.toLocaleString('en-IN')}
                       </span>
                       <span className="text-gray-400 text-xs mx-1">–</span>
                       <span className="text-sm font-bold text-brand-600 dark:text-brand-400">
-                        ₹{p.priceMax.toLocaleString("en-IN")}
+                        ₹{p.priceMax.toLocaleString('en-IN')}
                       </span>
                     </div>
 
@@ -159,7 +159,7 @@ export default function PricingModal({ category, onClose }: Props) {
                 <div className="bg-brand-50 dark:bg-brand-900/20 rounded-xl p-3 text-center border border-brand-100 dark:border-brand-800">
                   <p className="text-[10px] text-brand-600 dark:text-brand-300 font-semibold uppercase tracking-wide">Lowest Entry Price</p>
                   <p className="text-lg font-bold text-brand-700 dark:text-brand-300 mt-1">
-                    ₹{Math.min(...products.map(p => p.priceMin)).toLocaleString("en-IN")}
+                    ₹{Math.min(...products.map(p => p.priceMin)).toLocaleString('en-IN')}
                   </p>
                 </div>
                 <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3 text-center border border-emerald-100 dark:border-emerald-800">
@@ -176,7 +176,7 @@ export default function PricingModal({ category, onClose }: Props) {
                 <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 text-center border border-amber-100 dark:border-amber-800">
                   <p className="text-[10px] text-amber-600 dark:text-amber-300 font-semibold uppercase tracking-wide">Premium High End</p>
                   <p className="text-lg font-bold text-amber-700 dark:text-amber-300 mt-1">
-                    ₹{Math.max(...products.map(p => p.priceMax)).toLocaleString("en-IN")}
+                    ₹{Math.max(...products.map(p => p.priceMax)).toLocaleString('en-IN')}
                   </p>
                 </div>
               </div>

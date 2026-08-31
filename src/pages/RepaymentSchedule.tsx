@@ -102,7 +102,7 @@ export default function RepaymentSchedule() {
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <span className="text-xs text-gray-500 dark:text-gray-400">{t("repayment.totalRepayment")}</span>
             <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-              ₹{Math.round(totalPayment).toLocaleString("en-IN")}
+              ₹{Math.round(totalPayment).toLocaleString('en-IN')}
             </p>
             <p className="mt-1 text-xs text-gray-400">{t("repayment.principal")} + {t("repayment.interest")}</p>
           </div>
@@ -110,7 +110,7 @@ export default function RepaymentSchedule() {
           <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
             <span className="text-xs text-gray-500 dark:text-gray-400">{t("dashboard.estMonthlyEmi")}</span>
             <p className="mt-1 text-2xl font-bold text-brand-600 dark:text-brand-400">
-              ₹{Math.round(loanCalculation.emi).toLocaleString("en-IN")}
+              ₹{Math.round(loanCalculation.emi).toLocaleString('en-IN')}
             </p>
             <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
               {loanCalculation.interestRate}% {t("common.perAnnum")}
@@ -174,22 +174,22 @@ export default function RepaymentSchedule() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono">₹{Math.round(row.principal).toLocaleString("en-IN")}</td>
-                    <td className="px-4 py-3 font-mono">₹{Math.round(row.interest).toLocaleString("en-IN")}</td>
+                    <td className="px-4 py-3 font-mono">₹{Math.round(row.principal).toLocaleString('en-IN')}</td>
+                    <td className="px-4 py-3 font-mono">₹{Math.round(row.interest).toLocaleString('en-IN')}</td>
                     <td className="px-4 py-3 font-mono font-bold text-gray-900 dark:text-white">
-                      ₹{Math.round(row.totalPayment).toLocaleString("en-IN")}
+                      ₹{Math.round(row.totalPayment).toLocaleString('en-IN')}
                     </td>
                     <td className="px-4 py-3 font-mono text-gray-600 dark:text-gray-400">
-                      ₹{Math.max(0, Math.round(row.closingBalance)).toLocaleString("en-IN")}
+                      ₹{Math.max(0, Math.round(row.closingBalance)).toLocaleString('en-IN')}
                     </td>
                   </tr>
                 )})}
                 {/* Validation Totals Row */}
                 <tr className="bg-gray-100 dark:bg-gray-800 font-bold border-t-2 border-gray-300 dark:border-gray-700">
                   <td className="px-4 py-3 text-right" colSpan={2}>TOTALS:</td>
-                  <td className="px-4 py-3 font-mono text-emerald-600 dark:text-emerald-400">₹{Math.round(totalPrincipal).toLocaleString("en-IN")}</td>
-                  <td className="px-4 py-3 font-mono text-red-500">₹{Math.round(totalInterest).toLocaleString("en-IN")}</td>
-                  <td className="px-4 py-3 font-mono text-brand-600 dark:text-brand-400">₹{Math.round(totalPayment).toLocaleString("en-IN")}</td>
+                  <td className="px-4 py-3 font-mono text-emerald-600 dark:text-emerald-400">₹{Math.round(totalPrincipal).toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 font-mono text-red-500">₹{Math.round(totalInterest).toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3 font-mono text-brand-600 dark:text-brand-400">₹{Math.round(totalPayment).toLocaleString('en-IN')}</td>
                   <td className="px-4 py-3 font-mono text-gray-500 dark:text-gray-400">₹0</td>
                 </tr>
               </tbody>

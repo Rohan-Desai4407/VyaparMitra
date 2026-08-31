@@ -1,4 +1,4 @@
-﻿import { Router } from 'express';
+import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { CalculationService } from '../services/CalculationService.js';
 import { SchemeMatcher } from '../services/SchemeMatcher.js';
@@ -7,8 +7,11 @@ import { callGeminiApi } from "../config/gemini.js";
 import { schemeController } from '../controllers/scheme.controller.js';
 import { AmortizationEngine } from '../services/AmortizationEngine.js';
 import { SwotService } from '../services/SwotService.js';
+import simulationRoutes from "./simulation.routes.js";
 const router = Router();
 const prisma = new PrismaClient();
+
+router.use("/simulation", simulationRoutes);
 
 // GET /api/market-intelligence/summary
 router.get('/market-intelligence/summary', async (req, res) => {

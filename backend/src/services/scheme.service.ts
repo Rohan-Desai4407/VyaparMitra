@@ -1,4 +1,4 @@
-﻿import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 interface ApplicantData {
@@ -153,6 +153,33 @@ export const schemeService = {
         { name: 'Bank Statement', required: true }
       );
 
+      // Calculate Subsidy
+      let calculatedSubsidy = 0;
+      if (fRule.subsidyPercentage) {
+         calculatedSubsidy = projectCost * (fRule.subsidyPercentage / 100);
+         if (fRule.maximumSubsidy && calculatedSubsidy > fRule.maximumSubsidy) {
+            calculatedSubsidy = fRule.maximumSubsidy;
+         }
+      }
+
+      // Calculate EMI and Total Repayment
+      let emi = 0;
+      let totalRepayment = 0;
+      const principal = Math.min(requestedLoan, maxEligibleLoan);
+      
+      if (fRule.interestRate && fRule.tenureMonths && principal > 0) {
+         const annualRate = parseFloat(fRule.interestRate);
+         if (!isNaN(annualRate) && annualRate > 0) {
+            const r = annualRate / 12 / 100;
+            const n = fRule.tenureMonths - (fRule.moratoriumMonths || 0);
+            if (n > 0) {
+               emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+               emi = Math.round(emi);
+               totalRepayment = Math.round(emi * n);
+            }
+         }
+      }
+
       const result = {
         schemeId: scheme.id,
         schemeCode: scheme.schemeCode,
@@ -170,6 +197,9 @@ export const schemeService = {
           moratoriumMonths: fRule.moratoriumMonths,
           maxProjectCost: fRule.maximumProjectCost,
           maxLoan: fRule.maximumLoan,
+          subsidy: calculatedSubsidy,
+          emi: emi,
+          totalRepayment: totalRepayment
         },
         eligible,
         eligibilityStatus: eligible ? (requiredAdditionalFunding > 0 ? "PARTIALLY ELIGIBLE" : "ELIGIBLE") : "NOT ELIGIBLE",

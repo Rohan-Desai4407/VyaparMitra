@@ -516,7 +516,7 @@ export default function BusinessAssessmentForm() {
                 </div>
                 {preview && (
                   <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                    At a <strong className="text-gray-700 dark:text-gray-300">{preview.marginPercentage}%</strong> margin contribution, this supports an estimated project size of <strong className="text-brand-600 dark:text-brand-400">&#8377;{preview.feasibleProjectCost?.toLocaleString("en-IN")}</strong>.
+                    At a <strong className="text-gray-700 dark:text-gray-300">{preview.marginPercentage}%</strong> margin contribution, this supports an estimated project size of <strong className="text-brand-600 dark:text-brand-400">&#8377;{preview.feasibleProjectCost?.toLocaleString('en-IN')}</strong>.
                   </p>
                 )}
               </div>
@@ -542,7 +542,7 @@ export default function BusinessAssessmentForm() {
                       {preview.bestScheme?.interestRate ? `${preview.bestScheme.interestRate}% Interest` : 'Varies'} • Match: {preview.bestScheme?.matchScore || 0}%
                     </span>
                     <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
-                      Potential Financing: <strong className="text-gray-900 dark:text-white">&#8377;{preview.potentialFinancing?.toLocaleString("en-IN")}</strong> ({preview.financingPercentage}%)
+                      Potential Financing: <strong className="text-gray-900 dark:text-white">&#8377;{preview.potentialFinancing?.toLocaleString('en-IN')}</strong> ({preview.financingPercentage}%)
                     </p>
                   </div>
                 </div>

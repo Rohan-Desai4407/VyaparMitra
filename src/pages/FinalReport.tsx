@@ -171,11 +171,11 @@ export default function FinalReport() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("financial.userMargin")} ({Math.round(report.financial.financing?.marginCapital / report.financial.financing?.projectCost * 100)}%)</span>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{report.financial.financing?.marginCapital?.toLocaleString("en-IN")}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{report.financial.financing?.marginCapital?.toLocaleString('en-IN')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("financial.totalFeasibleCost")}</span>
-                    <p className="text-lg font-bold text-brand-600 dark:text-brand-400">₹{report.financial.financing?.projectCost?.toLocaleString("en-IN")}</p>
+                    <p className="text-lg font-bold text-brand-600 dark:text-brand-400">₹{report.financial.financing?.projectCost?.toLocaleString('en-IN')}</p>
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("scheme.autoRecTitle")}</span>
@@ -183,14 +183,14 @@ export default function FinalReport() {
                   </div>
                   <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800">
                     <span className="text-xs text-gray-400">{t("financial.eligibleLoan")} ({Math.round(report.financial.financing?.requestedLoan / report.financial.financing?.projectCost * 100)}%)</span>
-                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{report.financial.financing?.requestedLoan?.toLocaleString("en-IN")}</p>
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">₹{report.financial.financing?.requestedLoan?.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/40 p-3 rounded-lg">
                   <span><strong>{t("scheme.interestRate")}:</strong> {report.financial.financials?.interestRate}% {t("common.perAnnum")}</span>
                   <span><strong>{t("scheme.repaymentTenure")}:</strong> {report.financial.financials?.tenureMonths / 12} {t("common.years")}</span>
                   <span><strong>{t("scheme.moratoriumPeriod")}:</strong> {report.financial.financials?.moratoriumMonths} {t("common.months")}</span>
-                  <span><strong>{t("dashboard.estMonthlyEmi")}:</strong> ₹{report.repayment?.loanCalculation?.emi?.toLocaleString("en-IN") || 'N/A'}</span>
+                  <span><strong>{t("dashboard.estMonthlyEmi")}:</strong> ₹{report.repayment?.loanCalculation?.emi?.toLocaleString('en-IN') || 'N/A'}</span>
                 </div>
               </>
             )}
@@ -209,7 +209,7 @@ export default function FinalReport() {
                     <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded">{report.dataQuality.market}</span>
                   </div>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                    Estimated reach of <strong>{report.market.consumer?.consumerBase?.toLocaleString("en-IN") || 'N/A'} consumers</strong> within 10 km radius. Suggested market price point: <strong>{report.market.pricing?.suggestedPricing || 'N/A'}</strong>.
+                    Estimated reach of <strong>{report.market.consumer?.consumerBase?.toLocaleString('en-IN') || 'N/A'} consumers</strong> within 10 km radius. Suggested market price point: <strong>{report.market.pricing?.suggestedPricing || 'N/A'}</strong>.
                   </p>
                   <p className="text-[10px] text-gray-400 mt-2">Source: {report.market.consumer?.source || 'Model estimate'}</p>
                 </div>

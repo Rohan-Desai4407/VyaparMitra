@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useVyapar } from '../context/VyaparContext';
 
 export function useFinancialSchemes() {
@@ -36,6 +36,7 @@ export function useFinancialSchemes() {
       const json = await res.json();
       
       // Our API returns { status, data: { schemes, recommendedScheme } }
+      console.log("Scheme API Response:", json);
       if (json && json.data && json.data.schemes) {
         setData(json.data);
       } else {
