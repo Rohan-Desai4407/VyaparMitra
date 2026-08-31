@@ -53,11 +53,6 @@ const AppSidebar: React.FC = () => {
       path: "/financial-planner",
     },
     {
-      icon: <TableIcon />,
-      name: t("nav.schemeRouter"),
-      path: "/scheme-router",
-    },
-    {
       icon: <CalenderIcon />,
       name: t("nav.repaymentSchedule"),
       path: "/repayment-schedule",
@@ -73,15 +68,15 @@ const AppSidebar: React.FC = () => {
       path: "/what-if-simulator",
     },
     {
+      icon: <TableIcon />,
+      name: t("nav.schemeRouter"),
+      path: "/scheme-router",
+    },
+    {
       icon: <PageIcon />,
       name: t("nav.finalReport"),
       path: "/final-report",
-    },
-    {
-      icon: <Bell className="w-5 h-5" />,
-      name: t("nav.notifications", "Notifications"),
-      path: "/notifications",
-    },
+    }
   ];
 
   const othersItems: NavItem[] = [

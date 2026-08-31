@@ -104,7 +104,7 @@ export default function MarketAnalysis() {
               {data && <DataSourceBadge {...data.consumer} />}
             </span>
             <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-              {loading ? "..." : (data?.consumerError ? <span className="text-sm text-red-500">{data.consumerError}</span> : data?.consumer?.consumerBase?.toLocaleString("en-IN") || "N/A")}
+              {loading ? "..." : (data?.consumerError ? <span className="text-sm text-red-500">{data.consumerError}</span> : data?.consumer?.consumerBase?.toLocaleString('en-IN') || "N/A")}
             </p>
             <div className="mt-2 flex gap-1">
               {[5, 10, 15, 25].map(r => (

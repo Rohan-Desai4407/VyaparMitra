@@ -1,4 +1,4 @@
-﻿import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { schemeService } from "../services/scheme.service.js";
 import { sendSuccess, sendError } from "../utils/response.js";
 
@@ -7,6 +7,7 @@ export const schemeController = {
   async evaluate(req: Request, res: Response, next: NextFunction) {
     try {
       const { applicant, business, projectCost, marginCapital } = req.body;
+      console.log("Evaluate Scheme Request:", req.body);
       
       if (!projectCost || !marginCapital) {
         return sendError(res, "projectCost and marginCapital are required.", 400);

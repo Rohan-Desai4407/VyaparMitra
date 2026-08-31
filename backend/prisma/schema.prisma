@@ -19,6 +19,7 @@ model User {
   updatedAt   DateTime @updatedAt
 
   assessments Assessment[]
+  simulationScenarios SimulationScenario[]
 }
 
 model AuditLog {
@@ -380,4 +381,50 @@ model ProjectExpense {
   isOptional         Boolean  @default(false)
 
   assessment         Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+}
+// ==========================================
+// SIMULATION MODELS
+// ==========================================
+
+model SimulationScenario {
+  id                    String   @id @default(uuid())
+  userId                String
+  assessmentId          String
+  schemeId              String?
+  projectCost           Float?
+  marginCapital         Float?
+  
+  salesVolumeChange     Float
+  sellingPriceChange    Float
+  rawMaterialCostChange Float
+  opexChange            Float
+  interestRateChange    Float
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User       @relation(fields: [userId], references: [id])
+  assessment            Assessment @relation(fields: [assessmentId], references: [id])
+  results               SimulationResult[]
+}
+
+model SimulationResult {
+  id                String   @id @default(uuid())
+  scenarioId        String
+  
+  monthlyRevenue    Float
+  totalExpenses     Float
+  operatingProfit   Float
+  profitMargin      Float
+  emi               Float
+  dscr              Float    
+  breakEvenUnits    Int
+  runwayMonths      Int
+  stressScore       Int
+  riskLevel         String
+  
+  aiInsights        String?  // JSON string
+  createdAt         DateTime @default(now())
+
+  scenario          SimulationScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 }

@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { calculateSimulation, fetchAiAnalysis } from "../services/simulationApi";
 import { useVyapar } from "../context/VyaparContext";
 import { useTranslation } from "react-i18next";
 import PageMeta from "../components/common/PageMeta";
@@ -78,58 +79,78 @@ export default function WhatIfSimulator() {
     setActivePreset("base"); // Switch indicator if manual edit occurs
   };
 
-  // Base parameters derived from Vyapar Context
-  const basePricePerUnit = 60; // default benchmark per unit INR
-  const baseMonthlyUnits = Math.round((financials.projectCost * 0.25) / basePricePerUnit) || 1000;
-  const baseMonthlyRevenue = baseMonthlyUnits * basePricePerUnit;
-  const baseRawMaterialCost = Math.round(baseMonthlyRevenue * 0.45);
-  const baseOpex = Math.round(baseMonthlyRevenue * 0.20);
-  const baseMonthlyEmi = financials.monthlyEmi || 2800;
+  
+  // --- DYNAMIC API INTEGRATION ---
+  const [simData, setSimData] = useState<any>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
-  // Calculated Simulation Outputs
-  const simPricePerUnit = Math.round(basePricePerUnit * (1 + priceChangePct / 100));
+  useEffect(() => {
+    const payload = {
+      userId: 'mock-user-1',
+      assessmentId: 'mock-assessment-1',
+      projectCost: financials.projectCost || 1000000,
+      marginCapital: input.marginCapital || 100000,
+      salesVolumeChange: volumeChangePct,
+      sellingPriceChange: priceChangePct,
+      rawMaterialCostChange: rawMaterialCostChangePct,
+      opexChange: opexChangePct,
+      interestRateChange: interestRateShift,
+      schemeId: financials?.scheme?.id
+    };
+    
+    const timer = setTimeout(() => {
+      calculateSimulation(payload).then(data => {
+        setSimData(data);
+      }).catch(err => console.error(err));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [
+    volumeChangePct, 
+    priceChangePct, 
+    rawMaterialCostChangePct, 
+    opexChangePct, 
+    interestRateShift,
+    financials.projectCost,
+    input.marginCapital,
+    financials?.scheme?.id
+  ]);
+
+  const handleRefreshAi = () => {
+    if (!simData) return;
+    setIsAiLoading(true);
+    fetchAiAnalysis(simData, input.businessCategory || 'General').then(data => {
+      setAiAnalysis(data);
+    }).catch(err => console.error(err))
+      .finally(() => setIsAiLoading(false));
+  };
+
+  const simMonthlyRevenue = simData?.monthlyRevenue || 0;
+  const simMonthlyEmi = simData?.emi || 0;
+  const simTotalExpenses = simData?.totalExpenses || 0;
+  const simNetProfit = simData?.operatingProfit || 0;
+  const simNetMarginPct = simData?.profitMargin || 0;
+  const simRawMaterialCost = Math.round(simTotalExpenses * 0.45);
+  const simOpex = Math.round(simTotalExpenses * 0.20);
+  const breakEvenUnits = simData?.breakEvenUnits || 0;
+
+  const simPricePerUnit = Math.round(60 * (1 + priceChangePct / 100));
+  const baseMonthlyUnits = Math.round(((financials?.projectCost || 1000000) * 0.25) / 60) || 1000;
   const simMonthlyUnits = Math.round(baseMonthlyUnits * (1 + volumeChangePct / 100));
-  const simMonthlyRevenue = Math.round(simMonthlyUnits * simPricePerUnit);
-
-  const simRawMaterialCost = Math.round(
-    baseRawMaterialCost * (simMonthlyUnits / baseMonthlyUnits) * (1 + rawMaterialCostChangePct / 100)
-  );
-  const simOpex = Math.round(baseOpex * (1 + opexChangePct / 100));
-
-  const effectiveInterestRate = Math.max(1, financials.scheme.interestRate + interestRateShift);
-  const r = effectiveInterestRate / 100 / 12;
-  const n = financials.scheme.tenureYears * 12;
-  const simMonthlyEmi =
-    Math.round((financials.maxLoanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1)) || 0;
-
-  const simTotalExpenses = simRawMaterialCost + simOpex + simMonthlyEmi;
-  const simNetProfit = simMonthlyRevenue - simTotalExpenses;
-  const simNetMarginPct = simMonthlyRevenue > 0 ? Number(((simNetProfit / simMonthlyRevenue) * 100).toFixed(2)) : 0;
-
-  // Break-Even Analysis
-  const varCostPerUnit = simMonthlyUnits > 0 ? simRawMaterialCost / simMonthlyUnits : 0;
-  const contribMarginPerUnit = simPricePerUnit - varCostPerUnit;
-  const fixedCosts = simOpex + simMonthlyEmi;
-  const breakEvenUnits = contribMarginPerUnit > 0 ? Math.ceil(fixedCosts / contribMarginPerUnit) : 0;
   const breakEvenRevenue = breakEvenUnits * simPricePerUnit;
 
-  // Financial Stress Score (0 to 100) & DSCR
-  const dscr = simMonthlyEmi > 0 ? Number(((simNetProfit + simMonthlyEmi) / simMonthlyEmi).toFixed(2)) : 5;
-  const healthScore = useMemo(() => {
-    let score = 100;
-    if (simNetProfit < 0) score -= 50;
-    else if (simNetMarginPct < 10) score -= 20;
+  const baseMonthlyRevenue = baseMonthlyUnits * 60;
+  const baseRawMaterialCost = Math.round(baseMonthlyRevenue * 0.45);
+  const baseOpex = Math.round(baseMonthlyRevenue * 0.20);
+  const baseMonthlyEmi = financials?.monthlyEmi || 2800;
 
-    if (dscr < 1.0) score -= 30;
-    else if (dscr < 1.3) score -= 15;
+  const effectiveInterestRate = Math.max(1, (financials?.scheme?.interestRate || 12) + interestRateShift);
 
-    if (volumeChangePct < -20) score -= 10;
-    if (rawMaterialCostChangePct > 20) score -= 10;
 
-    return Math.max(0, Math.min(100, score));
-  }, [simNetProfit, simNetMarginPct, dscr, volumeChangePct, rawMaterialCostChangePct]);
 
-  const riskRating = healthScore >= 75 ? "LOW_RISK" : healthScore >= 50 ? "MODERATE_RISK" : "HIGH_RISK";
+  const healthScore = simData?.stressScore || 0;
+  const riskRating = simData?.riskLevel || 'MODERATE_RISK';
+  const dscr = simData?.dscr || 0;
 
   // 12-Month Projections for Cashflow Chart
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -179,7 +200,7 @@ export default function WhatIfSimulator() {
       },
     },
     tooltip: {
-      y: { formatter: (val) => `₹${val.toLocaleString("en-IN")}` },
+      y: { formatter: (val) => `₹${val.toLocaleString('en-IN')}` },
     },
     grid: { borderColor: "#F3F4F6" },
   };
@@ -216,7 +237,7 @@ export default function WhatIfSimulator() {
             </div>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Simulating for <span className="font-semibold text-gray-800 dark:text-gray-200">{input.category}</span> in{" "}
-              <span className="font-semibold text-gray-800 dark:text-gray-200">{input.village}, {input.block}</span> (Margin Capital: ₹{input.marginCapital.toLocaleString("en-IN")})
+              <span className="font-semibold text-gray-800 dark:text-gray-200">{input.village}, {input.block}</span> (Margin Capital: ₹{input.marginCapital.toLocaleString('en-IN')})
             </p>
           </div>
 
@@ -430,7 +451,7 @@ export default function WhatIfSimulator() {
                 Scheme: <span className="font-semibold">{financials.scheme.name}</span> (Tenure: {financials.scheme.tenureYears} yrs)
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                Total Loan: <span className="font-semibold">₹{financials.maxLoanAmount.toLocaleString("en-IN")}</span> (90% Financing)
+                Total Loan: <span className="font-semibold">₹{financials.maxLoanAmount.toLocaleString('en-IN')}</span> (90% Financing)
               </p>
             </div>
           </div>
@@ -442,7 +463,7 @@ export default function WhatIfSimulator() {
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800/40">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Est. Net Monthly Profit</span>
             <p className={`mt-2 text-2xl font-black ${simNetProfit >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-              ₹{simNetProfit.toLocaleString("en-IN")}
+              ₹{simNetProfit.toLocaleString('en-IN')}
             </p>
             <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
               <span>Base: ₹{baseMonthlyRevenue - (baseRawMaterialCost + baseOpex + baseMonthlyEmi)}</span>
@@ -459,11 +480,11 @@ export default function WhatIfSimulator() {
               <Target className="h-4 w-4 text-brand-500" />
             </span>
             <p className="mt-2 text-2xl font-black text-gray-900 dark:text-white">
-              {breakEvenUnits.toLocaleString("en-IN")} <span className="text-sm font-normal text-gray-500">units/mo</span>
+              {breakEvenUnits.toLocaleString('en-IN')} <span className="text-sm font-normal text-gray-500">units/mo</span>
             </p>
             <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
               <span>Req. Revenue:</span>
-              <span className="font-semibold text-gray-800 dark:text-gray-200">₹{breakEvenRevenue.toLocaleString("en-IN")}</span>
+              <span className="font-semibold text-gray-800 dark:text-gray-200">₹{breakEvenRevenue.toLocaleString('en-IN')}</span>
             </div>
           </div>
 
@@ -471,7 +492,7 @@ export default function WhatIfSimulator() {
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-800/40">
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Simulated Monthly EMI</span>
             <p className="mt-2 text-2xl font-black text-indigo-600 dark:text-indigo-400">
-              ₹{simMonthlyEmi.toLocaleString("en-IN")}
+              ₹{simMonthlyEmi.toLocaleString('en-IN')}
             </p>
             <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
               <span>Interest Rate:</span>
@@ -525,7 +546,7 @@ export default function WhatIfSimulator() {
               <ModernDonutChart
                 segments={donutSegments}
                 centerLabel="Est. Revenue"
-                centerValue={`₹${simMonthlyRevenue.toLocaleString("en-IN")}`}
+                centerValue={`₹${simMonthlyRevenue.toLocaleString('en-IN')}`}
               />
             </ComponentCard>
           </div>
@@ -548,8 +569,8 @@ export default function WhatIfSimulator() {
                 </h4>
                 <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
                   {simNetProfit > 0
-                    ? `Under this scenario, your proposed unit generates a net monthly surplus of ₹${simNetProfit.toLocaleString("en-IN")} (${simNetMarginPct}% net margin) after serving ₹${simMonthlyEmi.toLocaleString("en-IN")} in loan EMI commitments.`
-                    : `Under this scenario, total monthly costs (₹${simTotalExpenses.toLocaleString("en-IN")}) exceed projected monthly revenue (₹${simMonthlyRevenue.toLocaleString("en-IN")}) resulting in a net monthly loss of ₹${Math.abs(simNetProfit).toLocaleString("en-IN")}.`}
+                    ? `Under this scenario, your proposed unit generates a net monthly surplus of ₹${simNetProfit.toLocaleString('en-IN')} (${simNetMarginPct}% net margin) after serving ₹${simMonthlyEmi.toLocaleString('en-IN')} in loan EMI commitments.`
+                    : `Under this scenario, total monthly costs (₹${simTotalExpenses.toLocaleString('en-IN')}) exceed projected monthly revenue (₹${simMonthlyRevenue.toLocaleString('en-IN')}) resulting in a net monthly loss of ₹${Math.abs(simNetProfit).toLocaleString('en-IN')}.`}
                 </p>
               </div>
             </div>
@@ -586,6 +607,33 @@ export default function WhatIfSimulator() {
                   </li>
                 </ul>
               </div>
+            </div>
+          </div>
+        </ComponentCard>
+
+        {/* Data Sources / Calculation Basis */}
+        <ComponentCard title={
+          <div className="flex items-center gap-2">
+            <HelpCircle className="w-5 h-5 text-brand-600" />
+            <span>Calculation Basis</span>
+          </div>
+        }>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <span className="block text-xs text-gray-500 mb-1">Project Cost</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Project Expense Plan</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <span className="block text-xs text-gray-500 mb-1">Loan & Interest</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Selected Scheme</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <span className="block text-xs text-gray-500 mb-1">Revenue Assumptions</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Business Assessment</span>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <span className="block text-xs text-gray-500 mb-1">AI Insights</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">Gemini</span>
             </div>
           </div>
         </ComponentCard>
@@ -654,7 +702,7 @@ function ModernDonutChart({
         ))}
         <circle cx={cx} cy={cy} r={ri-4} fill="white" stroke="#F1F5F9" strokeWidth="1" />
         <text x={cx} y={cy-10} textAnchor="middle" fontSize="9" fill="#94A3B8" fontWeight="600" letterSpacing="0.08em">{centerLabel.toUpperCase()}</text>
-        <text x={cx} y={cy+7} textAnchor="middle" fontSize="13" fill="#0F172A" fontWeight="800">{hovered !== null ? `₹${arcs[hovered].value.toLocaleString("en-IN")}` : centerValue}</text>
+        <text x={cx} y={cy+7} textAnchor="middle" fontSize="13" fill="#0F172A" fontWeight="800">{hovered !== null ? `₹${arcs[hovered].value.toLocaleString('en-IN')}` : centerValue}</text>
         {hovered !== null && (<text x={cx} y={cy+22} textAnchor="middle" fontSize="8" fill={arcs[hovered].color} fontWeight="700">{arcs[hovered].label}</text>)}
       </svg>
 
@@ -667,7 +715,7 @@ function ModernDonutChart({
               <span className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color, boxShadow: `0 0 4px ${seg.color}80` }} />
               <div className="min-w-0">
                 <div className="text-[10px] font-semibold text-gray-700 dark:text-gray-200 truncate">{seg.label}</div>
-                <div className="text-[10px] text-gray-400">{`₹${seg.value.toLocaleString("en-IN")} `}<span style={{ color: seg.color }}>{pct}%</span></div>
+                <div className="text-[10px] text-gray-400">{`₹${seg.value.toLocaleString('en-IN')} `}<span style={{ color: seg.color }}>{pct}%</span></div>
               </div>
             </div>
           );
@@ -677,7 +725,7 @@ function ModernDonutChart({
       <div className="w-full px-2">
         <div className="flex justify-between text-[10px] text-gray-400 mb-1">
           <span className="font-semibold uppercase tracking-wide">Cost Distribution</span>
-          <span className="font-bold text-gray-600 dark:text-gray-300">Total ₹{total.toLocaleString("en-IN")}</span>
+          <span className="font-bold text-gray-600 dark:text-gray-300">Total ₹{total.toLocaleString('en-IN')}</span>
         </div>
         <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
           {segments.map((seg, i) => (

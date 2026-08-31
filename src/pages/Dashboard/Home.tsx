@@ -176,10 +176,10 @@ export default function Home() {
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-                  Welcome back, {userName}
+                  {t("dashboard.welcomeBack")}, {userName}
                 </h1>
                 <p className="text-gray-700 dark:text-gray-300 mt-2 font-medium">
-                  Here is the feasibility for <span className="font-bold">{input.category}</span> in {input.village}, {input.block}
+                  {t("dashboard.feasibilityFor")} <span className="font-bold">{input.category}</span> in {input.village}, {input.block}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {input.district} District • {input.state} • {input.language}

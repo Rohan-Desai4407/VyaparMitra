@@ -122,6 +122,24 @@ export const aiAdvisorService = {
   /**
    * Generates a dynamic chat response for the AI Advisor interface
    */
+
+  async translateText(text: string, targetLanguage: string): Promise<string> {
+    const ai = getAiClient();
+    if (!ai) return text;
+    try {
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-1.5-flash',
+        contents: prompt,
+        config: { temperature: 0.1 }
+      });
+      return response.text?.trim() || text;
+    } catch (e) {
+      console.error("Translation failed", e);
+      return text;
+    }
+  },
+
   async generateChatResponse(input: BusinessInputData, userMessage: string, chatHistory: string = ""): Promise<string> {
     const ai = getAiClient();
     if (!ai) {

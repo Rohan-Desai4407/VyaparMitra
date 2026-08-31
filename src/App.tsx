@@ -18,6 +18,7 @@ import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
 import Notifications from "./pages/Notifications";
 import About from "./pages/About";
+import Support from "./pages/Support";
 
 // Other Pages
 import UserProfiles from "./pages/UserProfiles";
@@ -73,6 +74,7 @@ export default function App() {
               <Route path="/final-report" element={<FinalReport />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/about" element={<About />} />
+              <Route path="/support" element={<Support />} />
               <Route path="/profile" element={<UserProfiles />} />
             </Route>
 
