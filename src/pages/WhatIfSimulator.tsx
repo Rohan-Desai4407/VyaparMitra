@@ -96,7 +96,7 @@ export default function WhatIfSimulator() {
       rawMaterialCostChange: rawMaterialCostChangePct,
       opexChange: opexChangePct,
       interestRateChange: interestRateShift,
-      schemeId: financials?.scheme?.id
+      schemeId: (financials?.scheme as any)?.id || (financials?.scheme as any)?.code
     };
     
     const timer = setTimeout(() => {
@@ -113,13 +113,14 @@ export default function WhatIfSimulator() {
     interestRateShift,
     financials.projectCost,
     input.marginCapital,
-    financials?.scheme?.id
+    (financials?.scheme as any)?.id,
+    (financials?.scheme as any)?.code
   ]);
 
   const handleRefreshAi = () => {
     if (!simData) return;
     setIsAiLoading(true);
-    fetchAiAnalysis(simData, input.businessCategory || 'General').then(data => {
+    fetchAiAnalysis(simData, input.category || 'General').then(data => {
       setAiAnalysis(data);
     }).catch(err => console.error(err))
       .finally(() => setIsAiLoading(false));

@@ -14,6 +14,7 @@ const COMMAND_ROUTES = [
   { key: "dashboard", path: "/dashboard" },
   { key: "assessment", path: "/assessment" },
   { key: "marketAnalysis", path: "/market-analysis" },
+  { key: "swotRiskAdvisor", path: "/swot-risk-advisor" },
   { key: "financialPlanner", path: "/financial-planner" },
   { key: "schemeRouter", path: "/scheme-router" },
   { key: "repaymentSchedule", path: "/repayment-schedule" },

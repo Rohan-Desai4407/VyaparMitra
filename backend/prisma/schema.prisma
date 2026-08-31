@@ -234,6 +234,7 @@ model Assessment {
   result AssessmentResult?
   swot             SwotAnalysis?
   projectExpenses ProjectExpense[]
+  simulationScenarios SimulationScenario[]
 }
 
 model AssessmentResult {

@@ -14,6 +14,7 @@ import SchemeRouter from "./pages/SchemeRouter";
 import RepaymentSchedule from "./pages/RepaymentSchedule";
 import AiAdvisor from "./pages/AiAdvisor";
 import WhatIfSimulator from "./pages/WhatIfSimulator";
+import SwotRiskAdvisor from "./pages/SwotRiskAdvisor";
 import SwotMatrix from "./pages/SwotMatrix";
 import FinalReport from "./pages/FinalReport";
 import Notifications from "./pages/Notifications";
@@ -65,12 +66,13 @@ export default function App() {
               <Route path="/dashboard" element={<Home />} />
               <Route path="/assessment" element={<BusinessAssessmentForm />} />
               <Route path="/market-analysis" element={<MarketAnalysis />} />
+              <Route path="/swot-risk-advisor" element={<SwotRiskAdvisor />} />
               <Route path="/financial-planner" element={<FinancialPlanner />} />
               <Route path="/scheme-router" element={<SchemeRouter />} />
               <Route path="/repayment-schedule" element={<RepaymentSchedule />} />
               <Route path="/ai-advisor" element={<AiAdvisor />} />
               <Route path="/what-if-simulator" element={<WhatIfSimulator />} />
-              <Route path="/swot-matrix" element={<SwotMatrix />} />
+              <Route path="/swot-matrix" element={<SwotRiskAdvisor />} />
               <Route path="/final-report" element={<FinalReport />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/about" element={<About />} />

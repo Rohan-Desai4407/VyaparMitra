@@ -127,7 +127,7 @@ export const aiAdvisorService = {
     const ai = getAiClient();
     if (!ai) return text;
     try {
-
+      const prompt = `Translate the following text into ${targetLanguage}. Maintain accurate tone and preserve any technical or financial terms correctly.\n\nText: "${text}"`;
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash',
         contents: prompt,
