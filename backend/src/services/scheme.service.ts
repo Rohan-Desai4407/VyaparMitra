@@ -236,9 +236,9 @@ export const schemeService = {
   
   // Legacy stubs for existing code (so we don't break other parts temporarily)
   getEligibleScheme(projectCost: number) {
-     return { schemeCode: 'TERM', maxLoan: 1000000, interestRate: '8', tenureYears: 7, moratoriumMonths: 6 };
+     return { schemeCode: 'TERM', schemeName: 'PMEGP Subsidy Scheme', maxLoan: 1000000, interestRate: 8.5, tenureYears: 7, moratoriumMonths: 6 };
   },
   getSchemeFromMargin(marginCapital: number) {
-     return { schemeCode: 'TERM', maxLoan: 1000000, interestRate: '8', tenureYears: 7, moratoriumMonths: 6 };
+     return { schemeCode: 'TERM', schemeName: 'PMEGP Subsidy Scheme', maxLoan: 1000000, interestRate: 8.5, tenureYears: 7, moratoriumMonths: 6 };
   }
 };

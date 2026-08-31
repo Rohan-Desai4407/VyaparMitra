@@ -6,6 +6,7 @@ import { Bell, HelpCircle } from "lucide-react";
 // Assume these icons are imported from an icon library
 import { Sliders, Wallet } from "lucide-react";
 import {
+  AlertHexaIcon,
   CalenderIcon,
   ChatIcon,
   ChevronDownIcon,
@@ -46,7 +47,11 @@ const AppSidebar: React.FC = () => {
       name: t("nav.marketAnalysis"),
       path: "/market-analysis",
     },
-    
+    {
+      icon: <AlertHexaIcon />,
+      name: t("nav.swotRiskAdvisor", "AI SWOT & Risk Advisor"),
+      path: "/swot-risk-advisor",
+    },
     {
       icon: <DollarLineIcon />,
       name: t("nav.financialPlanner"),

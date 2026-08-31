@@ -1,204 +1,219 @@
-# TailAdmin React - Free React Tailwind Admin Dashboard Template
+# 🚀 VyaparMitra (व्यापारमित्र)
 
-TailAdmin is a free and open-source admin dashboard template built on **React and Tailwind CSS**, providing developers
-with everything they need to create a comprehensive, data-driven back-end,
-dashboard, or admin panel solution for upcoming web projects.
+> **Plan • Grow • Prosper** — AI-Driven Hyper-Local Business Feasibility & Financial Advisory Platform for Indian Entrepreneurs.
 
-With TailAdmin, you get access to all the necessary dashboard UI components, elements, and pages required to build a
-feature-rich and complete dashboard or admin panel. Whether you're building dashboard or admin panel for a complex web
-application or a simple website, TailAdmin is the perfect solution to help you get up and running quickly.
+[![React 19](https://img.shields.io/badge/React-19.0.0-blue.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC.svg)](https://tailwindcss.com/)
+[![Prisma ORM](https://img.shields.io/badge/Prisma-5.22-2D3748.svg)](https://www.prisma.io/)
+[![Google Gemini AI](https://img.shields.io/badge/Google_Gemini-2.5%20%2F%203.6-orange.svg)](https://deepmind.google/technologies/gemini/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![TailAdmin React.js Dashboard Preview](./banner.png)
+---
 
-## Overview
+## 📖 Overview
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and
-control panels. It's built on:
+**VyaparMitra** is an intelligent web application designed to empower grassroots and rural entrepreneurs across India. By combining official demographic & geographic data (LGD), localized market intelligence, government loan policy schemes, and Google Gemini AI, VyaparMitra provides clear, deterministic business feasibility studies, cash flow simulations, SWOT assessments, and loan-readiness reports.
 
-- React 19
-- TypeScript
-- Tailwind CSS v4
+---
 
-### Quick Links
+## 🌟 Key Features & Architecture Modules
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1214477970819985778)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+### 1. 📍 Hyper-Local Business Assessment Form (`/assessment`)
+- State, District, Sub-District (Block), and Village selection backed by official LGD (Local Government Directory) datasets.
+- 10% Margin Capital model calculation (Project Cost = Margin Capital ÷ 10%, Maximum Loan = 90%).
+- Multilingual selection (English, Hindi, Gujarati, Tamil, Telugu, Marathi, Punjabi, Bengali, Odia, Kannada, Malayalam).
 
-### Demos
+### 2. 📊 Market Analysis (`/market-analysis`)
+- Dynamic 5km, 10km, 15km, and 25km consumer reach estimation.
+- Competitor density analysis and nearby enterprise tracking.
+- Purchasing power index and product pricing benchmarks with modal breakdowns.
+- Primary distribution channels & top unserved market opportunities.
+- Actionable revenue expansion strategies & Leaflet-based interactive geolocation map.
 
-- [Free Version](https://free-react-demo.tailadmin.com/)
-- [Pro Version](https://react-demo.tailadmin.com)
+### 3. 🛡️ AI SWOT & Risk Advisor (`/swot-risk-advisor`)
+- AI-driven 4-quadrant strategic matrix (Strengths, Weaknesses, Opportunities, Threats).
+- Expandable evidence cards with confidence ratings and impact badges.
+- Instant "Ask AI About This" integration directing into the conversational advisor.
+- Hyper-local risk factor breakdown (supply bottlenecks, seasonal volatility, utility reliability).
+- Prioritized action recommendations.
 
-### Other Versions
+### 4. 💰 Smart Financial Calculator & Scheme Router (`/financial-planner` & `/scheme-router`)
+- Live margin capital slider with instant recalculation of project costs, equity, and debt.
+- Automatic routing to matching government policies (Micro Finance Scheme vs. Term Loan Scheme / PMEGP / Mudra).
+- Interest rate, tenure, and moratorium grace period analysis.
 
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
-- [Laravel Version](https://github.com/TailAdmin/tailadmin-laravel)
+### 5. 📅 Repayment & EMI Amortization Schedule (`/repayment-schedule`)
+- Month-by-month and quarterly installment breakdown.
+- Grace period / moratorium handling before principal repayment.
+- Cumulative interest and reducing balance calculations.
 
-## Installation
+### 6. 🤖 Multilingual AI Advisor (`/ai-advisor`)
+- Natural language conversational assistant powered by Google Gemini.
+- Voice typing with real-time speech-to-text and automated text-to-speech translation in regional Indian languages.
+- Persistent multi-session chat history.
 
-### Prerequisites
+### 7. 📈 What-if Financial Simulator (`/what-if-simulator`)
+- Stress-test business models against sales volume changes, price shifts, raw material inflation, and interest rate hikes.
+- Real-time 12-month net cashflow projection chart & SVG donut cost distribution.
+- Financial Health Score and DSCR (Debt Service Coverage Ratio) monitoring.
 
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
+### 8. 📄 Final Feasibility & Loan Readiness Report (`/final-report`)
+- Consolidated appraisal report ready for bank submission, DIC verification, and loan sanction.
+- Includes official checklists (Udyam, Aadhaar, PAN, residence proof, quotations).
+- Clean print and PDF export styling.
 
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
+### 9. ⚙️ Admin Portal (`/admin/*`)
+- Secure dashboard for user administration, audit logs, scheme rule configurations, and analytics.
 
-### Cloning the Repository
+---
 
-Clone the repository using the following command:
+## 🛠️ Technology Stack
 
-```bash
-git clone https://github.com/TailAdmin/free-react-tailwind-admin-dashboard.git
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend Framework** | React 19, TypeScript, Vite 6, React Router v7 |
+| **Styling & Icons** | Tailwind CSS v4, Lucide React, Custom SVG Icons |
+| **Charts & Visuals** | ApexCharts, React-ApexCharts, Leaflet, React-Leaflet |
+| **Internationalization**| i18next, react-i18next (English, Hindi, Gujarati, etc.) |
+| **Backend & API** | Node.js, Express, TypeScript |
+| **Database & ORM** | MongoDB / PostgreSQL via Prisma ORM v5.22 |
+| **AI & LLM** | Google Gemini Generative AI SDK (`@google/genai`, `@google/generative-ai`) |
+
+---
+
+## 📁 Project Structure
+
+```
+VyaparMitra/
+├── backend/                  # Express + TypeScript + Prisma backend
+│   ├── prisma/
+│   │   └── schema.prisma     # Database schemas (Schemes, Assessments, Simulations)
+│   ├── scripts/              # Seeding and data import scripts (LGD locations)
+│   └── src/
+│       ├── controllers/      # Route controllers (schemes, simulations, swot)
+│       ├── middleware/       # Auth and admin role middlewares
+│       ├── routes/           # REST API routes
+│       ├── services/         # Business logic and AI Gemini integrations
+│       └── server.ts         # Backend entry point
+├── public/                   # Static assets, logos, and icons
+├── src/
+│   ├── components/           # Reusable UI components, modals, charts, and maps
+│   ├── context/              # React contexts (VyaparContext, NotificationContext, SidebarContext)
+│   ├── data/                 # Canonical Indian states, districts, blocks & village data
+│   ├── hooks/                # Custom React hooks (market intelligence, SWOT, financial)
+│   ├── icons/                # Custom SVG icons
+│   ├── layout/               # App layout, header, sidebar, and admin navigation
+│   ├── locales/              # i18n translation JSON dictionaries (en, hi, gu, ta, te, etc.)
+│   ├── pages/                # Application pages & route components
+│   │   ├── Dashboard/        # Dashboard overview
+│   │   ├── MarketAnalysis.tsx# Dedicated Market Intelligence page
+│   │   ├── SwotRiskAdvisor.tsx# Dedicated AI SWOT & Risk page
+│   │   ├── FinancialPlanner.tsx
+│   │   ├── SchemeRouter.tsx
+│   │   ├── RepaymentSchedule.tsx
+│   │   ├── AiAdvisor.tsx     # Voice & conversational AI chat
+│   │   ├── WhatIfSimulator.tsx# Scenario stress testing
+│   │   └── FinalReport.tsx   # Bank-ready feasibility report
+│   ├── services/             # API services and client integration
+│   ├── App.tsx               # App routing configuration
+│   └── main.tsx              # React entry point
+└── package.json
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+---
 
-1. Install dependencies:
+## 🚀 Quick Start
 
+### 1. Prerequisites
+- **Node.js**: v18.x or later (Node 20+ recommended)
+- **npm** or **yarn**
+- **Gemini API Key**: (Optional for live AI features, mock fallbacks provided)
+
+### 2. Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Rohan-Desai4407/VyaparMitra.git
+   cd VyaparMitra
+   ```
+
+2. **Install Frontend Dependencies:**
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
-2. Start the development server:
+3. **Install Backend Dependencies:**
    ```bash
-   npm run dev
-   # or
-   yarn dev
+   cd backend
+   npm install
+   npx prisma generate
+   cd ..
    ```
 
-## Components
+### 3. Environment Setup
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using React.js and Tailwind CSS. The
-template includes:
+Create `.env` in the root directory:
+```env
+VITE_API_URL=http://localhost:3001
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- FAQ & Accordion, Testimonials, and Carousels
-- Can't forget Dark Mode 🕶️
+Create `backend/.env`:
+```env
+PORT=3001
+DATABASE_URL="your_mongodb_or_postgres_connection_string"
+JWT_SECRET="your_jwt_secret_key"
+GEMINI_API_KEY="your_gemini_api_key_here"
+```
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+### 4. Running the Development Server
 
-## Feature Comparison
+- **Start Frontend:**
+  ```bash
+  npm run dev
+  ```
+  *(Default frontend URL: `http://localhost:5173`)*
 
-### Free Version
+- **Start Backend:**
+  ```bash
+  cd backend
+  npm run dev
+  ```
+  *(Default API URL: `http://localhost:3001`)*
 
-- 1 Unique Dashboard
-- 35+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+### 5. Production Build
 
-### Pro Version
+To test and compile both frontend and backend:
+```bash
+# Build Frontend
+npm run build
 
-- 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, SaaS, Stocks, Logistics (more coming soon)
-- 500+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+# Build Backend
+cd backend && npm run build
+```
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+---
 
-## Changelog
+## 🌐 Available Routes
 
-### Version 2.3.0 - [April 28, 2026]
-- Added **AI Dashboard** with token usage and revenue tracking.
-- Added **Sales Dashboard** with retention and multi-channel analytics.
-- Added **Finance Dashboard** with cashflow and balance management.
-- Introduced **6 New Layout variations** for improved UI flexibility.
-- Integrated **Advanced Data Visualization** with 7+ new chart types.
+| Route | Description |
+| :--- | :--- |
+| `/` | Landing Page & Portal Overview |
+| `/dashboard` | User Feasibility & Metric Summary Dashboard |
+| `/assessment` | Business Category, Location & Capital Parameter Form |
+| `/market-analysis` | Hyper-Local Market Demographics, Competitors, & Pricing |
+| `/swot-risk-advisor` | AI-Driven SWOT Matrix, Risk Breakdown & Recommendations |
+| `/financial-planner` | Capital Ratio & Margin Calculation Simulator |
+| `/scheme-router` | Auto-Matched Government Scheme Selection & Matrix |
+| `/repayment-schedule`| Loan EMI & Moratorium Amortization Schedule |
+| `/ai-advisor` | Multilingual NLP AI Business Advisor with Voice Typing |
+| `/what-if-simulator` | Stress-Testing What-if Financial Simulator |
+| `/final-report` | Bank-Ready Feasibility & Loan Readiness Report |
+| `/admin/*` | Administrative Management & Audit Controls |
 
-### Version 2.1.0 - [Dec 30, 2025]
+---
 
-- Resolved Date Picker positioning and input issues in Charts.
+## 📜 License
 
-### Version 2.0.2 - [March 25, 2025]
-
-- Upgraded to React 19
-- Included overrides for packages to prevent peer dependency errors.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
-
-### Version 2.0.1 - [February 27, 2025]
-
-#### Update Overview
-
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
-
-#### Next Steps
-
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
-
-### Version 2.0.0 - [February 2025]
-
-A major update with comprehensive redesign and modern React patterns implementation.
-
-#### Major Improvements
-
-- Complete UI redesign with modern React patterns
-- New features: collapsible sidebar, chat, and calendar
-- Improved performance and accessibility
-- Updated data visualization using ApexCharts
-
-#### Key Features
-
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Enhanced navigation with React Router integration
-- Advanced tables with sorting and filtering
-- Calendar with drag-and-drop support
-- New UI components and improved existing ones
-
-#### Breaking Changes
-
-- Updated sidebar component API
-- Migrated charts to ApexCharts
-- Revised authentication system
-
-[Read more](https://tailadmin.com/docs/update-logs/react) on this release.
-
-### Version 1.3.7 - [June 20, 2024]
-
-#### Enhancements
-
-1. Remove Repetition of DefaultLayout in every Pages
-2. Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns.
-
-### Version 1.3.6 - [Jan 31, 2024]
-
-#### Enhancements
-
-1. Integrate flatpickr in [Date Picker/Form Elements]
-2. Change color after select an option [Select Element/Form Elements].
-3. Make it functional [Multiselect Dropdown/Form Elements].
-4. Make best value editable [Pricing Table One/Pricing Table].
-5. Rearrange Folder structure.
-
-### Version 1.2.0 - [Apr 28, 2023]
-
-- Add Typescript in TailAdmin React.
-
-### Version 1.0.0 - Initial Release - [Mar 13, 2023]
-
-- Initial release of TailAdmin React.
-
-## License
-
-TailAdmin React.js Free Version is released under the MIT License.
-
-## Support
-
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing
-and maintaining this template.
+This project is open-source and available under the [MIT License](LICENSE).

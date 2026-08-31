@@ -1,22 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Lightbulb, Bot, Zap, AlertTriangle, Check, Rocket, Star, AlertCircle, X, ChevronRight } from "lucide-react";
+import { Lightbulb, Rocket, RefreshCw, Download, Edit2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { RefreshCw, Download, Edit2 } from "lucide-react";
 import { useVyapar } from "../context/VyaparContext";
 import PageMeta from "../components/common/PageMeta";
 import ComponentCard from "../components/common/ComponentCard";
 import DataSourceBadge from "../components/common/DataSourceBadge";
 import { useMarketIntelligence } from "../hooks/useMarketIntelligence";
-import { useSwotAnalysis } from "../hooks/useSwotAnalysis";
 import MapVisualization from "../components/MapVisualization";
 import PricingModal from "../components/PricingModal";
-import SwotPoint from "../components/SwotPoint";
 
 export default function MarketAnalysis() {
   const { t } = useTranslation();
   const { input } = useVyapar();
-  const { data: swotData, loading: swotLoading, error: swotError, refetch: refetchSwot } = useSwotAnalysis(input.assessmentId);
   const [radius, setRadius] = useState(10);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
@@ -256,34 +252,32 @@ export default function MarketAnalysis() {
           </ComponentCard>
         </div>
 
-        
-          {/* Actionable Revenue Growth Tactics */}
-          <div className="mt-6">
-            <ComponentCard title={<div className="flex items-center gap-2"><Rocket className="w-5 h-5 text-brand-600" /> Actionable Revenue Growth Tactics</div>}>
-              {data && data.growth && <div className="absolute top-4 right-4"><DataSourceBadge {...data.growth} /></div>}
-              <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                Highly recommended expansion strategies to maximize profits for your {input.category} business in {input.village}:
-              </p>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {loading ? <p className="text-sm">Loading...</p> :
-                  data?.growth?.tactics?.map((tactic: any, idx: number) => (
-                    <div key={idx} className="flex flex-col gap-2 rounded-xl border border-brand-100 bg-brand-50/30 p-4 dark:border-brand-900/30 dark:bg-brand-950/10 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-brand-900 dark:text-brand-300 text-sm">{tactic.title}</h4>
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full dark:bg-emerald-900/50 dark:text-emerald-400">{tactic.impact}</span>
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                        {tactic.description}
-                      </p>
+        {/* Actionable Revenue Growth Tactics */}
+        <div className="mt-6">
+          <ComponentCard title={<div className="flex items-center gap-2"><Rocket className="w-5 h-5 text-brand-600" /> Actionable Revenue Growth Tactics</div>}>
+            {data && data.growth && <div className="absolute top-4 right-4"><DataSourceBadge {...data.growth} /></div>}
+            <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+              Highly recommended expansion strategies to maximize profits for your {input.category} business in {input.village}:
+            </p>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {loading ? <p className="text-sm">Loading...</p> :
+                data?.growth?.tactics?.map((tactic: any, idx: number) => (
+                  <div key={idx} className="flex flex-col gap-2 rounded-xl border border-brand-100 bg-brand-50/30 p-4 dark:border-brand-900/30 dark:bg-brand-950/10 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-brand-900 dark:text-brand-300 text-sm">{tactic.title}</h4>
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full dark:bg-emerald-900/50 dark:text-emerald-400">{tactic.impact}</span>
                     </div>
-                  ))
-                }
-              </div>
-            </ComponentCard>
-          </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {tactic.description}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+          </ComponentCard>
+        </div>
 
-
-          {/* Interactive Map */}
+        {/* Interactive Map */}
         <ComponentCard title="Map-Based Visualization — Nearby Businesses & Infrastructure">
           <MapVisualization
              key={`map-${radius}-${(data?.competitor?.count ?? 0)}`}
@@ -297,88 +291,6 @@ export default function MarketAnalysis() {
              centerCoords={data?.centerCoords}
           />
         </ComponentCard>
-
-        {/* AI SWOT & Risk Advisor */}
-        <div className="mt-8">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Bot className="w-6 h-6 text-brand-600" /> AI SWOT & Risk Advisor
-            </div>
-            {swotData?.overallRiskScore !== undefined && (
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Risk Score:</span>
-                <span className={`font-bold ${swotData.overallRiskScore > 40 ? 'text-red-600' : swotData.overallRiskScore > 25 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                  {swotData.overallRiskScore}/100
-                </span>
-              </div>
-            )}
-          </h2>
-
-          {swotLoading && (
-            <div className="w-full bg-brand-50/50 dark:bg-brand-950/20 border border-brand-100 dark:border-brand-900/50 rounded-2xl p-12 flex flex-col items-center justify-center gap-4">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin"></div>
-                <Bot className="w-6 h-6 text-brand-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              </div>
-              <h3 className="text-lg font-bold text-brand-900 dark:text-brand-300">Analyzing your business...</h3>
-            </div>
-          )}
-
-          {swotError && !swotLoading && (
-            <div className="w-full bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500" />
-              <h3 className="text-lg font-bold text-red-900 dark:text-red-300">{swotError}</h3>
-              <button onClick={refetchSwot} className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
-                Retry Analysis
-              </button>
-            </div>
-          )}
-
-          {!swotLoading && !swotError && swotData && (
-            <div className="space-y-6">
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex items-start gap-4 shadow-sm">
-                <div className="bg-brand-100 dark:bg-brand-900/50 p-3 rounded-lg shrink-0">
-                  <Bot className="w-6 h-6 text-brand-700 dark:text-brand-300" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-1">Executive Summary</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{swotData.overallAssessment}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <ComponentCard title={<div className="flex items-center gap-2"><Zap className="w-4 h-4 text-emerald-600" /> Key Business Strengths</div>}>
-                  <ul className="space-y-2.5">
-                    {swotData.strengths?.map((item: any, idx: number) => (
-                      <SwotPoint key={idx} item={item} category="strength" icon={Check} iconColorClass="text-emerald-600" bgColorClass="bg-emerald-50/60 dark:bg-emerald-950/30" textColorClass="text-emerald-900 dark:text-emerald-300" />
-                    ))}
-                  </ul>
-                </ComponentCard>
-                <ComponentCard title={<div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-600" /> Operational Weaknesses</div>}>
-                  <ul className="space-y-2.5">
-                    {swotData.weaknesses?.map((item: any, idx: number) => (
-                      <SwotPoint key={idx} item={item} category="weakness" icon={ChevronRight} iconColorClass="text-amber-600" bgColorClass="bg-amber-50/60 dark:bg-amber-950/30" textColorClass="text-amber-900 dark:text-amber-300" />
-                    ))}
-                  </ul>
-                </ComponentCard>
-                <ComponentCard title={<div className="flex items-center gap-2"><Rocket className="w-4 h-4 text-blue-600" /> Local Market Opportunities</div>}>
-                  <ul className="space-y-2.5">
-                    {swotData.opportunities?.map((item: any, idx: number) => (
-                      <SwotPoint key={idx} item={item} category="opportunity" icon={Star} iconColorClass="text-blue-600" bgColorClass="bg-blue-50/60 dark:bg-blue-950/30" textColorClass="text-blue-900 dark:text-blue-300" />
-                    ))}
-                  </ul>
-                </ComponentCard>
-                <ComponentCard title={<div className="flex items-center gap-2"><AlertCircle className="w-4 h-4 text-rose-600" /> Threats & Local Bottlenecks</div>}>
-                  <ul className="space-y-2.5">
-                    {swotData.threats?.map((item: any, idx: number) => (
-                      <SwotPoint key={idx} item={item} category="threat" icon={X} iconColorClass="text-red-500" bgColorClass="bg-red-50/60 dark:bg-red-950/30" textColorClass="text-red-900 dark:text-red-300" />
-                    ))}
-                  </ul>
-                </ComponentCard>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Pricing Modal */}
