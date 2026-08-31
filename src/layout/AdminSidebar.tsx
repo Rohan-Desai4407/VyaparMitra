@@ -75,9 +75,13 @@ export const AdminSidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (open:
         <div className="flex h-16 items-center justify-between px-4 border-b border-slate-800">
           {(!collapsed || mobileOpen) && (
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-extrabold shadow-md">
-                VM
-              </div>
+              <div className="flex items-center justify-center shrink-0">
+                  <img
+                    src="/images/logo/vyapar-mitra-icon.png"
+                    alt="VyaparMitra Logo"
+                    className="w-10 h-10 object-contain"
+                  />
+                </div>
               <div className="flex flex-col">
                 <span className="text-base font-extrabold tracking-tight text-white leading-none">
                   Vyapar<span className="text-emerald-400">Mitra</span>
@@ -89,9 +93,13 @@ export const AdminSidebar: React.FC<{ mobileOpen: boolean; setMobileOpen: (open:
             </div>
           )}
           {collapsed && !mobileOpen && (
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 font-bold">
-              VM
-            </div>
+            <div className="mx-auto flex items-center justify-center shrink-0 w-full">
+                <img
+                  src="/images/logo/vyapar-mitra-icon.png"
+                  alt="VyaparMitra Logo"
+                  className="w-10 h-10 object-contain"
+                />
+              </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
