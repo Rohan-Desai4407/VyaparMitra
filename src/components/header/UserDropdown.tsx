@@ -26,7 +26,7 @@ export default function UserDropdown() {
     localStorage.removeItem("userName");
     localStorage.removeItem("userAvatar");
     closeDropdown();
-    navigate("/signin");
+    navigate("/");
   };
 
   const calculateProgress = (userObj: any) => {
